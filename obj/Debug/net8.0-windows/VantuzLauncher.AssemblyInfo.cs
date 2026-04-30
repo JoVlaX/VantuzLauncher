@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VantuzLauncher")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f93d49f5f9d61c78ed146b621427411449885808")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bad1d21dc22d8fbc29f61214e926b9cd447b83e2")]
 [assembly: System.Reflection.AssemblyProductAttribute("VantuzLauncher")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VantuzLauncher")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

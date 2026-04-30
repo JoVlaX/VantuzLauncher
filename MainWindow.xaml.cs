@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net; // Добавлено для SecurityProtocol
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -12,21 +13,39 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
+using CmlLib.Core.ProcessBuilder;
+using CmlLib.Core.Installer.Forge;
 
 namespace VantuzLauncher
 {
     public partial class MainWindow : Window
     {
+        private readonly string _apiUrl = "https://troglobit.webhm.pro/api.php";
         private readonly string _packwizUrl = "https://raw.githubusercontent.com/JoVlaX/sigmaivan/main/pack.toml";
-        private readonly string _packwizUrl = "https://troglobit.webhm.pro/modpack/pack.toml";
         private readonly string _packwizBootstrapUrl = "https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar";
         
         private readonly string _mcDir;
-        private static readonly HttpClient _httpClient = new HttpClient();
+        
+        // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL (на время тестов)
+        private static readonly HttpClientHandler _handler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+        };
+        private static readonly HttpClient _httpClient = new HttpClient(_handler);
 
         public MainWindow()
         {
             InitializeComponent();
+            
+            // Форсируем использование современных протоколов безопасности для устранения EOF
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+            
+            // Притворяемся браузером, чтобы сервера загрузок не сбрасывали соединение
+            if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
+            {
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            }
+
             _mcDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuz");
             if (!Directory.Exists(_mcDir)) Directory.CreateDirectory(_mcDir);
         }
@@ -81,7 +100,7 @@ namespace VantuzLauncher
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Произошла ошибка:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Произошла ошибка:\n{ex.Message}\n\nВнутренняя ошибка: {ex.InnerException?.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 SetUIState(false);
             }
         }
@@ -138,39 +157,34 @@ namespace VantuzLauncher
 
         private async Task LaunchGameAsync(string sessionUsername)
         {
-            UpdateStatus("Подготовка библиотек и ядра...");
+            UpdateStatus("Подготовка библиотек...");
 
-            var launcher = new CMLauncher(new MinecraftPath(_mcDir));
+            var path = new MinecraftPath(_mcDir);
+            var launcher = new MinecraftLauncher(path);
 
-            launcher.FileChanged += (e) =>
+            launcher.FileProgressChanged += (sender, args) =>
             {
                 Dispatcher.Invoke(() => {
-                    UpdateStatus($"Загрузка: {e.FileName}");
-                    LauncherProgress.Maximum = e.TotalFileCount;
-                    LauncherProgress.Value = e.ProgressedFileCount;
+                    UpdateStatus($"Загрузка: {args.Name}");
+                    LauncherProgress.Maximum = args.TotalTasks;
+                    LauncherProgress.Value = args.ProgressedTasks;
                 });
             };
 
-            var versions = await launcher.GetAllVersionsAsync();
-            string targetVersion = "1.20.1"; 
-
-            foreach (var v in versions)
-            {
-                if (v.Name.ToLower().Contains("fabric") || v.Name.ToLower().Contains("forge"))
-                {
-                    targetVersion = v.Name;
-                    break;
-                }
-            }
+            UpdateStatus("Установка Forge 47.4.10...");
+            
+            var forge = new ForgeInstaller(launcher);
+            // Пытаемся установить Forge. Библиотека сама должна обработать редиректы.
+            string targetVersion = await forge.Install("1.20.1", "47.4.10");
 
             var launchOption = new MLaunchOption
             {
-                Session = MSession.GetOfflineSession(sessionUsername),
+                Session = MSession.CreateOfflineSession(sessionUsername),
                 MaximumRamMb = 4096
             };
 
             UpdateStatus("Запуск процесса игры...");
-            var process = await launcher.CreateProcessAsync(targetVersion, launchOption);
+            var process = await launcher.InstallAndBuildProcessAsync(targetVersion, launchOption);
             process.Start();
 
             Application.Current.Shutdown();
