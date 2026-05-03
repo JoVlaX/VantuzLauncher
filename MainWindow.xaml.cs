@@ -1,4 +1,4 @@
-﻿#nullable disable
+#nullable disable
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +13,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.IO.Compression;
 using System.Linq;
+using System.Management;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.ProcessBuilder;
@@ -22,11 +23,16 @@ namespace VantuzLauncher
 {
     public partial class MainWindow : Window
     {
+        private const string CurrentVersion = "BUILD_DATE_PLACEHOLDER"; // Текущая версия лаунчера
         private readonly string _apiUrl = "https://troglobit.webhm.pro/api.php";
+        private readonly string _versionUrl = "https://troglobit.webhm.pro/launcher_version.txt";
+        private readonly string _downloadUrl = "https://troglobit.webhm.pro/VantuzLauncher.exe";
         private readonly string _packwizBootstrapUrl = "https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar";
         
         private readonly string _mcDir;
         private readonly string _configPath;
+        private int _currentRamMb = 4096;
+        private int _totalRamMb = 8192;
         
         // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL
         private static readonly HttpClientHandler _handler = new HttpClientHandler
@@ -50,10 +56,121 @@ namespace VantuzLauncher
             if (!Directory.Exists(_mcDir)) Directory.CreateDirectory(_mcDir);
 
             _configPath = Path.Combine(_mcDir, "launcher_config.json");
-            LoadSavedCredentials();
+            
+            InitializeRamLimits();
+            VersionText.Text = $"v{CurrentVersion}";
+            LoadSavedConfig();
+            
+            // Проверка обновлений при запуске
+            _ = CheckForUpdatesAsync();
         }
 
-        private void LoadSavedCredentials()
+        private void InitializeRamLimits()
+        {
+            try
+            {
+                var searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
+                foreach (var obj in searcher.Get())
+                {
+                    long totalBytes = Convert.ToInt64(obj["TotalPhysicalMemory"]);
+                    _totalRamMb = (int)(totalBytes / 1024 / 1024);
+                    
+                    // Округляем до ГБ вниз для лимита
+                    int totalGb = _totalRamMb / 1024;
+                    RamSlider.Maximum = totalGb * 1024;
+                    RamSlider.Minimum = 1024;
+                    break;
+                }
+            }
+            catch
+            {
+                // Если не удалось получить инфо, ставим стандартные 8ГБ лимит
+                _totalRamMb = 8192;
+                RamSlider.Maximum = 8192;
+                RamSlider.Minimum = 1024;
+            }
+        }
+
+        private async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                var serverVersion = (await _httpClient.GetStringAsync(_versionUrl)).Trim();
+                if (decimal.TryParse(serverVersion.Replace(".", ""), out decimal sVer) && 
+                    decimal.TryParse(CurrentVersion.Replace(".", ""), out decimal cVer))
+                {
+                    if (sVer > cVer)
+                    {
+                        var result = MessageBox.Show($"Доступно новое обновление ({serverVersion}). Установить сейчас?", 
+                                                   "Обновление", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            UpdateStatus("Загрузка обновления...");
+                            await DownloadAndApplyUpdateAsync();
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private async Task DownloadAndApplyUpdateAsync()
+        {
+            try
+            {
+                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                string tempExePath = exePath + ".new";
+                
+                var bytes = await _httpClient.GetByteArrayAsync(_downloadUrl);
+                await File.WriteAllBytesAsync(tempExePath, bytes);
+
+                string batchScript = $@"
+@echo off
+timeout /t 2 /nobreak > nul
+del ""{exePath}""
+move ""{tempExePath}"" ""{exePath}""
+start """" ""{exePath}""
+del ""%~f0""
+";
+                string batchPath = Path.Combine(Path.GetTempPath(), "vantuz_updater.bat");
+                await File.WriteAllTextAsync(batchPath, batchScript, Encoding.GetEncoding(866));
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c \"{batchPath}\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                });
+
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при обновлении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateStatus("");
+            }
+        }
+
+        private void BtnSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPanel.Visibility = Visibility.Visible;
+        }
+
+        private void BtnCloseSettings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void RamSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            _currentRamMb = (int)e.NewValue;
+            if (RamText != null) 
+                RamText.Text = $"Выделено: {_currentRamMb} МБ из {RamSlider.Maximum} МБ";
+            SaveConfig();
+        }
+
+        private void LoadSavedConfig()
         {
             try
             {
@@ -66,21 +183,30 @@ namespace VantuzLauncher
                         UsernameBox.Text = config.Username;
                         PasswordBox.Password = config.Password;
                         RememberMeBox.IsChecked = config.RememberMe;
+                        
+                        _currentRamMb = config.RamMb > 0 ? config.RamMb : 4096;
+                        
+                        // Проверка на выход за границы при смене ПК
+                        if (_currentRamMb > RamSlider.Maximum) _currentRamMb = (int)RamSlider.Maximum;
+                        
+                        RamSlider.Value = _currentRamMb;
+                        RamText.Text = $"Выделено: {_currentRamMb} МБ из {RamSlider.Maximum} МБ";
                     }
                 }
             }
             catch { }
         }
 
-        private void SaveCredentials(string username, string password, bool remember)
+        private void SaveConfig()
         {
             try
             {
                 var config = new LauncherConfig
                 {
-                    Username = remember ? username : "",
-                    Password = remember ? password : "",
-                    RememberMe = remember
+                    Username = RememberMeBox.IsChecked == true ? UsernameBox.Text : "",
+                    Password = RememberMeBox.IsChecked == true ? PasswordBox.Password : "",
+                    RememberMe = RememberMeBox.IsChecked == true,
+                    RamMb = _currentRamMb
                 };
                 var json = JsonSerializer.Serialize(config);
                 File.WriteAllText(_configPath, json);
@@ -191,7 +317,7 @@ namespace VantuzLauncher
                 }
 
                 // Сохраняем учетные данные, если авторизация успешна
-                SaveCredentials(username, password, RememberMeBox.IsChecked == true);
+                SaveConfig();
 
                 if (!authResponse.has_access)
                 {
@@ -451,7 +577,7 @@ namespace VantuzLauncher
                 var launchOption = new MLaunchOption
                 {
                     Session = MSession.CreateOfflineSession(sessionUsername),
-                    MaximumRamMb = 4096,
+                    MaximumRamMb = _currentRamMb,
                     JavaPath = javaPath // Используем портативную Java
                 };
 
@@ -549,5 +675,6 @@ namespace VantuzLauncher
         public string Username { get; set; }
         public string Password { get; set; }
         public bool RememberMe { get; set; }
+        public int RamMb { get; set; }
     }
 }

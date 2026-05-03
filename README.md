@@ -5,4 +5,3 @@
 Name: FTP_HOST — Secret: [твой IP/домен]
 Name: FTP_USERNAME — Secret: [логин хостинга]
 Name: FTP_PASSWORD — Secret: [пароль хостинга]
-

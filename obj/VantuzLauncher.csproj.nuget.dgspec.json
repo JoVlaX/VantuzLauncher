@@ -50,6 +50,10 @@
             "CmlLib.Core.Installer.Forge": {
               "target": "Package",
               "version": "[1.1.1, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             }
           },
           "imports": [

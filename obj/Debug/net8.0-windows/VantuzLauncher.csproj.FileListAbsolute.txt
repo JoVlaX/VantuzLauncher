@@ -54,3 +54,5 @@ C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows
 C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLa.F69A5718.Up2Date
 C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.genruntimeconfig.cache
 C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\ref\VantuzLauncher.dll
+C:\000\projects\troglobit\VantuzLauncher\bin\Debug\net8.0-windows\System.Management.dll
+C:\000\projects\troglobit\VantuzLauncher\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Management.dll
