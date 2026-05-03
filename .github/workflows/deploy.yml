@@ -1,0 +1,45 @@
+name: Build and Deploy Launcher
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Publish Launcher
+      run: dotnet publish VantuzLauncher.csproj -c Release -r win-x64 --self-contained false -o ./publish
+
+    - name: Generate Version File
+      shell: pwsh
+      run: |
+        $version = Get-Date -Format "yyyyMMdd.HHmm"
+        $version | Out-File -FilePath "./publish/launcher_version.txt" -Encoding ascii
+        echo "Build Version: $version"
+
+    - name: Prepare SFTP Folder
+      shell: pwsh
+      run: |
+        mkdir ./deploy_files
+        cp ./publish/VantuzLauncher.exe ./deploy_files/
+        cp ./publish/launcher_version.txt ./deploy_files/
+
+    - name: Deploy via SFTP
+      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      with:
+        username: ${{ secrets.SFTP_USERNAME }}
+        server: ${{ secrets.SFTP_HOST }}
+        password: ${{ secrets.SFTP_PASSWORD }}
+        local_path: './deploy_files/*'
+        remote_path: '/www/troglobit.webhm.pro/'
+        delete_remote_files: false

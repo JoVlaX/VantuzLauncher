@@ -26,3 +26,31 @@ C:\000\projects\troglobit\VantuzLauncher\bin\Debug\net8.0-windows\CmlLib.Core.dl
 C:\000\projects\troglobit\VantuzLauncher\bin\Debug\net8.0-windows\CmlLib.Core.Commons.dll
 C:\000\projects\troglobit\VantuzLauncher\bin\Debug\net8.0-windows\CmlLib.Core.Installer.Forge.dll
 C:\000\projects\troglobit\VantuzLauncher\bin\Debug\net8.0-windows\HtmlAgilityPack.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.csproj.AssemblyReference.cache
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\MainWindow.baml
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\MainWindow.g.cs
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\App.g.cs
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher_MarkupCompile.cache
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.g.resources
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.GeneratedMSBuildEditorConfig.editorconfig
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.AssemblyInfoInputs.cache
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.AssemblyInfo.cs
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.csproj.CoreCompileInputs.cache
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.sourcelink.json
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\refint\VantuzLauncher.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.pdb
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\VantuzLauncher.exe
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\VantuzLauncher.deps.json
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\VantuzLauncher.runtimeconfig.json
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\VantuzLauncher.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\VantuzLauncher.pdb
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\CmlLib.Core.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\CmlLib.Core.Commons.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\CmlLib.Core.Installer.Forge.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\HtmlAgilityPack.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\SevenZip.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\bin\Debug\net8.0-windows\ICSharpCode.SharpZipLib.dll
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLa.F69A5718.Up2Date
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\VantuzLauncher.genruntimeconfig.cache
+C:\000\projects\troglobit\VantuzLauncher — копия\obj\Debug\net8.0-windows\ref\VantuzLauncher.dll
