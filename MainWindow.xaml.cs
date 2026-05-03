@@ -44,13 +44,15 @@ namespace VantuzLauncher
         public MainWindow()
         {
             InitializeComponent();
-            
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
             
             if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
             {
                 _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
             }
+            
+            // Устанавливаем бесконечный таймаут для работы с большими файлами обновлений и модов
+            _httpClient.Timeout = System.Threading.Timeout.InfiniteTimeSpan;
 
             _mcDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuz");
             if (!Directory.Exists(_mcDir)) Directory.CreateDirectory(_mcDir);
@@ -120,27 +122,52 @@ namespace VantuzLauncher
             {
                 string exePath = Process.GetCurrentProcess().MainModule.FileName;
                 string tempExePath = exePath + ".new";
-                
-                var bytes = await _httpClient.GetByteArrayAsync(_downloadUrl);
-                await File.WriteAllBytesAsync(tempExePath, bytes);
+
+                using (var response = await _httpClient.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                    var buffer = new byte[8192];
+                    var totalRead = 0L;
+
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(tempExePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        int read;
+                        while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await fileStream.WriteAsync(buffer, 0, read);
+                            totalRead += read;
+
+                            if (totalBytes != -1)
+                            {
+                                double percentage = (double)totalRead / totalBytes * 100;
+                                Dispatcher.Invoke(() => {
+                                    UpdateStatus($"Загрузка обновления: {percentage:F1}%...");
+                                    LauncherProgress.Value = percentage;
+                                });
+                            }
+                        }
+                    }
+                }
 
                 string batchScript = $@"
 @echo off
-timeout /t 2 /nobreak > nul
-del ""{exePath}""
-move ""{tempExePath}"" ""{exePath}""
+taskkill /F /IM VantuzLauncher.exe > nul 2>&1
+timeout /t 5 /nobreak > nul
+del /Q ""{exePath}""
+move /Y ""{tempExePath}"" ""{exePath}""
 start """" ""{exePath}""
-del ""%~f0""
-";
+del ""%~f0""";
+                
                 string batchPath = Path.Combine(Path.GetTempPath(), "vantuz_updater.bat");
                 await File.WriteAllTextAsync(batchPath, batchScript, Encoding.GetEncoding(866));
 
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c \"{batchPath}\"",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
+                Process.Start(new ProcessStartInfo { 
+                    FileName = "cmd.exe", 
+                    Arguments = $"/c \"{batchPath}\"", 
+                    CreateNoWindow = true, 
+                    UseShellExecute = false 
                 });
 
                 Application.Current.Shutdown();
