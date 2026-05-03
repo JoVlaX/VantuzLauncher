@@ -17,10 +17,11 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Inject Version into Code
+    - name: Prepare Version and Inject into Code
       shell: pwsh
       run: |
         $version = Get-Date -Format "yyyyMMdd.HHmm"
+        echo "CURRENT_VERSION=$version" >> $env:GITHUB_ENV
         $filePath = "./MainWindow.xaml.cs"
         (Get-Content $filePath) -replace 'BUILD_DATE_PLACEHOLDER', $version | Set-Content $filePath
         echo "Injected Version: $version"
@@ -31,7 +32,7 @@ jobs:
     - name: Generate Version File
       shell: pwsh
       run: |
-        $version = Get-Date -Format "yyyyMMdd.HHmm"
+        $version = $env:CURRENT_VERSION
         $version | Out-File -FilePath "./publish/launcher_version.txt" -Encoding ascii
         echo "Build Version: $version"
 

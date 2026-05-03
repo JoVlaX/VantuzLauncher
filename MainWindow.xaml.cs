@@ -44,6 +44,10 @@ namespace VantuzLauncher
         public MainWindow()
         {
             InitializeComponent();
+            
+            // Регистрируем провайдер кодировок для поддержки 866 (DOS)
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
             
             if (!_httpClient.DefaultRequestHeaders.Contains("User-Agent"))
@@ -120,7 +124,9 @@ namespace VantuzLauncher
         {
             try
             {
-                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                SetUIState(true); // Включаем прогресс-панель сразу
+                
+                string exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule.FileName;
                 string tempExePath = exePath + ".new";
 
                 using (var response = await _httpClient.GetAsync(_downloadUrl, HttpCompletionOption.ResponseHeadersRead))
