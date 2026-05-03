@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: windows-latest
     
     steps:
@@ -27,12 +27,22 @@ jobs:
         $version | Out-File -FilePath "./publish/launcher_version.txt" -Encoding ascii
         echo "Build Version: $version"
 
-    - name: Prepare SFTP Folder
-      shell: pwsh
-      run: |
-        mkdir ./deploy_files
-        cp ./publish/VantuzLauncher.exe ./deploy_files/
-        cp ./publish/launcher_version.txt ./deploy_files/
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: launcher-build
+        path: ./publish
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: launcher-build
+        path: ./publish
 
     - name: Deploy via SFTP
       uses: wlixcc/SFTP-Deploy-Action@v1.2.4
@@ -40,6 +50,6 @@ jobs:
         username: ${{ secrets.SFTP_USERNAME }}
         server: ${{ secrets.SFTP_HOST }}
         password: ${{ secrets.SFTP_PASSWORD }}
-        local_path: './deploy_files/*'
+        local_path: './publish/*'
         remote_path: '/www/troglobit.webhm.pro/'
         delete_remote_files: false
