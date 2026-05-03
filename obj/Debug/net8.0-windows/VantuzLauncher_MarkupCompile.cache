@@ -1,18 +1,18 @@
 ﻿VantuzLauncher
-1.0.0.0
+
 
 winexe
 C#
 .cs
-c:\000\projects\troglobit\VantuzLauncher\obj\Debug\net8.0-windows\
+C:\000\projects\troglobit\VantuzLauncher\obj\Debug\net8.0-windows\
 VantuzLauncher
 none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
-c:\000\projects\troglobit\VantuzLauncher\App.xaml
+C:\000\projects\troglobit\VantuzLauncher\App.xaml
 11407045341
 
-6329187915
+4-1583464757
 204-2042715069
 MainWindow.xaml;
 
