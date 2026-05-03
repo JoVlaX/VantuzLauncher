@@ -44,12 +44,12 @@ jobs:
         name: launcher-build
         path: ./publish
 
-    - name: Deploy via SFTP
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+    - name: Deploy via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.0
       with:
-        username: ${{ secrets.SFTP_USERNAME }}
-        server: ${{ secrets.SFTP_HOST }}
-        password: ${{ secrets.SFTP_PASSWORD }}
-        local_path: './publish/*'
-        remote_path: '/www/troglobit.webhm.pro/'
-        delete_remote_files: false
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./publish/
+        server-dir: /www/troglobit.webhm.pro/
+        port: 21
