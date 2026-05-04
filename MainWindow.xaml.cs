@@ -252,8 +252,16 @@ del ""%~f0""";
             string runtimeDir = Path.Combine(_mcDir, "runtime");
             string javaExe = Path.Combine(runtimeDir, "bin", "java.exe");
 
+            // Проверка целостности Java: наличие файла и размер > 0
             if (File.Exists(javaExe))
-                return javaExe;
+            {
+                var fileInfo = new FileInfo(javaExe);
+                if (fileInfo.Length > 0)
+                    return javaExe;
+                
+                // Если файл 0 байт, удаляем папку для перекачивания
+                try { Directory.Delete(runtimeDir, true); } catch { }
+            }
 
             UpdateStatus("Загрузка автономной Java 17...");
             string zipPath = Path.Combine(_mcDir, "java.zip");
@@ -365,14 +373,39 @@ del ""%~f0""";
                     : "https://raw.githubusercontent.com/JoVlaX/sigmaivan/main/pack.toml";
 
                 UpdateStatus("Проверка Packwiz...");
-                await SyncModpackAsync(packwizUrl, javaPath);
+                try 
+                {
+                    await SyncModpackAsync(packwizUrl, javaPath);
+                }
+                catch (Exception ex)
+                {
+                    LogException(ex);
+                    throw new Exception("Ошибка синхронизации модов. Проверьте интернет или обратитесь к администрации.");
+                }
 
                 UpdateStatus("Инициализация Minecraft...");
-                await LaunchGameAsync(authResponse.username ?? username, javaPath);
+                try 
+                {
+                    await LaunchGameAsync(authResponse.username ?? username, javaPath);
+                }
+                catch (Exception ex)
+                {
+                    LogException(ex);
+                    throw new Exception("Ошибка запуска Minecraft. Проверьте интернет или обратитесь к администрации.");
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Произошла ошибка:\n{ex.Message}\n\nВнутренняя ошибка: {ex.InnerException?.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                // Если это наше "чистое" сообщение, не логируем его повторно (оно уже залогировано внутри)
+                if (!ex.Message.Contains("обратитесь к администрации"))
+                {
+                    LogException(ex);
+                    MessageBox.Show("Произошла ошибка запуска. Проверьте интернет или обратитесь к администрации.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 SetUIState(false);
             }
         }
@@ -682,6 +715,20 @@ del ""%~f0""";
         private void UpdateStatus(string message)
         {
             StatusText.Text = message;
+        }
+
+        private void LogException(Exception ex)
+        {
+            try
+            {
+                string logFile = Path.Combine(_mcDir, "launcher-errors.log");
+                string errorMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR: {ex.Message}\n" +
+                                 $"StackTrace: {ex.StackTrace}\n" +
+                                 (ex.InnerException != null ? $"InnerException: {ex.InnerException.Message}\n" : "") +
+                                 "--------------------------------------------------\n";
+                File.AppendAllText(logFile, errorMsg);
+            }
+            catch { }
         }
     }
 
