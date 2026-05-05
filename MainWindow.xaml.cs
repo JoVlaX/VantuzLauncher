@@ -368,9 +368,10 @@ del ""%~f0""";
                 }
 
                 // Динамический выбор ссылки на Packwiz
-                string packwizUrl = authResponse.is_admin 
-                    ? "https://raw.githubusercontent.com/JoVlaX/sigmaivan/dev/pack.toml" 
-                    : "https://raw.githubusercontent.com/JoVlaX/sigmaivan/main/pack.toml";
+                string baseUrl = "https://troglobit.webhm.pro/packs";
+                string packwizUrl = $"{baseUrl}/main/pack.toml";
+                if (authResponse.is_tester) packwizUrl = $"{baseUrl}/test/pack.toml";
+                else if (authResponse.is_admin) packwizUrl = $"{baseUrl}/dev/pack.toml";
 
                 UpdateStatus("Проверка Packwiz...");
                 try 
@@ -383,10 +384,13 @@ del ""%~f0""";
                     throw new Exception("Ошибка синхронизации модов. Проверьте интернет или обратитесь к администрации.");
                 }
 
+                UpdateStatus("Чтение конфигурации модпака...");
+                var (mcVersion, forgeVersion) = await GetPackVersionsAsync(packwizUrl);
+
                 UpdateStatus("Инициализация Minecraft...");
                 try 
                 {
-                    await LaunchGameAsync(authResponse.username ?? username, javaPath);
+                    await LaunchGameAsync(authResponse.username ?? username, javaPath, mcVersion, forgeVersion);
                 }
                 catch (Exception ex)
                 {
@@ -507,7 +511,7 @@ del ""%~f0""";
             }
         }
 
-        private async Task LaunchGameAsync(string sessionUsername, string javaPath)
+        private async Task LaunchGameAsync(string sessionUsername, string javaPath, string mcVersion, string targetVersion)
         {
             UpdateStatus("Подготовка библиотек...");
 
@@ -523,44 +527,20 @@ del ""%~f0""";
                 });
             };
 
-            string mcVersion = "1.20.1";
-            // Список версий Forge для 1.20.1, пробуем от самой новой к более старым
-            string[] forgeVersions = { "47.3.0", "47.2.20", "47.2.0", "47.1.0" };
-            string targetVersion = "";
-            string installerPath = "";
+            string installerFileName = $"forge-{mcVersion}-{targetVersion}-installer.jar";
+            string installerPath = Path.Combine(_mcDir, installerFileName);
 
-            foreach (var forgeVersion in forgeVersions)
+            if (!File.Exists(installerPath))
             {
-                string installerFileName = $"forge-{mcVersion}-{forgeVersion}-installer.jar";
-                installerPath = Path.Combine(_mcDir, installerFileName);
-
-                if (File.Exists(installerPath))
+                UpdateStatus($"Загрузка Forge {targetVersion}...");
+                string forgeDirectUrl = $"https://maven.minecraftforge.net/net/minecraftforge/forge/{mcVersion}-{targetVersion}/{installerFileName}";
+                var response = await _httpClient.GetAsync(forgeDirectUrl);
+                if (response.IsSuccessStatusCode)
                 {
-                    targetVersion = forgeVersion;
-                    break;
+                    var bytes = await response.Content.ReadAsByteArrayAsync();
+                    await File.WriteAllBytesAsync(installerPath, bytes);
                 }
-
-                UpdateStatus($"Проверка Forge {forgeVersion}...");
-                string forgeDirectUrl = $"https://maven.minecraftforge.net/net/minecraftforge/forge/{mcVersion}-{forgeVersion}/{installerFileName}";
-                
-                try 
-                {
-                    var response = await _httpClient.GetAsync(forgeDirectUrl);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        UpdateStatus($"Загрузка Forge {forgeVersion}...");
-                        var bytes = await response.Content.ReadAsByteArrayAsync();
-                        await File.WriteAllBytesAsync(installerPath, bytes);
-                        targetVersion = forgeVersion;
-                        break;
-                    }
-                }
-                catch { }
-            }
-
-            if (string.IsNullOrEmpty(targetVersion))
-            {
-                throw new Exception("Не удалось найти или скачать подходящую версию Forge для 1.20.1. Проверьте интернет-соединение.");
+                else throw new Exception($"Не удалось скачать установщик Forge {targetVersion}.");
             }
 
             UpdateStatus($"Установка Forge {targetVersion}...");
@@ -717,6 +697,20 @@ del ""%~f0""";
             StatusText.Text = message;
         }
 
+        private async Task<(string mcVersion, string forgeVersion)> GetPackVersionsAsync(string packTomlUrl)
+        {
+            var content = await _httpClient.GetStringAsync(packTomlUrl);
+            string mcVer = "1.20.1", forgeVer = "";
+            foreach (var line in content.Split('\n'))
+            {
+                var t = line.Trim();
+                if (t.StartsWith("minecraft =")) mcVer = t.Split('=')[1].Trim(' ', '"', '\r');
+                if (t.StartsWith("forge =")) forgeVer = t.Split('=')[1].Trim(' ', '"', '\r');
+            }
+            if (string.IsNullOrEmpty(forgeVer)) throw new Exception("Версия Forge не найдена в конфигурации сборки.");
+            return (mcVer, forgeVer);
+        }
+
         private void LogException(Exception ex)
         {
             try
@@ -745,6 +739,9 @@ del ""%~f0""";
 
         [JsonPropertyName("is_admin")]
         public bool is_admin { get; set; }
+
+        [JsonPropertyName("is_tester")]
+        public bool is_tester { get; set; }
 
         [JsonPropertyName("message")]
         public string message { get; set; }
