@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<Obfuscator>
+  <Var name="InPath" value="." />
+  <Var name="OutPath" value="./Obfuscated" />
+  <Var name="KeepPublicApi" value="false" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="HideStrings" value="true" />
+  <Var name="RenameProperties" value="true" />
+  <Var name="RenameEvents" value="true" />
+  <Var name="RenameFields" value="true" />
+
+  <!-- Входной файл -->
+  <Module file="$(InPath)/VantuzLauncher.dll">
+    <!-- Пропускаем критические для WPF и сериализации классы -->
+    <SkipType name="VantuzLauncher.App" />
+    <SkipType name="VantuzLauncher.MainWindow" />
+    <SkipType name="VantuzLauncher.LauncherConfig" />
+    <SkipType name="VantuzLauncher.AuthResponse" />
+    <SkipNamespace name="XamlGeneratedNamespace" />
+  </Module>
+</Obfuscator>
