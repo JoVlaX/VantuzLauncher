@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "NdzEX3G1AnY=",
+  "dgSpecHash": "DeFWAKnp7og=",
   "success": true,
   "projectFilePath": "C:\\000\\projects\\troglobit\\VantuzLauncher\\VantuzLauncher.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,7 @@
     "C:\\Users\\1\\.nuget\\packages\\cmllib.core.installer.forge\\1.1.1\\cmllib.core.installer.forge.1.1.1.nupkg.sha512",
     "C:\\Users\\1\\.nuget\\packages\\htmlagilitypack\\1.11.48\\htmlagilitypack.1.11.48.nupkg.sha512",
     "C:\\Users\\1\\.nuget\\packages\\lzma-sdk\\19.0.0\\lzma-sdk.19.0.0.nupkg.sha512",
+    "C:\\Users\\1\\.nuget\\packages\\obfuscar\\2.2.38\\obfuscar.2.2.38.nupkg.sha512",
     "C:\\Users\\1\\.nuget\\packages\\sharpziplib\\1.4.2\\sharpziplib.1.4.2.nupkg.sha512",
     "C:\\Users\\1\\.nuget\\packages\\system.codedom\\8.0.0\\system.codedom.8.0.0.nupkg.sha512",
     "C:\\Users\\1\\.nuget\\packages\\system.management\\8.0.0\\system.management.8.0.0.nupkg.sha512",

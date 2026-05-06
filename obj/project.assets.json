@@ -69,6 +69,12 @@
           }
         }
       },
+      "Obfuscar/2.2.38": {
+        "type": "package",
+        "build": {
+          "build/obfuscar.props": {}
+        }
+      },
       "SharpZipLib/1.4.2": {
         "type": "package",
         "compile": {
@@ -284,6 +290,21 @@
         "lib/netstandard2.0/SevenZip.xml",
         "lzma-sdk.19.0.0.nupkg.sha512",
         "lzma-sdk.nuspec"
+      ]
+    },
+    "Obfuscar/2.2.38": {
+      "sha512": "v5EwYMf0V+qB4FRoivzF1j6otAnkoLeD79C5v3yFzjKBU5FZKhce7q8uSDDU7jY8wWD+wS/iB6CWJSQeTV3qig==",
+      "type": "package",
+      "path": "obfuscar/2.2.38",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Potion-icon.png",
+        "build/obfuscar.props",
+        "obfuscar.2.2.38.nupkg.sha512",
+        "obfuscar.nuspec",
+        "tools/Obfuscar.Console.exe"
       ]
     },
     "SharpZipLib/1.4.2": {
@@ -520,6 +541,7 @@
     "net8.0-windows7.0": [
       "CmlLib.Core >= 4.0.6",
       "CmlLib.Core.Installer.Forge >= 1.1.1",
+      "Obfuscar >= 2.2.38",
       "System.Management >= 8.0.0",
       "System.Text.Encoding.CodePages >= 8.0.0"
     ]
@@ -530,11 +552,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\000\\projects\\troglobit\\VantuzLauncher\\VantuzLauncher.csproj",
+      "projectUniqueName": "C:\\000\\projects\\troglobit\\VantuzLauncher\\VantuzLauncher.csproj",
       "projectName": "VantuzLauncher",
-      "projectPath": "c:\\000\\projects\\troglobit\\VantuzLauncher\\VantuzLauncher.csproj",
+      "projectPath": "C:\\000\\projects\\troglobit\\VantuzLauncher\\VantuzLauncher.csproj",
       "packagesPath": "C:\\Users\\1\\.nuget\\packages\\",
-      "outputPath": "c:\\000\\projects\\troglobit\\VantuzLauncher\\obj\\",
+      "outputPath": "C:\\000\\projects\\troglobit\\VantuzLauncher\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\1\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -573,6 +595,12 @@
           "CmlLib.Core.Installer.Forge": {
             "target": "Package",
             "version": "[1.1.1, )"
+          },
+          "Obfuscar": {
+            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[2.2.38, )"
           },
           "System.Management": {
             "target": "Package",

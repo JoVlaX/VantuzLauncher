@@ -24,7 +24,7 @@ namespace VantuzLauncher
     public partial class MainWindow : Window
     {
         private const string CurrentVersion = "BUILD_DATE_PLACEHOLDER"; // Текущая версия лаунчера
-        private readonly string _apiUrl = "https://troglobit.webhm.pro/api.php";
+        private readonly string _apiUrl = "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate";
         private readonly string _versionUrl = "https://troglobit.webhm.pro/launcher_version.txt";
         private readonly string _downloadUrl = "https://troglobit.webhm.pro/VantuzLauncher.exe";
         private readonly string _packwizBootstrapUrl = "https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar";
@@ -342,17 +342,10 @@ del ""%~f0""";
 
                 var authResponse = await AuthenticateUserAsync(username, password);
                 
-                if (authResponse == null || !string.Equals(authResponse.status, "success", StringComparison.OrdinalIgnoreCase))
+                if (authResponse == null || !string.IsNullOrEmpty(authResponse.error))
                 {
-                    string extraInfo = "";
-                    if (authResponse != null)
-                    {
-                        extraInfo = $"\nСтатус: {authResponse.status}";
-                        if (!string.IsNullOrEmpty(authResponse.message))
-                            extraInfo += $"\nСообщение от сервера: {authResponse.message}";
-                    }
-                    
-                    MessageBox.Show($"Неверный логин или пароль.{extraInfo}", "Ошибка авторизации", MessageBoxButton.OK, MessageBoxImage.Error);
+                    string extraInfo = authResponse?.errorMessage ?? "Неизвестная ошибка";
+                    MessageBox.Show($"Ошибка авторизации: {extraInfo}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     SetUIState(false);
                     return;
                 }
@@ -390,7 +383,7 @@ del ""%~f0""";
                 UpdateStatus("Инициализация Minecraft...");
                 try 
                 {
-                    await LaunchGameAsync(authResponse.username ?? username, javaPath, mcVersion, forgeVersion);
+                    await LaunchGameAsync(authResponse, javaPath, mcVersion, forgeVersion);
                 }
                 catch (Exception ex)
                 {
@@ -511,7 +504,7 @@ del ""%~f0""";
             }
         }
 
-        private async Task LaunchGameAsync(string sessionUsername, string javaPath, string mcVersion, string targetVersion)
+        private async Task LaunchGameAsync(AuthResponse authInfo, string javaPath, string mcVersion, string targetVersion)
         {
             UpdateStatus("Подготовка библиотек...");
 
@@ -526,6 +519,14 @@ del ""%~f0""";
                     LauncherProgress.Value = args.ProgressedTasks;
                 });
             };
+
+            UpdateStatus("Подготовка Yggdrasil (Authlib)...");
+            string authlibPath = Path.Combine(_mcDir, "authlib-injector.jar");
+            if (!File.Exists(authlibPath))
+            {
+                var authlibBytes = await _httpClient.GetByteArrayAsync("https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar");
+                await File.WriteAllBytesAsync(authlibPath, authlibBytes);
+            }
 
             string installerFileName = $"forge-{mcVersion}-{targetVersion}-installer.jar";
             string installerPath = Path.Combine(_mcDir, installerFileName);
@@ -620,11 +621,22 @@ del ""%~f0""";
                 // В CmlLib.Core v4 правильный метод:
                 await launcher.InstallAsync(version);
 
+                var session = new MSession
+                {
+                    Username = authInfo.selectedProfile.name,
+                    UUID = authInfo.selectedProfile.id,
+                    AccessToken = authInfo.accessToken,
+                    ClientToken = authInfo.clientToken,
+                    UserType = "mojang"
+                };
+
                 var launchOption = new MLaunchOption
                 {
-                    Session = MSession.CreateOfflineSession(sessionUsername),
+                    Session = session,
                     MaximumRamMb = _currentRamMb,
-                    JavaPath = javaPath // Используем портативную Java
+                    JavaPath = javaPath,
+                    // КРИТИЧНО: Подключение authlib-injector к процессу Java 
+                    JVMArguments = new string[] { $"-javaagent:\"{authlibPath}\"=https://troglobit.webhm.pro/yggdrasil" }
                 };
 
                 var gameProcess = await launcher.BuildProcessAsync(installedVersionName, launchOption);
@@ -728,23 +740,20 @@ del ""%~f0""";
 
     public class AuthResponse
     {
-        [JsonPropertyName("status")]
-        public string status { get; set; }
+        [JsonPropertyName("accessToken")] public string accessToken { get; set; }
+        [JsonPropertyName("clientToken")] public string clientToken { get; set; }
+        [JsonPropertyName("selectedProfile")] public Profile selectedProfile { get; set; }
+        [JsonPropertyName("error")] public string error { get; set; }
+        [JsonPropertyName("errorMessage")] public string errorMessage { get; set; }
+        [JsonPropertyName("has_access")] public bool has_access { get; set; }
+        [JsonPropertyName("is_admin")] public bool is_admin { get; set; }
+        [JsonPropertyName("is_tester")] public bool is_tester { get; set; }
+    }
 
-        [JsonPropertyName("username")]
-        public string username { get; set; }
-
-        [JsonPropertyName("has_access")]
-        public bool has_access { get; set; }
-
-        [JsonPropertyName("is_admin")]
-        public bool is_admin { get; set; }
-
-        [JsonPropertyName("is_tester")]
-        public bool is_tester { get; set; }
-
-        [JsonPropertyName("message")]
-        public string message { get; set; }
+    public class Profile
+    {
+        [JsonPropertyName("id")] public string id { get; set; }
+        [JsonPropertyName("name")] public string name { get; set; }
     }
 
     public class LauncherConfig
