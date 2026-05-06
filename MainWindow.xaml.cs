@@ -409,48 +409,30 @@ del ""%~f0""";
 
         private async Task<AuthResponse> AuthenticateUserAsync(string username, string password)
         {
-            // Попробуем сначала JSON формат (как было в оригинале), но с правильными заголовками
-            var payload = new { username = username, password = password };
+            var payload = new
+            {
+                username = username,
+                password = password,
+                clientToken = Guid.NewGuid().ToString("N")
+            };
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            try 
+            try
             {
                 var response = await _httpClient.PostAsync(_apiUrl, content);
                 var responseText = await response.Content.ReadAsStringAsync();
 
-                if (response.IsSuccessStatusCode)
-                {
-                    try {
-                        var result = JsonSerializer.Deserialize<AuthResponse>(responseText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        if (result != null && string.Equals(result.status, "success", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return result;
-                        }
-                    } catch { }
-                }
+                var result = JsonSerializer.Deserialize<AuthResponse>(responseText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                // Если JSON не сработал, пробуем FormUrlEncoded
-                var formData = new System.Collections.Generic.Dictionary<string, string>
-                {
-                    { "username", username },
-                    { "password", password }
-                };
-                var formContent = new FormUrlEncodedContent(formData);
-                
-                var formResponse = await _httpClient.PostAsync(_apiUrl, formContent);
-                var formResponseText = await formResponse.Content.ReadAsStringAsync();
+                if (result != null)
+                    return result;
 
-                try {
-                    return JsonSerializer.Deserialize<AuthResponse>(formResponseText, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                } catch (JsonException) {
-                    // Если и это не JSON, возвращаем ошибку с текстом ответа
-                    return new AuthResponse { status = "error", message = formResponseText };
-                }
+                return new AuthResponse { error = "UnknownError", errorMessage = "Не удалось обработать ответ от сервера авторизации." };
             }
             catch (Exception ex)
             {
-                throw new Exception($"Ошибка при связи с сервером авторизации: {ex.Message}", ex);
+                return new AuthResponse { error = "NetworkError", errorMessage = $"Ошибка соединения с сервером Yggdrasil: {ex.Message}" };
             }
         }
 
@@ -635,8 +617,8 @@ del ""%~f0""";
                     Session = session,
                     MaximumRamMb = _currentRamMb,
                     JavaPath = javaPath,
-                    // КРИТИЧНО: Подключение authlib-injector к процессу Java 
-                    JVMArguments = new string[] { $"-javaagent:\"{authlibPath}\"=https://troglobit.webhm.pro/yggdrasil" }
+                    // Исправленное свойство для CmlLib v4 
+                    JvmArgument = new string[] { $"-javaagent:\"{authlibPath}\"=https://troglobit.webhm.pro/yggdrasil" }
                 };
 
                 var gameProcess = await launcher.BuildProcessAsync(installedVersionName, launchOption);
