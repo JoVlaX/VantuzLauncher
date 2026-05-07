@@ -33,6 +33,7 @@ namespace VantuzLauncher
         private readonly string _configPath;
         private int _currentRamMb = 4096;
         private int _totalRamMb = 8192;
+        private static readonly object _logLock = new object();
         
         // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL
         private static readonly HttpClientHandler _handler = new HttpClientHandler
@@ -504,10 +505,22 @@ del ""%~f0""";
 
             UpdateStatus("Подготовка Yggdrasil (Authlib)...");
             string authlibPath = Path.Combine(_mcDir, "authlib-injector.jar");
-            if (!File.Exists(authlibPath))
+            bool needDownloadAuthlib = true;
+
+            if (File.Exists(authlibPath))
             {
-                var authlibBytes = await _httpClient.GetByteArrayAsync("https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar");
-                await File.WriteAllBytesAsync(authlibPath, authlibBytes);
+                if (new FileInfo(authlibPath).Length > 10000) // Проверка: файл не пустой (> 10KB)
+                    needDownloadAuthlib = false;
+                else
+                    File.Delete(authlibPath); // Удаляем битый файл
+            }
+
+            if (needDownloadAuthlib)
+            {
+                var response = await _httpClient.GetAsync("https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar");
+                response.EnsureSuccessStatusCode();
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                await File.WriteAllBytesAsync(authlibPath, bytes);
             }
 
             string installerFileName = $"forge-{mcVersion}-{targetVersion}-installer.jar";
@@ -636,11 +649,15 @@ del ""%~f0""";
 
                 gameProcess.OutputDataReceived += (s, args) => {
                     if (!string.IsNullOrEmpty(args.Data))
-                        File.AppendAllText(logPath, args.Data + Environment.NewLine);
+                    {
+                        lock (_logLock) { File.AppendAllText(logPath, args.Data + Environment.NewLine); }
+                    }
                 };
                 gameProcess.ErrorDataReceived += (s, args) => {
                     if (!string.IsNullOrEmpty(args.Data))
-                        File.AppendAllText(logPath, "[ERROR] " + args.Data + Environment.NewLine);
+                    {
+                        lock (_logLock) { File.AppendAllText(logPath, "[ERROR] " + args.Data + Environment.NewLine); }
+                    }
                 };
 
                 gameProcess.Start();
