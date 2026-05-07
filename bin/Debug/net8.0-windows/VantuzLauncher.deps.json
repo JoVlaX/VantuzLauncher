@@ -10,6 +10,7 @@
         "dependencies": {
           "CmlLib.Core": "4.0.6",
           "CmlLib.Core.Installer.Forge": "1.1.1",
+          "Obfuscar": "2.2.38",
           "System.Management": "8.0.0",
           "System.Text.Encoding.CodePages": "8.0.0"
         },
@@ -71,6 +72,7 @@
           }
         }
       },
+      "Obfuscar/2.2.38": {},
       "SharpZipLib/1.4.2": {
         "runtime": {
           "lib/net6.0/ICSharpCode.SharpZipLib.dll": {
@@ -144,6 +146,13 @@
       "sha512": "sha512-/4yPB/YNtttdbxmHifyNUw6rUiBqCCUgeuokXsWvM/X9CDXJq1eQdI9uVgNpJdrzAZhTIAqNzbOP7Z2ogZt+2g==",
       "path": "lzma-sdk/19.0.0",
       "hashPath": "lzma-sdk.19.0.0.nupkg.sha512"
+    },
+    "Obfuscar/2.2.38": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-v5EwYMf0V+qB4FRoivzF1j6otAnkoLeD79C5v3yFzjKBU5FZKhce7q8uSDDU7jY8wWD+wS/iB6CWJSQeTV3qig==",
+      "path": "obfuscar/2.2.38",
+      "hashPath": "obfuscar.2.2.38.nupkg.sha512"
     },
     "SharpZipLib/1.4.2": {
       "type": "package",
