@@ -618,7 +618,10 @@ del ""%~f0""";
                     MaximumRamMb = _currentRamMb,
                     JavaPath = javaPath,
                     // ПРАВИЛЬНОЕ_СВОЙСТВО для CmlLib.Core v4.0.6
-                    ExtraJvmArguments = new string[] { $"-javaagent:\"{authlibPath}\"=https://troglobit.webhm.pro/yggdrasil" }
+                    ExtraJvmArguments = new[] 
+                    { 
+                        new MArgument($"-javaagent:\"{authlibPath}\"=https://troglobit.webhm.pro/yggdrasil") 
+                    }
                 };
 
                 var gameProcess = await launcher.BuildProcessAsync(installedVersionName, launchOption);
