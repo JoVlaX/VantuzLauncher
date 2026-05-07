@@ -102,7 +102,7 @@ namespace VantuzLauncher
         {
             try
             {
-                var serverVersion = (await _httpClient.GetStringAsync(_versionUrl)).Trim();
+                var serverVersion = (await _httpClient.GetStringAsync($"{_versionUrl}?t={DateTime.Now.Ticks}")).Trim();
                 if (decimal.TryParse(serverVersion.Replace(".", ""), out decimal sVer) && 
                     decimal.TryParse(CurrentVersion.Replace(".", ""), out decimal cVer))
                 {
@@ -633,7 +633,7 @@ del ""%~f0""";
                     // ПРАВИЛЬНОЕ_СВОЙСТВО для CmlLib.Core v4.0.6
                     ExtraJvmArguments = new[] 
                     { 
-                        new MArgument($"-javaagent:{authlibPath}=https://troglobit.webhm.pro/yggdrasil") 
+                        new MArgument($"-javaagent:{authlibPath}=https://troglobit.webhm.pro/yggdrasil/") 
                     }
                 };
 
