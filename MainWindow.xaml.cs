@@ -633,7 +633,7 @@ del ""%~f0""";
                     // ПРАВИЛЬНОЕ_СВОЙСТВО для CmlLib.Core v4.0.6
                     ExtraJvmArguments = new[] 
                     { 
-                        new MArgument($"-javaagent:\"{authlibPath}\"=https://troglobit.webhm.pro/yggdrasil") 
+                        new MArgument($"-javaagent:{authlibPath}=https://troglobit.webhm.pro/yggdrasil") 
                     }
                 };
 
