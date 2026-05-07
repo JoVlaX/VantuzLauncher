@@ -33,6 +33,7 @@ namespace VantuzLauncher
         private readonly string _configPath;
         private int _currentRamMb = 4096;
         private int _totalRamMb = 8192;
+        private MSession _session;
         private static readonly object _logLock = new object();
         
         // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL
@@ -374,7 +375,7 @@ del ""%~f0""";
                 }
                 catch (Exception ex)
                 {
-                    LogException(ex);
+                    LogException(ex, "modpack_sync_error");
                     throw new Exception("Ошибка синхронизации модов. Проверьте интернет или обратитесь к администрации.");
                 }
 
@@ -388,7 +389,7 @@ del ""%~f0""";
                 }
                 catch (Exception ex)
                 {
-                    LogException(ex);
+                    LogException(ex, "game_launch_error");
                     throw new Exception("Ошибка запуска Minecraft. Проверьте интернет или обратитесь к администрации.");
                 }
             }
@@ -616,7 +617,7 @@ del ""%~f0""";
                 // В CmlLib.Core v4 правильный метод:
                 await launcher.InstallAsync(version);
 
-                var session = new MSession
+                _session = new MSession
                 {
                     Username = authInfo.selectedProfile.name,
                     UUID = authInfo.selectedProfile.id,
@@ -627,7 +628,7 @@ del ""%~f0""";
 
                 var launchOption = new MLaunchOption
                 {
-                    Session = session,
+                    Session = _session,
                     MaximumRamMb = _currentRamMb,
                     JavaPath = javaPath,
                     // ПРАВИЛЬНОЕ_СВОЙСТВО для CmlLib.Core v4.0.6
@@ -674,13 +675,20 @@ del ""%~f0""";
                         logTail = string.Join("\n", lines.Length > 10 ? lines[^10..] : lines);
                     } catch { }
 
-                    throw new Exception($"Игра закрылась сразу после запуска (ExitCode: {gameProcess.ExitCode}).\nПоследние строки лога:\n{logTail}");
+                    var crashEx = new Exception($"Игра закрылась сразу после запуска (ExitCode: {gameProcess.ExitCode}).\nПоследние строки лога:\n{logTail}");
+                    LogException(crashEx, "game_crash");
+                    throw crashEx;
                 }
 
                 Application.Current.Shutdown();
             }
             catch (Exception ex)
             {
+                if (!ex.Message.Contains("обратитесь к администрации"))
+                {
+                    LogException(ex, "game_launch_internal_error");
+                }
+                
                 string detail = $"Ошибка: {ex.Message}";
                 if (ex.StackTrace != null) detail += $"\n\nСтек вызовов:\n{ex.StackTrace}";
                 throw new Exception(detail);
@@ -725,18 +733,44 @@ del ""%~f0""";
             return (mcVer, forgeVer);
         }
 
-        private void LogException(Exception ex)
+        private void LogException(Exception ex, string type = "launcher_error")
         {
             try
             {
                 string logFile = Path.Combine(_mcDir, "launcher-errors.log");
-                string errorMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR: {ex.Message}\n" +
+                string errorMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ERROR ({type}): {ex.Message}\n" +
                                  $"StackTrace: {ex.StackTrace}\n" +
                                  (ex.InnerException != null ? $"InnerException: {ex.InnerException.Message}\n" : "") +
                                  "--------------------------------------------------\n";
                 File.AppendAllText(logFile, errorMsg);
+                
+                // Отправляем телеметрию
+                _ = SendTelemetryAsync(type, errorMsg);
             }
             catch { }
+        }
+
+        private async Task SendTelemetryAsync(string errorType, string logContent)
+        {
+            try
+            {
+                var payload = new
+                {
+                    username = _session?.Username ?? "unknown",
+                    error_type = errorType,
+                    log_content = logContent
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                // Отправляем без await ожиданий (fire and forget)
+                _ = _httpClient.PostAsync("https://troglobit.webhm.pro/api/telemetry.php", content);
+            }
+            catch
+            {
+                // Глушим любые ошибки сети. Телеметрия не должна ронять лаунчер.
+            }
         }
     }
 
