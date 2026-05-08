@@ -671,7 +671,7 @@ del ""%~f0""";
 
                 // Запуск античита: следим за папкой mods в реальном времени
                 string modsPath = Path.Combine(_mcDir, "mods");
-                StartAntiCheatWatcher(modsPath, gameProcess);
+                StartAntiCheatWatcher(modsPath);
 
                 await Task.Delay(5000);
                 
@@ -741,12 +741,16 @@ del ""%~f0""";
             return (mcVer, forgeVer);
         }
 
-        private void StartAntiCheatWatcher(string modsPath, Process gameProcess)
+        private void StartAntiCheatWatcher(string modsPath)
         {
             try
             {
+                if (_modsWatcher != null)
+                {
+                    _modsWatcher.Dispose();
+                }
+
                 _modsWatcher = new FileSystemWatcher(modsPath);
-                // Добавлен LastWrite для отлова копипасты файлов
                 _modsWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime;
                 _modsWatcher.Filter = "*.*";
                 _modsWatcher.IncludeSubdirectories = true;
@@ -757,20 +761,23 @@ del ""%~f0""";
 
                     try
                     {
-                        // Игнорируем gameProcess.HasExited, так как процесс мог форкнуться. 
-                        // Ищем и жестко убиваем процессы Java напрямую. 
-                        var javaProcesses = Process.GetProcessesByName("java").Concat(Process.GetProcessesByName("javaw"));
+                        var javaProcesses = Process.GetProcessesByName("java").Concat(Process.GetProcessesByName("javaw")).ToList();
+                        bool killedAny = false;
+
                         foreach (var p in javaProcesses)
                         {
-                            try { p.Kill(); } catch { } // Глушим ошибки доступа 
+                            try { p.Kill(); killedAny = true; } catch { }
                         }
 
-                        _ = SendTelemetryAsync("anticheat_violation", $"Изменен файл: {path} ({changeType})");
-
-                        Dispatcher.Invoke(() =>
+                        if (killedAny)
                         {
-                            MessageBox.Show("Обнаружено вмешательство в файлы (X-Ray/читы). Игра принудительно остановлена.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
-                        });
+                            _ = SendTelemetryAsync("anticheat_violation", $"Изменен файл: {path} ({changeType})");
+
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                MessageBox.Show("Обнаружено вмешательство в файлы модов. Игра принудительно остановлена.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
+                            });
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -784,22 +791,28 @@ del ""%~f0""";
 
                 _modsWatcher.EnableRaisingEvents = true;
 
-                // Оставляем освобождение ресурсов, но без жесткой привязки к логике убийства 
-                if (gameProcess != null)
+                // Фоновый мониторинг жизни Java вместо привязки к gameProcess 
+                Task.Run(async () =>
                 {
-                    gameProcess.Exited += (s, e) =>
+                    await Task.Delay(15000); // Даем Java 15 секунд на запуск 
+
+                    while (true)
                     {
-                        // Даем небольшую задержку, чтобы Java успела закрыться 
-                        Task.Delay(5000).ContinueWith(_ =>
+                        var javaProcesses = Process.GetProcessesByName("java").Concat(Process.GetProcessesByName("javaw"));
+                        if (!javaProcesses.Any())
                         {
+                            // Все процессы Java завершены, можно выключать античит 
                             if (_modsWatcher != null)
                             {
                                 _modsWatcher.EnableRaisingEvents = false;
                                 _modsWatcher.Dispose();
+                                _modsWatcher = null;
                             }
-                        });
-                    };
-                }
+                            break;
+                        }
+                        await Task.Delay(3000); // Проверяем каждые 3 секунды 
+                    }
+                });
             }
             catch (Exception ex)
             {
