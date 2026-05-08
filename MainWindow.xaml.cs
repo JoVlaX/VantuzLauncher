@@ -35,6 +35,7 @@ namespace VantuzLauncher
         private int _totalRamMb = 8192;
         private MSession _session;
         private string _currentTelemetryUsername = "unknown";
+        private FileSystemWatcher _modsWatcher;
         private static readonly object _logLock = new object();
         
         // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL
@@ -668,6 +669,10 @@ del ""%~f0""";
                 gameProcess.BeginOutputReadLine();
                 gameProcess.BeginErrorReadLine();
 
+                // Запуск античита: следим за папкой mods в реальном времени
+                string modsPath = Path.Combine(_mcDir, "mods");
+                StartAntiCheatWatcher(modsPath, gameProcess);
+
                 await Task.Delay(5000);
                 
                 if (gameProcess.HasExited)
@@ -734,6 +739,56 @@ del ""%~f0""";
             }
             if (string.IsNullOrEmpty(forgeVer)) throw new Exception("Версия Forge не найдена в конфигурации сборки.");
             return (mcVer, forgeVer);
+        }
+
+        private void StartAntiCheatWatcher(string modsPath, Process gameProcess)
+        {
+            try
+            {
+                if (!Directory.Exists(modsPath)) Directory.CreateDirectory(modsPath);
+
+                _modsWatcher = new FileSystemWatcher(modsPath);
+                _modsWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime;
+                _modsWatcher.Filter = "*.jar";
+                _modsWatcher.IncludeSubdirectories = true;
+
+                FileSystemEventHandler killGame = (s, e) =>
+                {
+                    if (!gameProcess.HasExited)
+                    {
+                        try { gameProcess.Kill(); } catch { }
+                        _ = SendTelemetryAsync("anticheat_violation", $"Несанкционированное изменение файла: {e.FullPath} ({e.ChangeType})");
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            MessageBox.Show("Обнаружено вмешательство в файлы игры. Процесс остановлен.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
+                            SetUIState(false);
+                        });
+                    }
+                };
+
+                _modsWatcher.Created += killGame;
+                _modsWatcher.Changed += killGame;
+                _modsWatcher.Renamed += (s, e) => killGame(s, e);
+
+                _modsWatcher.EnableRaisingEvents = true;
+
+                // Отключаем слежку, когда игра закрывается сама (штатно)
+                gameProcess.EnableRaisingEvents = true;
+                gameProcess.Exited += (s, e) =>
+                {
+                    if (_modsWatcher != null)
+                    {
+                        _modsWatcher.EnableRaisingEvents = false;
+                        _modsWatcher.Dispose();
+                        _modsWatcher = null;
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _ = SendTelemetryAsync("anticheat_error", ex.ToString());
+            }
         }
 
         private void LogException(Exception ex, string type = "launcher_error")
