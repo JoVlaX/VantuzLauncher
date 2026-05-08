@@ -34,6 +34,7 @@ namespace VantuzLauncher
         private int _currentRamMb = 4096;
         private int _totalRamMb = 8192;
         private MSession _session;
+        private string _currentTelemetryUsername = "unknown";
         private static readonly object _logLock = new object();
         
         // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL
@@ -331,6 +332,8 @@ del ""%~f0""";
                 MessageBox.Show("Пожалуйста, введите логин и пароль.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+
+            _currentTelemetryUsername = username;
 
             SetUIState(true);
             UpdateStatus("Авторизация...");
@@ -756,7 +759,7 @@ del ""%~f0""";
             {
                 var payload = new
                 {
-                    username = _session?.Username ?? "unknown",
+                    username = _currentTelemetryUsername,
                     error_type = errorType,
                     log_content = logContent
                 };
