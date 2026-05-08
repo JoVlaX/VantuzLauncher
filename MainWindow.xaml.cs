@@ -745,49 +745,54 @@ del ""%~f0""";
         {
             try
             {
-                if (!Directory.Exists(modsPath)) Directory.CreateDirectory(modsPath);
-
                 _modsWatcher = new FileSystemWatcher(modsPath);
                 _modsWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime;
-                _modsWatcher.Filter = "*.jar";
+                _modsWatcher.Filter = "*.*"; // Наблюдаем за ВСЕМИ файлами, чтобы ловить переименования
                 _modsWatcher.IncludeSubdirectories = true;
 
-                FileSystemEventHandler killGame = (s, e) =>
+                Action<string, string> triggerAntiCheat = (path, changeType) =>
                 {
-                    if (!gameProcess.HasExited)
-                    {
-                        try { gameProcess.Kill(); } catch { }
-                        _ = SendTelemetryAsync("anticheat_violation", $"Несанкционированное изменение файла: {e.FullPath} ({e.ChangeType})");
+                    // Ручная проверка расширения
+                    if (!path.EndsWith(".jar", StringComparison.OrdinalIgnoreCase)) return;
 
-                        Dispatcher.Invoke(() =>
+                    try
+                    {
+                        if (!gameProcess.HasExited)
                         {
-                            MessageBox.Show("Обнаружено вмешательство в файлы игры. Процесс остановлен.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
-                            SetUIState(false);
-                        });
+                            gameProcess.Kill();
+                            _ = SendTelemetryAsync("anticheat_violation", $"Изменен файл: {path} ({changeType})");
+
+                            Dispatcher.Invoke(() =>
+                            {
+                                MessageBox.Show("Обнаружено вмешательство в файлы игры. Процесс остановлен.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Если не получилось убить процесс - обязательно логируем
+                        _ = SendTelemetryAsync("anticheat_kill_error", ex.ToString());
                     }
                 };
 
-                _modsWatcher.Created += killGame;
-                _modsWatcher.Changed += killGame;
-                _modsWatcher.Renamed += (s, e) => killGame(s, e);
+                _modsWatcher.Created += (s, e) => triggerAntiCheat(e.FullPath, e.ChangeType.ToString());
+                _modsWatcher.Changed += (s, e) => triggerAntiCheat(e.FullPath, e.ChangeType.ToString());
+                _modsWatcher.Renamed += (s, e) => triggerAntiCheat(e.FullPath, "Renamed");
 
                 _modsWatcher.EnableRaisingEvents = true;
 
-                // Отключаем слежку, когда игра закрывается сама (штатно)
-                gameProcess.EnableRaisingEvents = true;
                 gameProcess.Exited += (s, e) =>
                 {
                     if (_modsWatcher != null)
                     {
                         _modsWatcher.EnableRaisingEvents = false;
                         _modsWatcher.Dispose();
-                        _modsWatcher = null;
                     }
                 };
             }
             catch (Exception ex)
             {
-                _ = SendTelemetryAsync("anticheat_error", ex.ToString());
+                _ = SendTelemetryAsync("anticheat_init_error", ex.ToString());
             }
         }
 
