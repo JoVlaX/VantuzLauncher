@@ -746,49 +746,60 @@ del ""%~f0""";
             try
             {
                 _modsWatcher = new FileSystemWatcher(modsPath);
-                _modsWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.CreationTime;
-                _modsWatcher.Filter = "*.*"; // Наблюдаем за ВСЕМИ файлами, чтобы ловить переименования
+                // Добавлен LastWrite для отлова копипасты файлов
+                _modsWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime;
+                _modsWatcher.Filter = "*.*";
                 _modsWatcher.IncludeSubdirectories = true;
 
                 Action<string, string> triggerAntiCheat = (path, changeType) =>
                 {
-                    // Ручная проверка расширения
                     if (!path.EndsWith(".jar", StringComparison.OrdinalIgnoreCase)) return;
 
                     try
                     {
-                        if (!gameProcess.HasExited)
+                        // Игнорируем gameProcess.HasExited, так как процесс мог форкнуться. 
+                        // Ищем и жестко убиваем процессы Java напрямую. 
+                        var javaProcesses = Process.GetProcessesByName("java").Concat(Process.GetProcessesByName("javaw"));
+                        foreach (var p in javaProcesses)
                         {
-                            gameProcess.Kill();
-                            _ = SendTelemetryAsync("anticheat_violation", $"Изменен файл: {path} ({changeType})");
-
-                            Dispatcher.Invoke(() =>
-                            {
-                                MessageBox.Show("Обнаружено вмешательство в файлы игры. Процесс остановлен.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
-                            });
+                            try { p.Kill(); } catch { } // Глушим ошибки доступа 
                         }
+
+                        _ = SendTelemetryAsync("anticheat_violation", $"Изменен файл: {path} ({changeType})");
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            MessageBox.Show("Обнаружено вмешательство в файлы (X-Ray/читы). Игра принудительно остановлена.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
                     }
                     catch (Exception ex)
                     {
-                        // Если не получилось убить процесс - обязательно логируем
                         _ = SendTelemetryAsync("anticheat_kill_error", ex.ToString());
                     }
                 };
 
-                _modsWatcher.Created += (s, e) => triggerAntiCheat(e.FullPath, e.ChangeType.ToString());
-                _modsWatcher.Changed += (s, e) => triggerAntiCheat(e.FullPath, e.ChangeType.ToString());
+                _modsWatcher.Created += (s, e) => triggerAntiCheat(e.FullPath, "Created");
+                _modsWatcher.Changed += (s, e) => triggerAntiCheat(e.FullPath, "Changed");
                 _modsWatcher.Renamed += (s, e) => triggerAntiCheat(e.FullPath, "Renamed");
 
                 _modsWatcher.EnableRaisingEvents = true;
 
-                gameProcess.Exited += (s, e) =>
+                // Оставляем освобождение ресурсов, но без жесткой привязки к логике убийства 
+                if (gameProcess != null)
                 {
-                    if (_modsWatcher != null)
+                    gameProcess.Exited += (s, e) =>
                     {
-                        _modsWatcher.EnableRaisingEvents = false;
-                        _modsWatcher.Dispose();
-                    }
-                };
+                        // Даем небольшую задержку, чтобы Java успела закрыться 
+                        Task.Delay(5000).ContinueWith(_ =>
+                        {
+                            if (_modsWatcher != null)
+                            {
+                                _modsWatcher.EnableRaisingEvents = false;
+                                _modsWatcher.Dispose();
+                            }
+                        });
+                    };
+                }
             }
             catch (Exception ex)
             {
