@@ -37,6 +37,7 @@ namespace VantuzLauncher
         private int _totalRamMb = 8192;
         private MSession _session;
         private string _currentTelemetryUsername = "unknown";
+        private bool _updateRequired = false;
         private List<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
         private static readonly object _logLock = new object();
         
@@ -117,13 +118,18 @@ namespace VantuzLauncher
                 {
                     if (sVer > cVer)
                     {
-                        var result = MessageBox.Show($"Доступно новое обновление ({serverVersion}). Установить сейчас?", 
-                                                   "Обновление", MessageBoxButton.YesNo, MessageBoxImage.Information);
-                        if (result == MessageBoxResult.Yes)
+                        _updateRequired = true;
+                        Dispatcher.Invoke(() =>
                         {
-                            UpdateStatus("Загрузка обновления...");
-                            await DownloadAndApplyUpdateAsync();
-                        }
+                            var btnText = (TextBlock)BtnPlay.FindName("BtnPlayText");
+                            if (btnText != null) btnText.Text = "ОБНОВИТЬ ЛАУНЧЕР";
+
+                            // Блокируем ввод, так как играть все равно нельзя 
+                            UsernameBox.IsEnabled = false;
+                            PasswordBox.IsEnabled = false;
+                            RememberMeBox.IsEnabled = false;
+                            UpdateStatus($"Доступна новая версия: {serverVersion}. Необходимо обновить.");
+                        });
                     }
                 }
             }
@@ -134,8 +140,6 @@ namespace VantuzLauncher
         {
             try
             {
-                SetUIState(true); // Включаем прогресс-панель сразу
-                
                 string exePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule.FileName;
                 string tempExePath = exePath + ".new";
 
@@ -331,6 +335,14 @@ del ""%~f0""";
 
         private async void BtnPlay_Click(object sender, RoutedEventArgs e)
         {
+            if (_updateRequired)
+            {
+                UpdateStatus("Загрузка обновления...");
+                SetUIState(true);
+                await DownloadAndApplyUpdateAsync();
+                return;
+            }
+
             string username = UsernameBox.Text.Trim();
             string password = PasswordBox.Password;
 
