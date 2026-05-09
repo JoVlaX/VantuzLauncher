@@ -343,6 +343,11 @@ del ""%~f0""";
                 return;
             }
 
+            SetUIState(true);
+            UpdateStatus("Проверка актуальности лаунчера...");
+            await CheckForUpdatesAsync();
+            if (_updateRequired) return; // Если после проверки оказалось, что нужно обновиться 
+
             string username = UsernameBox.Text.Trim();
             string password = PasswordBox.Password;
 
@@ -456,7 +461,8 @@ del ""%~f0""";
             {
                 username = username,
                 password = password,
-                clientToken = Guid.NewGuid().ToString("N")
+                clientToken = Guid.NewGuid().ToString("N"),
+                launcherVersion = CurrentVersion // Добавлено поле версии 
             };
             var json = JsonSerializer.Serialize(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
