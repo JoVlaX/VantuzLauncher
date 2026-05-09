@@ -26,6 +26,21 @@ jobs:
         (Get-Content $filePath) -replace 'BUILD_DATE_PLACEHOLDER', $version | Set-Content $filePath
         echo "Injected Version: $version"
 
+    - name: Resolve Obfuscar Dependencies 
+      shell: pwsh 
+      run: | 
+        # Ищем пути к системным библиотекам .NET на сервере GitHub Actions 
+        $wpfPath = (Get-ChildItem -Path "C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App" -Filter "PresentationFramework.dll" -Recurse | Select-Object -First 1).DirectoryName 
+        $corePath = (Get-ChildItem -Path "C:\Program Files\dotnet\shared\Microsoft.NETCore.App" -Filter "System.Runtime.dll" -Recurse | Select-Object -First 1).DirectoryName 
+        
+        # Внедряем пути поиска в конфигурацию обфускатора 
+        $xml = Get-Content obfuscar.xml 
+        $xml = $xml -replace '</Obfuscator>', "  <AssemblySearchPath path=`"$wpfPath`" />`n  <AssemblySearchPath path=`"$corePath`" />`n</Obfuscator>" 
+        Set-Content obfuscar.xml $xml 
+        
+        echo "Injected WPF Path: $wpfPath" 
+        echo "Injected Core Path: $corePath" 
+
     - name: Publish Launcher
       run: dotnet publish VantuzLauncher.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:IncludeNativeLibrariesForSelfExtract=true -o ./publish
 
