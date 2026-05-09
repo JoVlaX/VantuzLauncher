@@ -1,0 +1,27 @@
+# Build results 
+[Bb]in/ 
+[Oo]bj/ 
+[Dd]ebug/ 
+[Rr]elease/ 
+x64/ 
+x86/ 
+ 
+# Visual Studio folders and files 
+.vs/ 
+*.user 
+*.suo 
+*.userosscache 
+*.sln.docstates 
+ 
+# OS generated files 
+.DS_Store 
+Thumbs.db
+
+# Local testing and temp files 
+*.jar 
+*.zip 
+*.rar 
+*.log 
+temp/ 
+test/ 
+testing/

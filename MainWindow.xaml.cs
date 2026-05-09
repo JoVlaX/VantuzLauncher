@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace VantuzLauncher
         
         private readonly string _mcDir;
         private readonly string _configPath;
-        private int _currentRamMb = 4096;
+        private int _currentRamMb;
         private int _totalRamMb = 8192;
         private MSession _session;
         private string _currentTelemetryUsername = "unknown";
@@ -90,6 +91,9 @@ namespace VantuzLauncher
                     int totalGb = _totalRamMb / 1024;
                     RamSlider.Maximum = totalGb * 1024;
                     RamSlider.Minimum = 1024;
+
+                    // Динамический дефолт: половина от общей, но в пределах [1024, 4096]
+                    _currentRamMb = Math.Clamp(_totalRamMb / 2, 1024, 4096);
                     break;
                 }
             }
@@ -99,6 +103,7 @@ namespace VantuzLauncher
                 _totalRamMb = 8192;
                 RamSlider.Maximum = 8192;
                 RamSlider.Minimum = 1024;
+                _currentRamMb = 4096;
             }
         }
 
@@ -219,10 +224,10 @@ del ""%~f0""";
                     if (config != null)
                     {
                         UsernameBox.Text = config.Username;
-                        PasswordBox.Password = config.Password;
+                        PasswordBox.Password = CryptoHelper.Decrypt(config.Password);
                         RememberMeBox.IsChecked = config.RememberMe;
                         
-                        _currentRamMb = config.RamMb > 0 ? config.RamMb : 4096;
+                        _currentRamMb = config.RamMb;
                         
                         // Проверка на выход за границы при смене ПК
                         if (_currentRamMb > RamSlider.Maximum) _currentRamMb = (int)RamSlider.Maximum;
@@ -242,7 +247,7 @@ del ""%~f0""";
                 var config = new LauncherConfig
                 {
                     Username = RememberMeBox.IsChecked == true ? UsernameBox.Text : "",
-                    Password = RememberMeBox.IsChecked == true ? PasswordBox.Password : "",
+                    Password = RememberMeBox.IsChecked == true ? CryptoHelper.Encrypt(PasswordBox.Password) : "",
                     RememberMe = RememberMeBox.IsChecked == true,
                     RamMb = _currentRamMb
                 };
@@ -372,6 +377,25 @@ del ""%~f0""";
                 string packwizUrl = $"{baseUrl}/main/pack.toml";
                 if (authResponse.is_tester) packwizUrl = $"{baseUrl}/test/pack.toml";
                 else if (authResponse.is_admin) packwizUrl = $"{baseUrl}/dev/pack.toml";
+
+                UpdateStatus("Зачистка несанкционированных файлов...");
+                string[] foldersToClean = { "mods", "resourcepacks", "shaderpacks" };
+                foreach (var folder in foldersToClean)
+                {
+                    string folderPath = Path.Combine(_mcDir, folder);
+                    if (Directory.Exists(folderPath))
+                    {
+                        var files = Directory.GetFiles(folderPath);
+                        foreach (var file in files)
+                        {
+                            // Удаляем только архивы, чтобы не трогать папки или системные логи 
+                            if (file.EndsWith(".jar") || file.EndsWith(".zip") || file.EndsWith(".rar"))
+                            {
+                                try { File.Delete(file); } catch { }
+                            }
+                        }
+                    }
+                }
 
                 UpdateStatus("Проверка Packwiz...");
                 try 
@@ -529,89 +553,120 @@ del ""%~f0""";
                 await File.WriteAllBytesAsync(authlibPath, bytes);
             }
 
-            string installerFileName = $"forge-{mcVersion}-{targetVersion}-installer.jar";
-            string installerPath = Path.Combine(_mcDir, installerFileName);
+            string versionsDir = Path.Combine(_mcDir, "versions");
+            string installedVersionName = "";
 
-            if (!File.Exists(installerPath))
+            if (Directory.Exists(versionsDir))
             {
-                UpdateStatus($"Загрузка Forge {targetVersion}...");
-                string forgeDirectUrl = $"https://maven.minecraftforge.net/net/minecraftforge/forge/{mcVersion}-{targetVersion}/{installerFileName}";
-                var response = await _httpClient.GetAsync(forgeDirectUrl);
-                if (response.IsSuccessStatusCode)
+                var dirs = Directory.GetDirectories(versionsDir);
+                // Ищем папку, которая содержит "forge" и нашу версию MC
+                foreach (var dir in dirs)
                 {
-                    var bytes = await response.Content.ReadAsByteArrayAsync();
-                    await File.WriteAllBytesAsync(installerPath, bytes);
-                }
-                else throw new Exception($"Не удалось скачать установщик Forge {targetVersion}.");
-            }
-
-            UpdateStatus($"Установка Forge {targetVersion}...");
-            
-            try 
-            {
-                // Forge требует наличия файла launcher_profiles.json для работы установщика
-                string profilesPath = Path.Combine(_mcDir, "launcher_profiles.json");
-                if (!File.Exists(profilesPath))
-                {
-                    File.WriteAllText(profilesPath, "{ \"profiles\": {} }");
-                }
-
-                // Вместо forge.Install, который вызывает 404, используем прямой запуск установщика
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = javaPath,
-                    Arguments = $"-Djava.net.preferIPv4Stack=true -jar \"{installerPath}\" --installClient \"{_mcDir}\"",
-                    WorkingDirectory = _mcDir,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using (var process = Process.Start(processStartInfo))
-                {
-                    if (process == null) throw new Exception("Не удалось запустить установщик Forge.");
-                    UpdateStatus("Распаковка Forge (может занять 1-2 минуты)...");
-                    
-                    // Читаем вывод, чтобы видеть, если что-то пошло не так
-                    string output = await process.StandardOutput.ReadToEndAsync();
-                    string error = await process.StandardError.ReadToEndAsync();
-                    await process.WaitForExitAsync();
-
-                    if (process.ExitCode != 0)
+                    string name = Path.GetFileName(dir);
+                    if (name.Contains(mcVersion, StringComparison.OrdinalIgnoreCase) && 
+                        name.Contains("forge", StringComparison.OrdinalIgnoreCase) &&
+                        name.Contains(targetVersion, StringComparison.OrdinalIgnoreCase))
                     {
-                        throw new Exception($"Ошибка при установке Forge (ExitCode: {process.ExitCode}):\n{error}\n{output}");
+                        installedVersionName = name;
+                        break;
                     }
                 }
+            }
 
-                // После установки Forge создает папку в versions. Нам нужно найти ее точное имя.
-                UpdateStatus("Поиск установленной версии...");
-                string versionsDir = Path.Combine(_mcDir, "versions");
-                string installedVersionName = "";
+            if (string.IsNullOrEmpty(installedVersionName))
+            {
+                string installerFileName = $"forge-{mcVersion}-{targetVersion}-installer.jar";
+                string installerPath = Path.Combine(_mcDir, installerFileName);
 
-                if (Directory.Exists(versionsDir))
+                if (!File.Exists(installerPath))
                 {
-                    var dirs = Directory.GetDirectories(versionsDir);
-                    // Ищем папку, которая содержит "forge" и нашу версию MC
-                    foreach (var dir in dirs)
+                    UpdateStatus($"Загрузка Forge {targetVersion}...");
+                    string forgeDirectUrl = $"https://maven.minecraftforge.net/net/minecraftforge/forge/{mcVersion}-{targetVersion}/{installerFileName}";
+                    var response = await _httpClient.GetAsync(forgeDirectUrl);
+                    if (response.IsSuccessStatusCode)
                     {
-                        string name = Path.GetFileName(dir);
-                        if (name.Contains(mcVersion, StringComparison.OrdinalIgnoreCase) && 
-                            name.Contains("forge", StringComparison.OrdinalIgnoreCase))
+                        var bytes = await response.Content.ReadAsByteArrayAsync();
+                        await File.WriteAllBytesAsync(installerPath, bytes);
+                    }
+                    else throw new Exception($"Не удалось скачать установщик Forge {targetVersion}.");
+                }
+
+                UpdateStatus($"Установка Forge {targetVersion}...");
+                
+                try 
+                {
+                    // Forge требует наличия файла launcher_profiles.json для работы установщика
+                    string profilesPath = Path.Combine(_mcDir, "launcher_profiles.json");
+                    if (!File.Exists(profilesPath))
+                    {
+                        File.WriteAllText(profilesPath, "{ \"profiles\": {} }");
+                    }
+
+                    // Вместо forge.Install, который вызывает 404, используем прямой запуск установщика
+                    var processStartInfo = new ProcessStartInfo
+                    {
+                        FileName = javaPath,
+                        Arguments = $"-Djava.net.preferIPv4Stack=true -jar \"{installerPath}\" --installClient \"{_mcDir}\"",
+                        WorkingDirectory = _mcDir,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    using (var process = Process.Start(processStartInfo))
+                    {
+                        if (process == null) throw new Exception("Не удалось запустить установщик Forge.");
+                        UpdateStatus("Распаковка Forge (может занять 1-2 минуты)...");
+                        
+                        // Читаем вывод, чтобы видеть, если что-то пошло не так
+                        string output = await process.StandardOutput.ReadToEndAsync();
+                        string error = await process.StandardError.ReadToEndAsync();
+                        await process.WaitForExitAsync();
+
+                        if (process.ExitCode != 0)
                         {
-                            installedVersionName = name;
-                            break;
+                            throw new Exception($"Ошибка при установке Forge (ExitCode: {process.ExitCode}):\n{error}\n{output}");
+                        }
+                    }
+
+                    // После установки Forge создает папку в versions. Нам нужно найти ее точное имя.
+                    UpdateStatus("Поиск установленной версии...");
+                    if (Directory.Exists(versionsDir))
+                    {
+                        var dirs = Directory.GetDirectories(versionsDir);
+                        foreach (var dir in dirs)
+                        {
+                            string name = Path.GetFileName(dir);
+                            if (name.Contains(mcVersion, StringComparison.OrdinalIgnoreCase) && 
+                                name.Contains("forge", StringComparison.OrdinalIgnoreCase) &&
+                                name.Contains(targetVersion, StringComparison.OrdinalIgnoreCase))
+                            {
+                                installedVersionName = name;
+                                break;
+                            }
                         }
                     }
                 }
-
-                if (string.IsNullOrEmpty(installedVersionName))
+                catch (Exception ex)
                 {
-                    installedVersionName = $"{mcVersion}-forge-{targetVersion}";
+                    if (!ex.Message.Contains("обратитесь к администрации"))
+                    {
+                        LogException(ex, "forge_install_error");
+                    }
+                    throw;
                 }
+            }
 
-                UpdateStatus($"Найдена версия: {installedVersionName}. Запуск...");
+            if (string.IsNullOrEmpty(installedVersionName))
+            {
+                installedVersionName = $"{mcVersion}-forge-{targetVersion}";
+            }
 
+            UpdateStatus($"Используется версия: {installedVersionName}. Запуск...");
+
+            try 
+            {
                 // В CmlLib.Core v4 для обновления списка локальных версий 
                 // можно просто создать новый экземпляр или вызвать GetVersionAsync
                 // который сам проверит папку versions.
@@ -667,6 +722,7 @@ del ""%~f0""";
                 };
 
                 gameProcess.Start();
+                ChildProcessTracker.AddProcess(gameProcess);
                 gameProcess.BeginOutputReadLine();
                 gameProcess.BeginErrorReadLine();
 
@@ -688,7 +744,14 @@ del ""%~f0""";
                     throw crashEx;
                 }
 
-                Application.Current.Shutdown();
+                // Скрываем лаунчер, но оставляем его работать в фоне для античита 
+                Application.Current.Dispatcher.Invoke(() => { this.Hide(); });
+
+                // Ждем, пока игра не закроется 
+                await gameProcess.WaitForExitAsync();
+
+                // Только теперь закрываем лаунчер полностью 
+                Application.Current.Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
             }
             catch (Exception ex)
             {
@@ -745,18 +808,16 @@ del ""%~f0""";
         {
             try
             {
-                // Очищаем старые наблюдатели 
                 foreach (var w in _watchers) w?.Dispose();
                 _watchers.Clear();
 
-                // СПИСОК ПАПОК ПОД ЗАЩИТОЙ 
                 string[] protectedFolders = { "mods", "resourcepacks", "shaderpacks" };
 
                 Action<string, string> triggerAntiCheat = (path, changeType) =>
                 {
-                    // Реагируем на изменения архивов 
                     if (!path.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) &&
-                        !path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) return;
+                        !path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                        !path.EndsWith(".rar", StringComparison.OrdinalIgnoreCase)) return;
 
                     try
                     {
@@ -764,7 +825,6 @@ del ""%~f0""";
                         {
                             gameProcess.Kill();
                             _ = SendTelemetryAsync("anticheat_violation", $"Вмешательство во время игры: {path} ({changeType})");
-
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 MessageBox.Show("Обнаружено изменение критических файлов во время работы игры. Процесс принудительно остановлен.", "VantuzLauncher Античит", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -780,7 +840,6 @@ del ""%~f0""";
                 FileSystemEventHandler onFileChanged = (s, e) => triggerAntiCheat(e.FullPath, e.ChangeType.ToString());
                 RenamedEventHandler onFileRenamed = (s, e) => triggerAntiCheat(e.FullPath, "Renamed");
 
-                // Запускаем наблюдателя для каждой папки 
                 foreach (var folder in protectedFolders)
                 {
                     string fullPath = Path.Combine(mcDir, folder);
@@ -793,15 +852,12 @@ del ""%~f0""";
                         IncludeSubdirectories = true,
                         EnableRaisingEvents = true
                     };
-
                     watcher.Created += onFileChanged;
                     watcher.Changed += onFileChanged;
                     watcher.Renamed += onFileRenamed;
-
                     _watchers.Add(watcher);
                 }
 
-                // Динамическое выключение при закрытии игры 
                 gameProcess.EnableRaisingEvents = true;
                 gameProcess.Exited += (s, e) =>
                 {
@@ -832,7 +888,7 @@ del ""%~f0""";
             catch { }
         }
 
-        private async Task SendTelemetryAsync(string errorType, string logContent)
+        private Task SendTelemetryAsync(string errorType, string logContent)
         {
             try
             {
@@ -847,12 +903,13 @@ del ""%~f0""";
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
                 // Отправляем без await ожиданий (fire and forget)
-                _ = _httpClient.PostAsync("https://troglobit.webhm.pro/api/telemetry.php", content);
+                _httpClient.PostAsync("https://troglobit.webhm.pro/api/telemetry.php", content);
             }
             catch
             {
                 // Глушим любые ошибки сети. Телеметрия не должна ронять лаунчер.
             }
+            return Task.CompletedTask;
         }
     }
 
@@ -880,5 +937,120 @@ del ""%~f0""";
         public string Password { get; set; }
         public bool RememberMe { get; set; }
         public int RamMb { get; set; }
+    }
+
+    public static class ChildProcessTracker
+    {
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern IntPtr CreateJobObject(IntPtr a, string lpName);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern bool SetInformationJobObject(IntPtr hJob, int infoClass, IntPtr lpJobObjectInfo, int cbJobObjectInfoLength);
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+
+        private static IntPtr s_jobHandle;
+
+        static ChildProcessTracker()
+        {
+            s_jobHandle = CreateJobObject(IntPtr.Zero, null);
+            var info = new JOBOBJECT_BASIC_LIMIT_INFORMATION { LimitFlags = 0x2000 }; // JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE 
+            var extendedInfo = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION { BasicLimitInformation = info };
+
+            int length = System.Runtime.InteropServices.Marshal.SizeOf(typeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+            IntPtr extendedInfoPtr = System.Runtime.InteropServices.Marshal.AllocHGlobal(length);
+            System.Runtime.InteropServices.Marshal.StructureToPtr(extendedInfo, extendedInfoPtr, false);
+
+            SetInformationJobObject(s_jobHandle, 9, extendedInfoPtr, length);
+            System.Runtime.InteropServices.Marshal.FreeHGlobal(extendedInfoPtr);
+        }
+
+        public static void AddProcess(Process process)
+        {
+            if (s_jobHandle != IntPtr.Zero)
+                AssignProcessToJobObject(s_jobHandle, process.Handle);
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        struct JOBOBJECT_BASIC_LIMIT_INFORMATION
+        {
+            public long PerProcessUserTimeLimit;
+            public long PerJobUserTimeLimit;
+            public uint LimitFlags;
+            public UIntPtr MinimumWorkingSetSize;
+            public UIntPtr MaximumWorkingSetSize;
+            public uint ActiveProcessLimit;
+            public long Affinity;
+            public uint PriorityClass;
+            public uint SchedulingClass;
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        struct IO_COUNTERS
+        {
+            public ulong ReadOperationCount;
+            public ulong WriteOperationCount;
+            public ulong OtherOperationCount;
+            public ulong ReadTransferCount;
+            public ulong WriteTransferCount;
+            public ulong OtherTransferCount;
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        struct JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+        {
+            public JOBOBJECT_BASIC_LIMIT_INFORMATION BasicLimitInformation;
+            public IO_COUNTERS IoInfo;
+            public UIntPtr ProcessMemoryLimit;
+            public UIntPtr JobMemoryLimit;
+            public UIntPtr PeakProcessMemoryUsed;
+            public UIntPtr PeakJobMemoryUsed;
+        }
+    }
+
+    public static class CryptoHelper
+    {
+        private static readonly byte[] Entropy = Encoding.UTF8.GetBytes("VantuzLauncher_Secure_Key_2026");
+
+        public static string Encrypt(string clearText)
+        {
+            if (string.IsNullOrEmpty(clearText)) return clearText;
+            try
+            {
+                byte[] clearBytes = Encoding.UTF8.GetBytes(clearText);
+                using Aes aes = Aes.Create();
+                using var rfc2898 = new Rfc2898DeriveBytes(Environment.MachineName + "Vantuz", Entropy, 1000, HashAlgorithmName.SHA256);
+                aes.Key = rfc2898.GetBytes(aes.KeySize / 8);
+                aes.IV = rfc2898.GetBytes(aes.BlockSize / 8);
+
+                using MemoryStream ms = new MemoryStream();
+                using CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write);
+                cs.Write(clearBytes, 0, clearBytes.Length);
+                cs.Close();
+                return Convert.ToBase64String(ms.ToArray());
+            }
+            catch { return ""; }
+        }
+
+        public static string Decrypt(string cipherText)
+        {
+            if (string.IsNullOrEmpty(cipherText)) return cipherText;
+            try
+            {
+                byte[] cipherBytes = Convert.FromBase64String(cipherText);
+                using Aes aes = Aes.Create();
+                using var rfc2898 = new Rfc2898DeriveBytes(Environment.MachineName + "Vantuz", Entropy, 1000, HashAlgorithmName.SHA256);
+                aes.Key = rfc2898.GetBytes(aes.KeySize / 8);
+                aes.IV = rfc2898.GetBytes(aes.BlockSize / 8);
+
+                using MemoryStream ms = new MemoryStream();
+                using CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write);
+                cs.Write(cipherBytes, 0, cipherBytes.Length);
+                cs.Close();
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+            catch { return ""; }
+        }
     }
 }
