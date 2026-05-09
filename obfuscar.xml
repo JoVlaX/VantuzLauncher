@@ -2,12 +2,15 @@
 <Obfuscator>
   <Var name="InPath" value="." />
   <Var name="OutPath" value="./Obfuscated" />
-  <Var name="KeepPublicApi" value="false" />
+  <Var name="KeepPublicApi" value="true" />
   <Var name="HidePrivateApi" value="true" />
   <Var name="HideStrings" value="true" />
   <Var name="RenameProperties" value="true" />
   <Var name="RenameEvents" value="true" />
   <Var name="RenameFields" value="true" />
+  <Var name="AnalyzeBAML" value="false" />
+  <Var name="MarkedOnly" value="false" />
+  <Var name="IgnoreMissingAssemblies" value="true" />
 
   <!-- Входной файл -->
   <Module file="$(InPath)/VantuzLauncher.dll">
