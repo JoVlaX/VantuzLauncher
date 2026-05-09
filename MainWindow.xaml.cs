@@ -10,6 +10,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
 using System.Windows.Input;
 using System.IO.Compression;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace VantuzLauncher
         private int _totalRamMb = 8192;
         private MSession _session;
         private string _currentTelemetryUsername = "unknown";
-        private FileSystemWatcher _modsWatcher;
+        private List<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
         private static readonly object _logLock = new object();
         
         // Настраиваем HttpClient с заголовками браузера и игнорированием ошибок SSL
@@ -670,8 +671,7 @@ del ""%~f0""";
                 gameProcess.BeginErrorReadLine();
 
                 // Запуск античита: следим за папкой mods в реальном времени
-                string modsPath = Path.Combine(_mcDir, "mods");
-                StartAntiCheatWatcher(modsPath);
+                StartAntiCheatWatcher(_mcDir, gameProcess);
 
                 await Task.Delay(5000);
                 
@@ -741,41 +741,33 @@ del ""%~f0""";
             return (mcVer, forgeVer);
         }
 
-        private void StartAntiCheatWatcher(string modsPath)
+        private void StartAntiCheatWatcher(string mcDir, Process gameProcess)
         {
             try
             {
-                if (_modsWatcher != null)
-                {
-                    _modsWatcher.Dispose();
-                }
+                // Очищаем старые наблюдатели 
+                foreach (var w in _watchers) w?.Dispose();
+                _watchers.Clear();
 
-                _modsWatcher = new FileSystemWatcher(modsPath);
-                _modsWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime;
-                _modsWatcher.Filter = "*.*";
-                _modsWatcher.IncludeSubdirectories = true;
+                // СПИСОК ПАПОК ПОД ЗАЩИТОЙ 
+                string[] protectedFolders = { "mods", "resourcepacks", "shaderpacks" };
 
                 Action<string, string> triggerAntiCheat = (path, changeType) =>
                 {
-                    if (!path.EndsWith(".jar", StringComparison.OrdinalIgnoreCase)) return;
+                    // Реагируем на изменения архивов 
+                    if (!path.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) &&
+                        !path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) return;
 
                     try
                     {
-                        var javaProcesses = Process.GetProcessesByName("java").Concat(Process.GetProcessesByName("javaw")).ToList();
-                        bool killedAny = false;
-
-                        foreach (var p in javaProcesses)
+                        if (!gameProcess.HasExited)
                         {
-                            try { p.Kill(); killedAny = true; } catch { }
-                        }
-
-                        if (killedAny)
-                        {
-                            _ = SendTelemetryAsync("anticheat_violation", $"Изменен файл: {path} ({changeType})");
+                            gameProcess.Kill();
+                            _ = SendTelemetryAsync("anticheat_violation", $"Вмешательство во время игры: {path} ({changeType})");
 
                             Application.Current.Dispatcher.Invoke(() =>
                             {
-                                MessageBox.Show("Обнаружено вмешательство в файлы модов. Игра принудительно остановлена.", "Античит", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show("Обнаружено изменение критических файлов во время работы игры. Процесс принудительно остановлен.", "VantuzLauncher Античит", MessageBoxButton.OK, MessageBoxImage.Error);
                             });
                         }
                     }
@@ -785,34 +777,37 @@ del ""%~f0""";
                     }
                 };
 
-                _modsWatcher.Created += (s, e) => triggerAntiCheat(e.FullPath, "Created");
-                _modsWatcher.Changed += (s, e) => triggerAntiCheat(e.FullPath, "Changed");
-                _modsWatcher.Renamed += (s, e) => triggerAntiCheat(e.FullPath, "Renamed");
+                FileSystemEventHandler onFileChanged = (s, e) => triggerAntiCheat(e.FullPath, e.ChangeType.ToString());
+                RenamedEventHandler onFileRenamed = (s, e) => triggerAntiCheat(e.FullPath, "Renamed");
 
-                _modsWatcher.EnableRaisingEvents = true;
-
-                // Фоновый мониторинг жизни Java вместо привязки к gameProcess 
-                Task.Run(async () =>
+                // Запускаем наблюдателя для каждой папки 
+                foreach (var folder in protectedFolders)
                 {
-                    await Task.Delay(15000); // Даем Java 15 секунд на запуск 
+                    string fullPath = Path.Combine(mcDir, folder);
+                    if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
 
-                    while (true)
+                    var watcher = new FileSystemWatcher(fullPath)
                     {
-                        var javaProcesses = Process.GetProcessesByName("java").Concat(Process.GetProcessesByName("javaw"));
-                        if (!javaProcesses.Any())
-                        {
-                            // Все процессы Java завершены, можно выключать античит 
-                            if (_modsWatcher != null)
-                            {
-                                _modsWatcher.EnableRaisingEvents = false;
-                                _modsWatcher.Dispose();
-                                _modsWatcher = null;
-                            }
-                            break;
-                        }
-                        await Task.Delay(3000); // Проверяем каждые 3 секунды 
-                    }
-                });
+                        NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.CreationTime,
+                        Filter = "*.*",
+                        IncludeSubdirectories = true,
+                        EnableRaisingEvents = true
+                    };
+
+                    watcher.Created += onFileChanged;
+                    watcher.Changed += onFileChanged;
+                    watcher.Renamed += onFileRenamed;
+
+                    _watchers.Add(watcher);
+                }
+
+                // Динамическое выключение при закрытии игры 
+                gameProcess.EnableRaisingEvents = true;
+                gameProcess.Exited += (s, e) =>
+                {
+                    foreach (var w in _watchers) w?.Dispose();
+                    _watchers.Clear();
+                };
             }
             catch (Exception ex)
             {
