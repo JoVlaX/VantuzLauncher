@@ -21,26 +21,27 @@ public record StepConfig(string PluginName, JsonElement Config);
 
 public class PluginLoadContext : AssemblyLoadContext
 {
-    private readonly AssemblyDependencyResolver _resolver;
+    private readonly string _pluginsFolder;
 
-    public PluginLoadContext(string pluginPath) : base(isCollectible: true)
+    public PluginLoadContext(string pluginsFolder) : base(isCollectible: true)
     {
-        _resolver = new AssemblyDependencyResolver(pluginPath);
+        _pluginsFolder = pluginsFolder;
     }
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        // 1. Fallback для общих контрактов
+        // 1. Fallback для общих контрактов и системных библиотек 
         if (assemblyName.Name == "Vantuz.Core" || assemblyName.Name == "System.Text.Json")
-            return null; // Делегируем загрузку Default контексту
+            return null;
 
-        string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-        if (assemblyPath != null)
+        // 2. "Тупой" поиск транзитивных зависимостей в папке plugins 
+        string assemblyPath = Path.Combine(_pluginsFolder, assemblyName.Name + ".dll");
+        if (File.Exists(assemblyPath))
         {
-            // 10. Memory Loading для зависимостей
             using var fs = File.OpenRead(assemblyPath);
-            return LoadFromStream(fs);
+            return LoadFromStream(fs); // Memory Loading 
         }
+
         return null;
     }
 }
@@ -84,31 +85,40 @@ public class VantuzEngine
     {
         foreach (var (dllName, expectedHash) in pluginsConfig)
         {
-            // Защита от Path Traversal
             var safeDllName = Path.GetFileName(dllName);
             string fullPath = Path.Combine(_pluginsFolder, safeDllName);
             
             if (!File.Exists(fullPath)) throw new FileNotFoundException($"Plugin not found: {fullPath}");
 
-            // 10. Memory Loading & Hash Pinning
             using var fs = File.OpenRead(fullPath);
             ValidateHash(fs, expectedHash, safeDllName);
             
-            fs.Position = 0; // Сброс позиции после вычисления хэша
-            var context = new PluginLoadContext(fullPath);
-            var assembly = context.LoadFromStream(fs);
+            fs.Position = 0; 
+            // Используем новый конструктор контекста, передавая папку plugins 
+            var context = new PluginLoadContext(_pluginsFolder); 
+            var assembly = context.LoadFromStream(fs); 
 
-            var pluginTypes = assembly.GetTypes()
-                .Where(t => typeof (IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+            IEnumerable<Type> pluginTypes; 
+            try 
+            { 
+                pluginTypes = assembly.GetTypes() 
+                    .Where(t => typeof(IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
+            } 
+            catch (ReflectionTypeLoadException ex) 
+            { 
+                // Извлекаем детальную информацию о том, какая именно DLL не была найдена 
+                var loaderErrors = string.Join("; ", ex.LoaderExceptions.Select(e => e?.Message).Where(m => m != null)); 
+                throw new Exception($"Критическая ошибка загрузки типов в {safeDllName}: {loaderErrors}"); 
+            } 
 
-            foreach (var type in pluginTypes)
-            {
-                if (Activator.CreateInstance(type) is IVantuzPlugin plugin)
-                {
-                    _loadedPlugins.Add(plugin);
-                }
-            }
-        }
+            foreach (var type in pluginTypes) 
+            { 
+                if (Activator.CreateInstance(type) is IVantuzPlugin plugin) 
+                { 
+                    _loadedPlugins.Add(plugin); 
+                } 
+            } 
+        } 
     }
 
     private void ValidateHash(Stream fileStream, string expectedHash, string fileName)
