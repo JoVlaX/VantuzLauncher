@@ -169,5 +169,10 @@ public class VantuzEngine
         }
 
         await pipeline(contextData);
+
+        if (contextData.IsAborted) 
+        { 
+            throw new Exception($"Конвейер прерван:\n{contextData.AbortReason}"); 
+        } 
     }
 }

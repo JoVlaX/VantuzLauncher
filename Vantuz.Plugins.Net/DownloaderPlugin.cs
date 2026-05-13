@@ -17,6 +17,10 @@ public class DownloaderPlugin : IVantuzPlugin
         string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing");
         string destination = stepConfig.GetProperty("destination").GetString() ?? throw new Exception("Destination is missing");
 
+        // Применяем интерполяцию Payload 
+        url = Interpolate(url, context); 
+        destination = Interpolate(destination, context); 
+
         context.Reporter.ReportState($"Downloading {Path.GetFileName(destination)}...");
 
         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, context.CancellationToken);
@@ -53,4 +57,14 @@ public class DownloaderPlugin : IVantuzPlugin
         _httpClient.Dispose();
         return ValueTask.CompletedTask;
     }
+
+    private string Interpolate(string text, ExecutionContext context) 
+    { 
+        if (string.IsNullOrEmpty(text)) return text; 
+        foreach (var kvp in context.Payload) 
+        { 
+            text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
+        } 
+        return text; 
+    } 
 }
