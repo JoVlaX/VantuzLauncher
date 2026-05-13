@@ -1,0 +1,55 @@
+{ 
+  "plugins": { 
+    "Vantuz.Plugins.Auth.dll": "", 
+    "Vantuz.Plugins.Net.dll": "", 
+    "Vantuz.Plugins.OS.dll": "", 
+    "Vantuz.Plugins.Game.dll": "" 
+  }, 
+  "pipeline": [ 
+    { 
+      "pluginName": "Auth.Yggdrasil", 
+      "config": { 
+        "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate" 
+      } 
+    }, 
+    { 
+      "pluginName": "Net.Downloader", 
+      "config": { 
+        "url": "https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar", 
+        "destination": "{{mcDir}}/authlib-injector.jar" 
+      } 
+    }, 
+    { 
+      "pluginName": "Net.Downloader", 
+      "config": { 
+        "url": "https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar", 
+        "destination": "{{mcDir}}/packwiz-installer-bootstrap.jar" 
+      } 
+    }, 
+    { 
+      "pluginName": "OS.Executor", 
+      "config": { 
+        "fileName": "java", 
+        "arguments": "-jar \"{{mcDir}}/packwiz-installer-bootstrap.jar\" \"https://troglobit.webhm.pro/packs/main/pack.toml\" --side client --no-gui", 
+        "workDir": "{{mcDir}}", 
+        "waitForExit": true 
+      } 
+    }, 
+    { 
+      "pluginName": "Game.CmlLaunch", 
+      "config": { 
+        "versionName": "1.20.1-forge-47.2.20", 
+        "authlibPath": "{{mcDir}}/authlib-injector.jar" 
+      } 
+    }, 
+    { 
+      "pluginName": "OS.Executor", 
+      "config": { 
+        "fileName": "{{gameCommand}}", 
+        "arguments": "{{gameArgs}}", 
+        "workDir": "{{gameWorkDir}}", 
+        "waitForExit": false 
+      } 
+    } 
+  ] 
+} 

@@ -12,8 +12,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CmlLib.Core" Version="4.0.6" />
-    <PackageReference Include="CmlLib.Core.Installer.Forge" Version="1.1.1" />
+    <Compile Remove="Vantuz.Core\**" />
+    <Compile Remove="Vantuz.Host\**" />
+    <Compile Remove="Vantuz.Plugins.Auth\**" />
+    <Compile Remove="Vantuz.Plugins.Net\**" />
+    <Compile Remove="Vantuz.Plugins.OS\**" />
+    <Compile Remove="Vantuz.Plugins.Game\**" />
+    <Compile Remove="Vantuz.Builder\**" />
+    <EmbeddedResource Remove="Vantuz.Core\**" />
+    <EmbeddedResource Remove="Vantuz.Host\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Auth\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Net\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.OS\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Game\**" />
+    <EmbeddedResource Remove="Vantuz.Builder\**" />
+    <None Remove="Vantuz.Core\**" />
+    <None Remove="Vantuz.Host\**" />
+    <None Remove="Vantuz.Plugins.Auth\**" />
+    <None Remove="Vantuz.Plugins.Net\**" />
+    <None Remove="Vantuz.Plugins.OS\**" />
+    <None Remove="Vantuz.Plugins.Game\**" />
+    <None Remove="Vantuz.Builder\**" />
+    <Page Remove="Vantuz.Core\**" />
+    <Page Remove="Vantuz.Host\**" />
+    <Page Remove="Vantuz.Plugins.Auth\**" />
+    <Page Remove="Vantuz.Plugins.Net\**" />
+    <Page Remove="Vantuz.Plugins.OS\**" />
+    <Page Remove="Vantuz.Plugins.Game\**" />
+    <Page Remove="Vantuz.Builder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Vantuz.Core\Vantuz.Core.csproj" />
+    <ProjectReference Include="Vantuz.Host\Vantuz.Host.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageReference Include="Obfuscar" Version="2.2.38">
@@ -29,5 +63,23 @@
     <Exec Command="$(Obfuscar) $(ObfuscarConfig)" WorkingDirectory="$(TargetDir)" />
     <Copy SourceFiles="$(TargetDir)Obfuscated\VantuzLauncher.dll" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
   </Target>
+
+  <ItemGroup> 
+    <PluginNetFiles Include="$(SolutionDir)Vantuz.Plugins.Net\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginAuthFiles Include="$(SolutionDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginOSFiles Include="$(SolutionDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginGameFiles Include="$(SolutionDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" /> 
+  </ItemGroup> 
+ 
+  <Target Name="AssembleVantuz" AfterTargets="Build"> 
+    <Message Text="[Vantuz Assembler] Copying plugins to target directory..." Importance="high" /> 
+    <Copy SourceFiles="@(PluginNetFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginAuthFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginOSFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginGameFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+     
+    <Message Text="[Vantuz Assembler] Running Manifest Builder for Hash Pinning..." Importance="high" /> 
+    <Exec Command="dotnet run --project &quot;$(SolutionDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 
+  </Target> 
 
 </Project>

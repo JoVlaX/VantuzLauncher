@@ -1,8 +1,22 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VantuzLauncher", "VantuzLauncher.csproj", "{744D7B29-B5C8-4DB2-68C1-8062AF546896}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Core", "Vantuz.Core\Vantuz.Core.csproj", "{456962DE-3F48-4157-8BC7-B5F8F841FAC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Host", "Vantuz.Host\Vantuz.Host.csproj", "{973796AA-0498-437B-A8CE-A7174656EB69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Net", "Vantuz.Plugins.Net\Vantuz.Plugins.Net.csproj", "{A14A6392-C724-4467-947E-32E8A05BC766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Auth", "Vantuz.Plugins.Auth\Vantuz.Plugins.Auth.csproj", "{EEEF3490-A270-40FF-8664-7C49A94C234E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.OS", "Vantuz.Plugins.OS\Vantuz.Plugins.OS.csproj", "{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Game", "Vantuz.Plugins.Game\Vantuz.Plugins.Game.csproj", "{AED21E92-BC6A-4503-A58A-559D63481DCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Builder", "Vantuz.Builder\Vantuz.Builder.csproj", "{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,6 +28,34 @@ Global
 		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Release|Any CPU.Build.0 = Release|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
