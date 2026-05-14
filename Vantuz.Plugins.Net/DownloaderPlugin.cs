@@ -10,15 +10,25 @@ namespace Vantuz.Plugins.Net;
  public class DownloaderPlugin : IVantuzPlugin 
  { 
      public string Name => "Net.Downloader"; 
-     private readonly HttpClient _httpClient = new (); 
+     private readonly HttpClient _httpClient; 
+ 
+     public DownloaderPlugin() 
+     { 
+         _httpClient = new HttpClient(); 
+         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) VantuzLauncher/2.0"); 
+     } 
  
      public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
      { 
          string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing"); 
          string destination = stepConfig.GetProperty("destination").GetString() ?? throw new Exception("Destination is missing"); 
  
+         // Интерполяция путей и нормализация слешей 
          url = Interpolate(url, context); 
          destination = Interpolate(destination, context); 
+         
+         // Жесткая нормализация пути для Windows/Linux 
+         destination = Path.GetFullPath(destination.Replace('/', Path.DirectorySeparatorChar)); 
  
          context.Reporter.ReportState($"Downloading {Path.GetFileName(destination)}..."); 
  
@@ -28,7 +38,9 @@ namespace Vantuz.Plugins.Net;
          var totalBytes = response.Content.Headers.ContentLength ?? -1L; 
          using var contentStream = await response.Content.ReadAsStreamAsync(context.CancellationToken); 
          
-         Directory.CreateDirectory(Path.GetDirectoryName(destination)!); 
+         var dir = Path.GetDirectoryName(destination); 
+         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir); 
+         
          using var fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true); 
  
          var buffer = new byte[8192]; 
