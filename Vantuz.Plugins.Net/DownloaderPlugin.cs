@@ -23,13 +23,19 @@ namespace Vantuz.Plugins.Net;
          string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing"); 
          string destination = stepConfig.GetProperty("destination").GetString() ?? throw new Exception("Destination is missing"); 
  
-         // Интерполяция путей и нормализация слешей 
          url = Interpolate(url, context); 
          destination = Interpolate(destination, context); 
-         
-         // Жесткая нормализация пути для Windows/Linux 
          destination = Path.GetFullPath(destination.Replace('/', Path.DirectorySeparatorChar)); 
  
+         // Вызываем скачивание. Когда метод завершится, ВСЕ ресурсы (вкл. FileStream) будут закрыты. 
+         await PerformDownloadAsync(url, destination, context); 
+ 
+         // Файл физически свободен. Передаем эстафету дальше. 
+         await next(context); 
+     } 
+ 
+     private async Task PerformDownloadAsync(string url, string destination, ExecutionContext context) 
+     { 
          context.Reporter.ReportState($"Downloading {Path.GetFileName(destination)}..."); 
  
          using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, context.CancellationToken); 
@@ -60,7 +66,6 @@ namespace Vantuz.Plugins.Net;
          } 
  
          context.Reporter.ReportState("Download completed."); 
-         await next(context); 
      } 
  
      private string Interpolate(string text, ExecutionContext context) 
