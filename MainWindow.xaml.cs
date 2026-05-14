@@ -7,8 +7,10 @@ using System.Security.Cryptography;
 using System.Text; 
 using System.Text.Json; 
 using System.Threading; 
+using System.Threading.Tasks; 
 using System.Windows; 
 using System.Windows.Input; 
+using Vantuz.Core; 
 using Vantuz.Host; 
  
 namespace VantuzLauncher 
@@ -32,6 +34,29 @@ namespace VantuzLauncher
              
             InitializeRamLimits(); 
             LoadSavedConfig(); 
+        } 
+ 
+        // ПАТТЕРН 1: Thread-Safe Dispatching 
+        private class WpfReporter : IStatusReporter 
+        { 
+            private readonly Action<string> _updateState; 
+            private readonly Action<string, double> _updateProgress; 
+ 
+            public WpfReporter(Action<string> updateState, Action<string, double> updateProgress) 
+            { 
+                _updateState = updateState; 
+                _updateProgress = updateProgress; 
+            } 
+ 
+            public void ReportState(string message) 
+            { 
+                Application.Current.Dispatcher.Invoke(() => _updateState(message)); 
+            } 
+ 
+            public void ReportProgress(string taskName, double percentage) 
+            { 
+                Application.Current.Dispatcher.Invoke(() => _updateProgress(taskName, percentage)); 
+            } 
         } 
  
         private void InitializeRamLimits() 
@@ -117,6 +142,7 @@ namespace VantuzLauncher
         private void BtnSettings_Click(object sender, RoutedEventArgs e) => SettingsPanel.Visibility = Visibility.Visible; 
         private void BtnCloseSettings_Click(object sender, RoutedEventArgs e) => SettingsPanel.Visibility = Visibility.Collapsed; 
  
+        // ПАТТЕРН 2 и 3: Fire and Forget Boundary + State Machine UI 
         private async void BtnPlay_Click(object sender, RoutedEventArgs e) 
         { 
             string username = UsernameBox.Text.Trim(); 
@@ -129,43 +155,62 @@ namespace VantuzLauncher
             } 
  
             SaveConfig(); 
+ 
+            // Блокируем UI (State: В работе) 
             SetUIState(true); 
+            StatusText.Text = "Инициализация движка..."; 
+            LauncherProgress.Value = 0; 
              
             _cts = new CancellationTokenSource(); 
-             
-            var reporter = new WpfStatusReporter((message, progress) => 
-            { 
-                if (progress >= 0) LauncherProgress.Value = progress; 
-                StatusText.Text = message; 
-            }); 
- 
-            var initialPayload = new Dictionary<string, object> 
-            { 
-                { "username", username }, 
-                { "password", password }, 
-                { "ramMb", _currentRamMb }, 
-                { "mcDir", _mcDir } 
-            }; 
  
             try 
             { 
+                // Инициализируем потокобезопасный репортер 
+                var reporter = new WpfReporter( 
+                    msg => StatusText.Text = msg, 
+                    (task, prog) => { 
+                        StatusText.Text = $"{task}... {prog:F1}%"; 
+                        LauncherProgress.Value = prog; 
+                    } 
+                ); 
+ 
+                var initialPayload = new Dictionary<string, object> 
+                { 
+                    { "username", username }, 
+                    { "password", password }, 
+                    { "ramMb", _currentRamMb }, 
+                    { "mcDir", _mcDir } 
+                }; 
+ 
                 string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json"); 
+                string pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"); 
                  
-                // Проверка на наличие манифеста для предотвращения краша Host'а 
                 if (!File.Exists(bootJsonPath)) 
                     throw new FileNotFoundException("Файл манифеста boot.json не найден!"); 
  
-                // Инициализируем движок и запускаем конвейер 
-                var engine = new VantuzEngine(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"), reporter); 
-                await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
-                 
-                // Скрываем лаунчер, если конвейер успешно отработал (запустил игру) 
+                // Запускаем тяжелый конвейер в фоновом пуле потоков 
+                await Task.Run(async () => 
+                { 
+                    var engine = new VantuzEngine(pluginsDir, reporter); 
+                    await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
+                }); 
+ 
+                StatusText.Text = "Запуск успешно завершен!"; 
                 this.Hide(); 
             } 
             catch (Exception ex) 
             { 
-                MessageBox.Show($"Ошибка запуска конвейера: {ex.Message}", "Критическая ошибка", MessageBoxButton.OK, MessageBoxImage.Error); 
+                // Выводим пользователю понятную ошибку, а детали лежат в crash.log 
+                MessageBox.Show($"Критическая ошибка при запуске.\n\n{ex.Message}\n\nПодробности в файле crash.log.", 
+                                "Сбой Конвейера", MessageBoxButton.OK, MessageBoxImage.Error); 
+                StatusText.Text = "Ошибка запуска"; 
                 SetUIState(false); 
+            } 
+            finally 
+            { 
+                // Гарантированная разблокировка UI 
+                BtnPlay.IsEnabled = true; 
+                BtnPlay.Opacity = 1.0; 
             } 
         } 
  
