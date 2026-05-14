@@ -5,7 +5,6 @@ namespace Vantuz.Host;
  using System.IO; 
  using System.Linq; 
  using System.Reflection; 
- using System.Runtime.Loader; 
  using System.Security.Cryptography; 
  using System.Text.Json; 
  using System.Threading; 
@@ -18,31 +17,6 @@ namespace Vantuz.Host;
  ); 
  
  public record StepConfig(string PluginName, JsonElement Config); 
- 
- public class PluginLoadContext : AssemblyLoadContext 
- { 
-     private readonly string _pluginsFolder; 
- 
-     public PluginLoadContext(string pluginsFolder) : base(isCollectible: true) 
-     { 
-         _pluginsFolder = pluginsFolder; 
-     } 
- 
-     protected override Assembly? Load(AssemblyName assemblyName) 
-     { 
-         if (assemblyName.Name == "Vantuz.Core" || assemblyName.Name == "System.Text.Json") 
-             return null; 
- 
-         string assemblyPath = Path.Combine(_pluginsFolder, assemblyName.Name + ".dll"); 
-         if (File.Exists(assemblyPath)) 
-         { 
-             using var fs = File.OpenRead(assemblyPath); 
-             return LoadFromStream(fs); 
-         } 
- 
-         return null; 
-     } 
- } 
  
  public class VantuzEngine 
  { 
@@ -128,7 +102,6 @@ namespace Vantuz.Host;
  
      private async Task ExecutePipelineAsync(List<StepConfig> pipelineSteps, CancellationToken ct, IDictionary<string, object>? initialPayload) 
      { 
-         // Использование полностью квалифицированного имени для устранения CS0104 
          var contextData = new Vantuz.Core.ExecutionContext(ct, _reporter); 
          
          if (initialPayload != null) 
