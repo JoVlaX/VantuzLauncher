@@ -15,7 +15,6 @@ namespace Vantuz.Plugins.Game;
   
      public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
      { 
-         // Читаем имя итоговой версии исключительно из Payload 
          string versionName = context.Get<string>("targetVersionName") ?? throw new Exception("targetVersionName is missing in Payload. Run Installer first."); 
          string? authlibPath = stepConfig.TryGetProperty("authlibPath", out var alp) ? alp.GetString() : null; 
   
@@ -41,7 +40,8 @@ namespace Vantuz.Plugins.Game;
   
          launcher.FileProgressChanged += (sender, args) => 
          { 
-             context.Reporter.ReportProgress(args.Name, (double)args.ProgressedTasks / args.TotalTasks * 100); 
+             // Исправление CS8604: защита от null-значений 
+             context.Reporter.ReportProgress(args.Name ?? "Загрузка файлов...", (double)args.ProgressedTasks / args.TotalTasks * 100); 
          }; 
   
          try 

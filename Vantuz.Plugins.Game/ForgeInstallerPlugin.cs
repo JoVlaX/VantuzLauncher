@@ -25,7 +25,9 @@ namespace Vantuz.Plugins.Game;
   
          var path = new MinecraftPath(mcDir); 
          var launcher = new MinecraftLauncher(path); 
-         var forge = new MForge(launcher); 
+          
+         // Исправление CS0246: Используем актуальный класс ForgeInstaller 
+         var forge = new ForgeInstaller(launcher); 
   
          forge.FileProgressChanged += (sender, args) => 
          { 
@@ -35,7 +37,6 @@ namespace Vantuz.Plugins.Game;
          try 
          { 
              string resultingVersionName = await forge.Install(mcVersion, forgeVersion); 
-             // Передаем эстафету следующему лезвию через Payload 
              context.Set("targetVersionName", resultingVersionName); 
              context.Reporter.ReportState($"Forge установлен: {resultingVersionName}"); 
          } 
