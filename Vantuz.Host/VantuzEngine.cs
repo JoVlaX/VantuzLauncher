@@ -97,12 +97,30 @@ public class VantuzEngine
 
             var next = pipeline; 
             pipeline = async (ctx) => { 
-                if (ctx.IsAborted || ctx.CancellationToken.IsCancellationRequested) return; 
+                if (ctx.IsAborted || ctx.CancellationToken.IsCancellationRequested || ctx.Get<bool>("UpdateReady")) return; 
                 try { await plugin.InvokeAsync(ctx, step.Config, next); } 
                 catch (Exception ex) { ctx.Abort($"Plugin {plugin.Name} crashed: {ex.Message}"); } 
             }; 
         } 
         await pipeline(contextData); 
         if (contextData.IsAborted) throw new Exception(contextData.AbortReason); 
+
+        // ДОБАВЛЕНО: Внешняя мутация (External Bootstrapper) 
+        if (contextData.Get<bool>("UpdateReady")) 
+        { 
+            string scriptPath = contextData.Get<string>("UpdateScript")!; 
+            if (File.Exists(scriptPath)) 
+            { 
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo 
+                { 
+                    FileName = scriptPath, 
+                    UseShellExecute = true, 
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden 
+                }); 
+                 
+                // Жестко завершаем текущий процесс, чтобы ОС сняла блокировки с файлов 
+                Environment.Exit(0); 
+            } 
+        } 
     } 
 } 
