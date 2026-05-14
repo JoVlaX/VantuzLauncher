@@ -38,6 +38,13 @@
        } 
      }, 
      { 
+       "pluginName": "Net.Downloader", 
+       "config": { 
+         "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.2.20/forge-1.20.1-47.2.20-installer.jar", 
+         "destination": "{{mcDir}}\\forge-installer.jar" 
+       } 
+     }, 
+     { 
        "pluginName": "OS.Executor", 
        "config": { 
          "fileName": "java", 
@@ -47,15 +54,18 @@
        } 
      }, 
      { 
-       "pluginName": "Game.ForgeInstaller", 
+       "pluginName": "OS.Executor", 
        "config": { 
-         "mcVersion": "1.20.1", 
-         "forgeVersion": "47.2.20" 
+         "fileName": "java", 
+         "arguments": "-Djava.awt.headless=true -jar \"forge-installer.jar\" --installClient \"{{mcDir}}\"", 
+         "workDir": "{{mcDir}}", 
+         "waitForExit": true 
        } 
      }, 
      { 
        "pluginName": "Game.CmlLaunch", 
        "config": { 
+         "versionName": "1.20.1-forge-47.2.20", 
          "authlibPath": "{{mcDir}}\\authlib-injector.jar" 
        } 
      }, 

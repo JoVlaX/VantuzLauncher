@@ -15,7 +15,7 @@ namespace Vantuz.Plugins.Game;
   
      public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
      { 
-         string versionName = context.Get<string>("targetVersionName") ?? throw new Exception("targetVersionName is missing in Payload. Run Installer first."); 
+         string versionName = stepConfig.GetProperty("versionName").GetString() ?? throw new Exception("versionName is missing"); 
          string? authlibPath = stepConfig.TryGetProperty("authlibPath", out var alp) ? alp.GetString() : null; 
   
          string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in Payload"); 
@@ -27,6 +27,7 @@ namespace Vantuz.Plugins.Game;
          string uuid = context.Get<string>("uuid") ?? ""; 
          string playerName = context.Get<string>("playerName") ?? "Player"; 
   
+         versionName = Interpolate(versionName, context); 
          if (authlibPath != null)  
          { 
              authlibPath = Interpolate(authlibPath, context); 
@@ -40,51 +41,42 @@ namespace Vantuz.Plugins.Game;
   
          launcher.FileProgressChanged += (sender, args) => 
          { 
-             // Исправление CS8604: защита от null-значений 
              context.Reporter.ReportProgress(args.Name ?? "Загрузка файлов...", (double)args.ProgressedTasks / args.TotalTasks * 100); 
          }; 
   
-         try 
+         var version = await launcher.GetVersionAsync(versionName); 
+         await launcher.InstallAsync(version); 
+  
+         context.Reporter.ReportState("Генерация аргументов запуска..."); 
+  
+         var session = new MSession 
          { 
-             var version = await launcher.GetVersionAsync(versionName); 
-             await launcher.InstallAsync(version); 
+             Username = playerName, 
+             UUID = uuid, 
+             AccessToken = accessToken, 
+             UserType = "mojang" 
+         }; 
   
-             context.Reporter.ReportState("Генерация аргументов запуска..."); 
-  
-             var session = new MSession 
-             { 
-                 Username = playerName, 
-                 UUID = uuid, 
-                 AccessToken = accessToken, 
-                 UserType = "mojang" 
-             }; 
-  
-             var launchOption = new MLaunchOption 
-             { 
-                 Session = session, 
-                 MaximumRamMb = ramMb, 
-                 JavaPath = javaPath 
-             }; 
-  
-             if (!string.IsNullOrEmpty(authlibPath)) 
-             { 
-                 launchOption.ExtraJvmArguments = new[]  
-                 {  
-                     new MArgument($"-javaagent:{authlibPath}=https://troglobit.webhm.pro/yggdrasil/")  
-                 }; 
-             } 
-  
-             var process = await launcher.BuildProcessAsync(versionName, launchOption); 
-  
-             context.Set("gameCommand", process.StartInfo.FileName); 
-             context.Set("gameArgs", process.StartInfo.Arguments); 
-             context.Set("gameWorkDir", process.StartInfo.WorkingDirectory); 
-         } 
-         catch (Exception ex) 
+         var launchOption = new MLaunchOption 
          { 
-             context.Abort($"Ошибка подготовки запуска: {ex.Message}"); 
-             return; 
+             Session = session, 
+             MaximumRamMb = ramMb, 
+             JavaPath = javaPath 
+         }; 
+  
+         if (!string.IsNullOrEmpty(authlibPath)) 
+         { 
+             launchOption.ExtraJvmArguments = new[]  
+             {  
+                 new MArgument($"-javaagent:{authlibPath}=https://troglobit.webhm.pro/yggdrasil/")  
+             }; 
          } 
+  
+         var process = await launcher.BuildProcessAsync(versionName, launchOption); 
+  
+         context.Set("gameCommand", process.StartInfo.FileName); 
+         context.Set("gameArgs", process.StartInfo.Arguments); 
+         context.Set("gameWorkDir", process.StartInfo.WorkingDirectory); 
   
          await next(context); 
      } 
