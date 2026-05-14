@@ -1,0 +1,2008 @@
+================================================================================
+FILE: .gitattributes
+================================================================================
+# Auto detect text files and perform LF normalization
+* text=auto
+
+================================================================================
+END OF FILE: .gitattributes
+================================================================================
+
+================================================================================
+FILE: .gitignore
+================================================================================
+# Build results 
+[Bb]in/ 
+[Oo]bj/ 
+[Dd]ebug/ 
+[Rr]elease/ 
+x64/ 
+x86/ 
+ 
+# Visual Studio folders and files 
+.vs/ 
+*.user 
+*.suo 
+*.userosscache 
+*.sln.docstates 
+ 
+# OS generated files 
+.DS_Store 
+Thumbs.db
+
+# Local testing and temp files 
+*.jar 
+*.zip 
+*.rar 
+*.log 
+temp/ 
+test/ 
+testing/
+
+================================================================================
+END OF FILE: .gitignore
+================================================================================
+
+================================================================================
+FILE: .\App.xaml
+================================================================================
+<Application x:Class="VantuzLauncher.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:VantuzLauncher"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
+
+================================================================================
+END OF FILE: .\App.xaml
+================================================================================
+
+================================================================================
+FILE: .\App.xaml.cs
+================================================================================
+using System.Configuration;
+using System.Data;
+using System.Windows;
+
+namespace VantuzLauncher;
+
+/// <summary>
+/// Interaction logic for App.xaml
+/// </summary>
+public partial class App : Application
+{
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+
+        AppDomain.CurrentDomain.UnhandledException += (s, args) =>
+        {
+            var ex = (Exception)args.ExceptionObject;
+            MessageBox.Show($"Критическая ошибка при запуске:\n{ex.Message}\n{ex.StackTrace}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        };
+    }
+}
+
+
+================================================================================
+END OF FILE: .\App.xaml.cs
+================================================================================
+
+================================================================================
+FILE: .\AssemblyInfo.cs
+================================================================================
+using System.Windows;
+
+[assembly:ThemeInfo(
+    ResourceDictionaryLocation.None,            //where theme specific resource dictionaries are located
+                                                //(used if a resource is not found in the page,
+                                                // or application resource dictionaries)
+    ResourceDictionaryLocation.SourceAssembly   //where the generic resource dictionary is located
+                                                //(used if a resource is not found in the page,
+                                                // app, or any theme specific resource dictionaries)
+)]
+
+================================================================================
+END OF FILE: .\AssemblyInfo.cs
+================================================================================
+
+================================================================================
+FILE: .\boot.template.json
+================================================================================
+{ 
+   "plugins": { 
+     "Vantuz.Plugins.Auth.dll": "", 
+     "Vantuz.Plugins.Net.dll": "", 
+     "Vantuz.Plugins.OS.dll": "", 
+     "Vantuz.Plugins.Game.dll": "" 
+   }, 
+   "pipeline": [ 
+     { 
+       "pluginName": "Net.ApiReader", 
+       "config": { 
+         "url": "https://troglobit.webhm.pro/launcher_version.txt", 
+         "payloadKey": "remoteVersion", 
+         "ignoreSslErrors": true, 
+         "fallback": "2.0-dev" 
+       } 
+     }, 
+     { 
+       "pluginName": "Auth.Yggdrasil", 
+       "config": { 
+         "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate", 
+         "ignoreSslErrors": true, 
+         "launcherVersion": "{{remoteVersion}}" 
+       } 
+     }, 
+     { 
+       "pluginName": "Net.Downloader", 
+       "config": { 
+         "url": "https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar", 
+         "destination": "{{mcDir}}\\authlib-injector.jar" 
+       } 
+     }, 
+     { 
+       "pluginName": "Net.Downloader", 
+       "config": { 
+         "url": "https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar", 
+         "destination": "{{mcDir}}\\packwiz-installer-bootstrap.jar" 
+       } 
+     }, 
+     { 
+       "pluginName": "Net.Downloader", 
+       "config": { 
+         "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.2.20/forge-1.20.1-47.2.20-installer.jar", 
+         "destination": "{{mcDir}}\\forge-installer.jar" 
+       } 
+     }, 
+     { 
+       "pluginName": "OS.Executor", 
+       "config": { 
+         "fileName": "java", 
+         "arguments": "-jar \"packwiz-installer-bootstrap.jar\" \"https://troglobit.webhm.pro/packs/main/pack.toml\" --side client --no-gui", 
+         "workDir": "{{mcDir}}", 
+         "waitForExit": true 
+       } 
+     }, 
+     { 
+       "pluginName": "OS.Executor", 
+       "config": { 
+         "fileName": "java", 
+         "arguments": "-Djava.awt.headless=true -jar \"forge-installer.jar\" --installClient \"{{mcDir}}\"", 
+         "workDir": "{{mcDir}}", 
+         "waitForExit": true 
+       } 
+     }, 
+     { 
+       "pluginName": "Game.CmlLaunch", 
+       "config": { 
+         "versionName": "1.20.1-forge-47.2.20", 
+         "authlibPath": "{{mcDir}}\\authlib-injector.jar" 
+       } 
+     }, 
+     { 
+       "pluginName": "OS.Executor", 
+       "config": { 
+         "fileName": "{{gameCommand}}", 
+         "arguments": "{{gameArgs}}", 
+         "workDir": "{{gameWorkDir}}", 
+         "waitForExit": false 
+       } 
+     } 
+   ] 
+ } 
+
+================================================================================
+END OF FILE: .\boot.template.json
+================================================================================
+
+================================================================================
+FILE: .\MainWindow.xaml
+================================================================================
+<Window x:Class="VantuzLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Vantuz Launcher" Height="550" Width="850"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStartupLocation="CenterScreen" MouseDown="Window_MouseDown">
+    <Border Background="#09090B" CornerRadius="12" BorderBrush="#27272A" BorderThickness="1">
+        <Grid>
+            <!-- Settings Gear Button (Top Left) -->
+            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Width="40" Height="40" Margin="10"
+                    Background="Transparent" BorderThickness="0" Foreground="#3F3F46" Click="BtnSettings_Click" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" x:Name="bgBorder" CornerRadius="6">
+                            <Path Data="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.85,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" 
+                                  Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" Width="18" Height="18"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bgBorder" Property="Background" Value="#18181B" />
+                                <Setter Property="Foreground" Value="#71717A" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Close Custom Button (Top Right) -->
+            <Button HorizontalAlignment="Right" VerticalAlignment="Top" Width="40" Height="40" Margin="10"
+                    Background="Transparent" BorderThickness="0" Foreground="#A1A1AA" Content="✕"
+                    Click="BtnClose_Click" Cursor="Hand" FontSize="16">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" x:Name="bgBorder" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bgBorder" Property="Background" Value="#27272A" />
+                                <Setter Property="Foreground" Value="#F4F4F5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- Main UI -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="340">
+                
+                <!-- Logo -->
+                <TextBlock Text="VANTUZ" FontSize="42" FontWeight="Black" Foreground="#F4F4F5" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                <TextBlock Text="M I N E C R A F T" FontSize="12" FontWeight="SemiBold" Foreground="#71717A" HorizontalAlignment="Center" Margin="0,0,0,50"/>
+
+                <!-- Username -->
+                <TextBlock Text="ЛОГИН" Foreground="#A1A1AA" FontSize="11" Margin="0,0,0,8" FontWeight="SemiBold"/>
+                <Border Background="#18181B" CornerRadius="8" BorderBrush="#27272A" BorderThickness="1" Margin="0,0,0,20" Height="48">
+                    <TextBox x:Name="UsernameBox" Background="Transparent" Foreground="#F4F4F5" BorderThickness="0"
+                             Padding="14,12" FontSize="15" VerticalContentAlignment="Center" CaretBrush="#F4F4F5"/>
+                </Border>
+
+                <!-- Password -->
+                <TextBlock Text="ПАРОЛЬ" Foreground="#A1A1AA" FontSize="11" Margin="0,0,0,8" FontWeight="SemiBold"/>
+                <Border Background="#18181B" CornerRadius="8" BorderBrush="#27272A" BorderThickness="1" Margin="0,0,0,15" Height="48">
+                    <PasswordBox x:Name="PasswordBox" Background="Transparent" Foreground="#F4F4F5" BorderThickness="0"
+                                 Padding="14,12" FontSize="15" VerticalContentAlignment="Center" CaretBrush="#F4F4F5"/>
+                </Border>
+
+                <!-- Remember Me -->
+                <CheckBox x:Name="RememberMeBox" Content="Запомнить меня" Foreground="#71717A" Margin="0,0,0,30" FontSize="13">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="18" Height="18" Background="#18181B" BorderBrush="#27272A" BorderThickness="1" CornerRadius="4" x:Name="checkBorder">
+                                                <Path x:Name="checkMark" Data="M0,4.5 L3.5,8 L10,0" Stroke="#09090B" StrokeThickness="2.5" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,1,0,0"/>
+                                            </Border>
+                                            <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="checkBorder" Property="Background" Value="#F4F4F5"/>
+                                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                                                <Setter Property="Foreground" Value="#F4F4F5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
+
+                <!-- Play Button -->
+                <Button x:Name="BtnPlay" Height="52" Cursor="Hand" Click="BtnPlay_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="#F4F4F5" CornerRadius="8" x:Name="btnBorder">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="btnBorder" Property="Background" Value="#FFFFFF" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="btnBorder" Property="Background" Value="#3F3F46" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <TextBlock Text="ИГРАТЬ" Foreground="#09090B" FontWeight="Bold" FontSize="15" x:Name="BtnPlayText"/>
+                </Button>
+
+                <!-- Progress / Status Panel -->
+                <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,25,0,0">
+                    <TextBlock x:Name="StatusText" Text="Подготовка к запуску..." Foreground="#A1A1AA" FontSize="12" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                    <ProgressBar x:Name="LauncherProgress" Height="4" Background="#18181B" Foreground="#F4F4F5" BorderThickness="0" Maximum="100"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Settings Panel Overlay -->
+            <Grid x:Name="SettingsPanel" Visibility="Collapsed" Background="#CC09090B">
+                <Border Background="#18181B" CornerRadius="12" BorderBrush="#27272A" BorderThickness="1" 
+                        Width="340" Height="280" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel Margin="24">
+                        <Grid Margin="0,0,0,24">
+                            <TextBlock Text="НАСТРОЙКИ" Foreground="#F4F4F5" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <Button HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="#A1A1AA" 
+                                    Content="✕" Click="BtnCloseSettings_Click" Cursor="Hand" FontSize="16"/>
+                        </Grid>
+
+                        <TextBlock Text="ВЫДЕЛЕНИЕ ОЗУ" Foreground="#A1A1AA" FontSize="11" Margin="0,0,0,12" FontWeight="SemiBold"/>
+                        <Grid Margin="0,0,0,8">
+                            <Slider x:Name="RamSlider" Minimum="1024" Maximum="16384" SmallChange="512" LargeChange="1024" 
+                                    Value="4096" TickFrequency="512" IsSnapToTickEnabled="True"
+                                    ValueChanged="RamSlider_ValueChanged" VerticalAlignment="Center" Margin="0,0,0,30"/>
+                            <TextBlock x:Name="RamText" Text="Выделено: 4096 МБ из 8192 МБ" Foreground="#F4F4F5" FontSize="11" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom" FontWeight="Bold" Margin="0,0,0,5"/>
+                        </Grid>
+                        <TextBlock Text="Установите объем памяти для Minecraft" Foreground="#71717A" FontSize="11" Margin="0,0,0,30"/>
+                        
+                        <TextBlock Text="ВЕРСИЯ ЛАУНЧЕРА" Foreground="#A1A1AA" FontSize="11" Margin="0,0,0,4" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="VersionText" Text="v20260503.1200" Foreground="#71717A" FontSize="11"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
+
+================================================================================
+END OF FILE: .\MainWindow.xaml
+================================================================================
+
+================================================================================
+FILE: .\MainWindow.xaml.cs
+================================================================================
+#nullable disable 
+using System; 
+using System.Collections.Generic; 
+using System.IO; 
+using System.Management; 
+using System.Security.Cryptography; 
+using System.Text; 
+using System.Text.Json; 
+using System.Threading; 
+using System.Threading.Tasks; 
+using System.Windows; 
+using System.Windows.Input; 
+using Vantuz.Core; 
+using Vantuz.Host; 
+ 
+namespace VantuzLauncher 
+{ 
+    public partial class MainWindow : Window 
+    { 
+        private readonly string _mcDir; 
+        private readonly string _configPath; 
+        private int _currentRamMb; 
+        private int _totalRamMb = 8192; 
+        private CancellationTokenSource _cts; 
+ 
+        public MainWindow() 
+        { 
+            InitializeComponent(); 
+             
+            _mcDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuz"); 
+            if (!Directory.Exists(_mcDir)) Directory.CreateDirectory(_mcDir); 
+ 
+            _configPath = Path.Combine(_mcDir, "launcher_config.json"); 
+             
+            InitializeRamLimits(); 
+            LoadSavedConfig(); 
+        } 
+ 
+        // ПАТТЕРН 1: Thread-Safe Dispatching 
+        private class WpfReporter : IStatusReporter 
+        { 
+            private readonly Action<string> _updateState; 
+            private readonly Action<string, double> _updateProgress; 
+ 
+            public WpfReporter(Action<string> updateState, Action<string, double> updateProgress) 
+            { 
+                _updateState = updateState; 
+                _updateProgress = updateProgress; 
+            } 
+ 
+            public void ReportState(string message) 
+            { 
+                Application.Current.Dispatcher.Invoke(() => _updateState(message)); 
+            } 
+ 
+            public void ReportProgress(string taskName, double percentage) 
+            { 
+                Application.Current.Dispatcher.Invoke(() => _updateProgress(taskName, percentage)); 
+            } 
+        } 
+ 
+        private void InitializeRamLimits() 
+        { 
+            try 
+            { 
+                var searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem"); 
+                foreach (var obj in searcher.Get()) 
+                { 
+                    long totalBytes = Convert.ToInt64(obj["TotalPhysicalMemory"]); 
+                    _totalRamMb = (int)(totalBytes / 1024 / 1024); 
+                    int totalGb = _totalRamMb / 1024; 
+                    RamSlider.Maximum = totalGb * 1024; 
+                    RamSlider.Minimum = 1024; 
+                    _currentRamMb = Math.Clamp(_totalRamMb / 2, 1024, 4096); 
+                    break; 
+                } 
+            } 
+            catch 
+            { 
+                RamSlider.Maximum = 8192; 
+                RamSlider.Minimum = 1024; 
+                _currentRamMb = 4096; 
+            } 
+        } 
+ 
+        private void LoadSavedConfig() 
+        { 
+            try 
+            { 
+                if (File.Exists(_configPath)) 
+                { 
+                    var json = File.ReadAllText(_configPath); 
+                    var config = JsonSerializer.Deserialize<LauncherConfig>(json); 
+                    if (config != null) 
+                    { 
+                        UsernameBox.Text = config.Username; 
+                        PasswordBox.Password = CryptoHelper.Decrypt(config.Password); 
+                        RememberMeBox.IsChecked = config.RememberMe; 
+                        _currentRamMb = Math.Clamp(config.RamMb, (int)RamSlider.Minimum, (int)RamSlider.Maximum); 
+                        RamSlider.Value = _currentRamMb; 
+                        if (RamText != null) RamText.Text = $"Выделено: {_currentRamMb} МБ из {RamSlider.Maximum} МБ"; 
+                    } 
+                } 
+            } 
+            catch { } 
+        } 
+ 
+        private void SaveConfig() 
+        { 
+            try 
+            { 
+                var config = new LauncherConfig 
+                { 
+                    Username = RememberMeBox.IsChecked == true ? UsernameBox.Text : "", 
+                    Password = RememberMeBox.IsChecked == true ? CryptoHelper.Encrypt(PasswordBox.Password) : "", 
+                    RememberMe = RememberMeBox.IsChecked == true, 
+                    RamMb = _currentRamMb 
+                }; 
+                File.WriteAllText(_configPath, JsonSerializer.Serialize(config)); 
+            } 
+            catch { } 
+        } 
+ 
+        private void RamSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) 
+        { 
+            _currentRamMb = (int)e.NewValue; 
+            if (RamText != null) RamText.Text = $"Выделено: {_currentRamMb} МБ из {RamSlider.Maximum} МБ"; 
+            SaveConfig(); 
+        } 
+ 
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e) 
+        { 
+            if (e.ChangedButton == MouseButton.Left) this.DragMove(); 
+        } 
+ 
+        private void BtnClose_Click(object sender, RoutedEventArgs e) 
+        { 
+            _cts?.Cancel(); 
+            Application.Current.Shutdown(); 
+        } 
+ 
+        private void BtnSettings_Click(object sender, RoutedEventArgs e) => SettingsPanel.Visibility = Visibility.Visible; 
+        private void BtnCloseSettings_Click(object sender, RoutedEventArgs e) => SettingsPanel.Visibility = Visibility.Collapsed; 
+ 
+        // ПАТТЕРН 2 и 3: Fire and Forget Boundary + State Machine UI 
+        private async void BtnPlay_Click(object sender, RoutedEventArgs e) 
+        { 
+            string username = UsernameBox.Text.Trim(); 
+            string password = PasswordBox.Password; 
+ 
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) 
+            { 
+                MessageBox.Show("Пожалуйста, введите логин и пароль.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning); 
+                return; 
+            } 
+ 
+            SaveConfig(); 
+ 
+            // Блокируем UI (State: В работе) 
+            SetUIState(true); 
+            StatusText.Text = "Инициализация движка..."; 
+            LauncherProgress.Value = 0; 
+             
+            _cts = new CancellationTokenSource(); 
+ 
+            try 
+            { 
+                // Инициализируем потокобезопасный репортер 
+                var reporter = new WpfReporter( 
+                    msg => StatusText.Text = msg, 
+                    (task, prog) => { 
+                        StatusText.Text = $"{task}... {prog:F1}%"; 
+                        LauncherProgress.Value = prog; 
+                    } 
+                ); 
+ 
+                var initialPayload = new Dictionary<string, object> 
+                { 
+                    { "username", username }, 
+                    { "password", password }, 
+                    { "ramMb", _currentRamMb }, 
+                    { "mcDir", _mcDir } 
+                }; 
+ 
+                string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json"); 
+                string pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"); 
+                 
+                if (!File.Exists(bootJsonPath)) 
+                    throw new FileNotFoundException("Файл манифеста boot.json не найден!"); 
+ 
+                // Запускаем тяжелый конвейер в фоновом пуле потоков 
+                await Task.Run(async () => 
+                { 
+                    var engine = new VantuzEngine(pluginsDir, reporter); 
+                    await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
+                }); 
+ 
+                StatusText.Text = "Запуск успешно завершен!"; 
+                this.Hide(); 
+            } 
+            catch (Exception ex) 
+            { 
+                // Выводим пользователю понятную ошибку, а детали лежат в crash.log 
+                MessageBox.Show($"Критическая ошибка при запуске.\n\n{ex.Message}\n\nПодробности в файле crash.log.", 
+                                "Сбой Конвейера", MessageBoxButton.OK, MessageBoxImage.Error); 
+                StatusText.Text = "Ошибка запуска"; 
+                SetUIState(false); 
+            } 
+            finally 
+            { 
+                // Гарантированная разблокировка UI 
+                BtnPlay.IsEnabled = true; 
+                BtnPlay.Opacity = 1.0; 
+            } 
+        } 
+ 
+        private void SetUIState(bool isProcessing) 
+        { 
+            BtnPlay.IsEnabled = !isProcessing; 
+            BtnPlay.Opacity = isProcessing ? 0.5 : 1.0; 
+            UsernameBox.IsEnabled = !isProcessing; 
+            PasswordBox.IsEnabled = !isProcessing; 
+            ProgressPanel.Visibility = isProcessing ? Visibility.Visible : Visibility.Collapsed; 
+             
+            if (!isProcessing) 
+            { 
+                LauncherProgress.Value = 0; 
+                StatusText.Text = ""; 
+            } 
+        } 
+    } 
+ 
+    public class LauncherConfig 
+    { 
+        public string Username { get; set; } 
+        public string Password { get; set; } 
+        public bool RememberMe { get; set; } 
+        public int RamMb { get; set; } 
+    } 
+ 
+    public static class CryptoHelper 
+    { 
+        private static readonly byte[] Entropy = Encoding.UTF8.GetBytes("VantuzLauncher_Secure_Key_2026"); 
+ 
+        public static string Encrypt(string clearText) 
+        { 
+            if (string.IsNullOrEmpty(clearText)) return clearText; 
+            try 
+            { 
+                using Aes aes = Aes.Create(); 
+                using var rfc2898 = new Rfc2898DeriveBytes(Environment.MachineName + "Vantuz", Entropy, 1000, HashAlgorithmName.SHA256); 
+                aes.Key = rfc2898.GetBytes(aes.KeySize / 8); 
+                aes.IV = rfc2898.GetBytes(aes.BlockSize / 8); 
+ 
+                using MemoryStream ms = new MemoryStream(); 
+                using CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write); 
+                cs.Write(Encoding.UTF8.GetBytes(clearText)); 
+                cs.Close(); 
+                return Convert.ToBase64String(ms.ToArray()); 
+            } 
+            catch { return ""; } 
+        } 
+ 
+        public static string Decrypt(string cipherText) 
+        { 
+            if (string.IsNullOrEmpty(cipherText)) return cipherText; 
+            try 
+            { 
+                using Aes aes = Aes.Create(); 
+                using var rfc2898 = new Rfc2898DeriveBytes(Environment.MachineName + "Vantuz", Entropy, 1000, HashAlgorithmName.SHA256); 
+                aes.Key = rfc2898.GetBytes(aes.KeySize / 8); 
+                aes.IV = rfc2898.GetBytes(aes.BlockSize / 8); 
+ 
+                using MemoryStream ms = new MemoryStream(); 
+                using CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write); 
+                byte[] cipherBytes = Convert.FromBase64String(cipherText); 
+                cs.Write(cipherBytes); 
+                cs.Close(); 
+                return Encoding.UTF8.GetString(ms.ToArray()); 
+            } 
+            catch { return ""; } 
+        } 
+    } 
+} 
+
+================================================================================
+END OF FILE: .\MainWindow.xaml.cs
+================================================================================
+
+================================================================================
+FILE: .\obfuscar.xml
+================================================================================
+<?xml version='1.0'?>
+<Obfuscator>
+  <Var name="InPath" value="." />
+  <Var name="OutPath" value="./Obfuscated" />
+  <Var name="KeepPublicApi" value="true" />
+  <Var name="HidePrivateApi" value="true" />
+  <Var name="HideStrings" value="true" />
+  <Var name="RenameProperties" value="true" />
+  <Var name="RenameEvents" value="true" />
+  <Var name="RenameFields" value="true" />
+  <Var name="AnalyzeBAML" value="false" />
+  <Var name="MarkedOnly" value="false" />
+  <Var name="IgnoreMissingAssemblies" value="true" />
+
+  <!-- Входной файл -->
+  <Module file="$(InPath)/VantuzLauncher.dll">
+    <!-- Пропускаем критические для WPF и сериализации классы -->
+    <SkipType name="VantuzLauncher.App" />
+    <SkipType name="VantuzLauncher.MainWindow" />
+    <SkipType name="VantuzLauncher.LauncherConfig" />
+    <SkipType name="VantuzLauncher.AuthResponse" />
+    <SkipNamespace name="XamlGeneratedNamespace" />
+  </Module>
+</Obfuscator>
+
+================================================================================
+END OF FILE: .\obfuscar.xml
+================================================================================
+
+================================================================================
+FILE: .\README.md
+================================================================================
+# VantuzLauncher 2.0 — Агностический Payload-Driven Бутстраппер
+
+**VantuzLauncher 2.0** — это глубоко переработанная, модульная архитектура лаунчера, построенная на принципах **Microkernel** и **Middleware Pipeline**. В отличие от классических монолитных лаунчеров, Vantuz 2.0 является «тупым» исполнителем, чья логика полностью определяется внешним JSON-манифестом (`boot.json`) и набором независимых плагинов-лезвий.
+
+---
+
+## 🚀 Ключевые особенности (Архитектура 2.0)
+
+- **Payload-Driven Execution**: Вся бизнес-логика (авторизация, загрузка, запуск) описана в JSON. Лаунчер лишь исполняет цепочку шагов.
+- **Microkernel Architecture**: Ядро (`Vantuz.Host`) изолировано от конкретных реализаций. Плагины загружаются в отдельные контексты (`AssemblyLoadContext`).
+- **Hash Pinning & Security**: Все плагины проходят проверку SHA-256 перед загрузкой. Подмена DLL невозможна.
+- **Memory Loading**: Плагины загружаются напрямую в память, не блокируя файлы на диске.
+- **Variable Interpolation**: Поддержка динамических переменных в конфиге (например, `{{mcDir}}`, `{{gameArgs}}`).
+- **Thread-Safe Reporting**: Потокобезопасная передача состояния из фонового конвейера в UI WPF через `IStatusReporter`.
+
+---
+
+## 📂 Структура проекта
+
+- **VantuzLauncher**: WPF-приложение (UI). Собирает данные, инициализирует ядро.
+- **Vantuz.Core**: Общие контракты, интерфейсы плагинов и контекст выполнения.
+- **Vantuz.Host**: Ядро (Engine). Отвечает за загрузку плагинов, валидацию хэшей и работу конвейера.
+- **Vantuz.Builder**: CLI-утилита для автоматической сборки `boot.json` и вычисления хэшей плагинов.
+- **Vantuz.Plugins.***: Набор независимых лезвий:
+  - `Auth.Yggdrasil`: Авторизация по протоколу Yggdrasil.
+  - `Net.Downloader`: Универсальный загрузчик файлов.
+  - `OS.Executor`: Запуск процессов с перехватом вывода.
+  - `Game.CmlLaunch`: Подготовка Minecraft (на базе CmlLib.Core).
+
+---
+
+## 🛠 Инструкция по сборке
+
+Проект полностью автоматизирован через MSBuild. При сборке основного проекта `VantuzLauncher` автоматически собираются все плагины, копируются в папку `plugins` и генерируется актуальный `boot.json`.
+
+1. Убедитесь, что установлен **.NET 8.0 SDK**.
+2. Клонируйте репозиторий.
+3. Выполните сборку решения:
+   ```bash
+   dotnet build VantuzLauncher.sln
+   ```
+4. Результат будет находиться в:
+   `VantuzLauncher/bin/Debug/net8.0-windows/win-x64/`
+
+---
+
+## ⚙️ Конфигурация (boot.json)
+
+Логика работы описывается в `boot.template.json`. Пример цепочки (Pipeline):
+
+```json
+{
+  "plugins": { "Vantuz.Plugins.Auth.dll": "" }, // Хэши заполняются автоматически
+  "pipeline": [
+    {
+      "pluginName": "Auth.Yggdrasil",
+      "config": { "url": "https://api.authserver.com/authenticate" }
+    },
+    {
+      "pluginName": "Net.Downloader",
+      "config": { 
+        "url": "https://example.com/file.jar", 
+        "destination": "{{mcDir}}/file.jar" 
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 🔒 Безопасность
+
+- **Изоляция**: Плагины не имеют прямого доступа к UI. Взаимодействие идет только через `ExecutionContext`.
+- **Криптография**: Локальные пароли шифруются AES с привязкой к железу пользователя (`MachineName`).
+- **Resilience**: Любой сбой в плагине корректно обрабатывается ядром через `context.Abort()`, не вызывая краш всего приложения.
+
+---
+
+## 👨‍💻 Для разработчиков плагинов
+
+Чтобы создать новое лезвие, реализуйте интерфейс `IVantuzPlugin` из `Vantuz.Core`:
+
+```csharp
+public class MyPlugin : IVantuzPlugin 
+{
+    public string Name => "My.CustomPlugin";
+    public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+    {
+        // Ваша логика здесь
+        await next(context); // Передать управление дальше
+    }
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+}
+```
+
+---
+*VantuzLauncher — Думай как Senior, делай код чистым.*
+
+================================================================================
+END OF FILE: .\README.md
+================================================================================
+
+================================================================================
+FILE: .\VantuzLauncher.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Vantuz.Core\**" />
+    <Compile Remove="Vantuz.Host\**" />
+    <Compile Remove="Vantuz.Plugins.Auth\**" />
+    <Compile Remove="Vantuz.Plugins.Net\**" />
+    <Compile Remove="Vantuz.Plugins.OS\**" />
+    <Compile Remove="Vantuz.Plugins.Game\**" />
+    <Compile Remove="Vantuz.Builder\**" />
+    <EmbeddedResource Remove="Vantuz.Core\**" />
+    <EmbeddedResource Remove="Vantuz.Host\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Auth\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Net\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.OS\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Game\**" />
+    <EmbeddedResource Remove="Vantuz.Builder\**" />
+    <None Remove="Vantuz.Core\**" />
+    <None Remove="Vantuz.Host\**" />
+    <None Remove="Vantuz.Plugins.Auth\**" />
+    <None Remove="Vantuz.Plugins.Net\**" />
+    <None Remove="Vantuz.Plugins.OS\**" />
+    <None Remove="Vantuz.Plugins.Game\**" />
+    <None Remove="Vantuz.Builder\**" />
+    <Page Remove="Vantuz.Core\**" />
+    <Page Remove="Vantuz.Host\**" />
+    <Page Remove="Vantuz.Plugins.Auth\**" />
+    <Page Remove="Vantuz.Plugins.Net\**" />
+    <Page Remove="Vantuz.Plugins.OS\**" />
+    <Page Remove="Vantuz.Plugins.Game\**" />
+    <Page Remove="Vantuz.Builder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Vantuz.Core\Vantuz.Core.csproj" />
+    <ProjectReference Include="Vantuz.Host\Vantuz.Host.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageReference Include="Obfuscar" Version="2.2.38">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target AfterTargets="AfterBuild" Name="Obfuscate" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <ObfuscarConfig>$(ProjectDir)obfuscar.xml</ObfuscarConfig>
+    </PropertyGroup>
+    <Exec Command="$(Obfuscar) $(ObfuscarConfig)" WorkingDirectory="$(TargetDir)" />
+    <Copy SourceFiles="$(TargetDir)Obfuscated\VantuzLauncher.dll" DestinationFolder="$(TargetDir)" OverwriteReadOnlyFiles="true" />
+  </Target>
+
+  <ItemGroup> 
+    <PluginNetFiles Include="$(SolutionDir)Vantuz.Plugins.Net\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginAuthFiles Include="$(SolutionDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginOSFiles Include="$(SolutionDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginGameFiles Include="$(SolutionDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" /> 
+  </ItemGroup> 
+ 
+  <Target Name="AssembleVantuz" AfterTargets="Build"> 
+    <Message Text="[Vantuz Assembler] Copying plugins to target directory..." Importance="high" /> 
+    <Copy SourceFiles="@(PluginNetFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginAuthFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginOSFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginGameFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+     
+    <Message Text="[Vantuz Assembler] Running Manifest Builder for Hash Pinning..." Importance="high" /> 
+    <Exec Command="dotnet run --project &quot;$(SolutionDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 
+  </Target> 
+
+</Project>
+
+================================================================================
+END OF FILE: .\VantuzLauncher.csproj
+================================================================================
+
+================================================================================
+FILE: .\VantuzLauncher.sln
+================================================================================
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VantuzLauncher", "VantuzLauncher.csproj", "{744D7B29-B5C8-4DB2-68C1-8062AF546896}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Core", "Vantuz.Core\Vantuz.Core.csproj", "{456962DE-3F48-4157-8BC7-B5F8F841FAC5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Host", "Vantuz.Host\Vantuz.Host.csproj", "{973796AA-0498-437B-A8CE-A7174656EB69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Net", "Vantuz.Plugins.Net\Vantuz.Plugins.Net.csproj", "{A14A6392-C724-4467-947E-32E8A05BC766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Auth", "Vantuz.Plugins.Auth\Vantuz.Plugins.Auth.csproj", "{EEEF3490-A270-40FF-8664-7C49A94C234E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.OS", "Vantuz.Plugins.OS\Vantuz.Plugins.OS.csproj", "{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Game", "Vantuz.Plugins.Game\Vantuz.Plugins.Game.csproj", "{AED21E92-BC6A-4503-A58A-559D63481DCA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Builder", "Vantuz.Builder\Vantuz.Builder.csproj", "{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{744D7B29-B5C8-4DB2-68C1-8062AF546896}.Release|Any CPU.Build.0 = Release|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{456962DE-3F48-4157-8BC7-B5F8F841FAC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{973796AA-0498-437B-A8CE-A7174656EB69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A14A6392-C724-4467-947E-32E8A05BC766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEEF3490-A270-40FF-8664-7C49A94C234E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B5A82EE-D0F3-49A9-80FC-7521E2BA02F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AED21E92-BC6A-4503-A58A-559D63481DCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1824C400-01AE-4EC9-8D7E-8361C1E23D8B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DF4737A1-2DA0-4BE7-BD29-29D7B40628E9}
+	EndGlobalSection
+EndGlobal
+
+================================================================================
+END OF FILE: .\VantuzLauncher.sln
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Builder\Program.cs
+================================================================================
+using System; 
+using System.IO; 
+using System.Security.Cryptography; 
+using System.Text.Json; 
+using System.Text.Json.Nodes; 
+ 
+if (args.Length < 3) 
+{ 
+    Console.WriteLine("Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>"); 
+    return; 
+} 
+ 
+string templatePath = args[0]; 
+string pluginsDir = args[1]; 
+string outputPath = args[2]; 
+ 
+if (!File.Exists(templatePath)) 
+{ 
+    Console.WriteLine($"Template not found: {templatePath}"); 
+    return; 
+} 
+ 
+var jsonString = File.ReadAllText(templatePath); 
+var node = JsonNode.Parse(jsonString); 
+ 
+if (node?["plugins"] is JsonObject pluginsNode) 
+{ 
+    foreach (var plugin in pluginsNode.ToDictionary(k => k.Key, v => v.Value)) 
+    { 
+        string dllPath = Path.Combine(pluginsDir, plugin.Key); 
+        if (File.Exists(dllPath)) 
+        { 
+            using var sha = SHA256.Create(); 
+            using var fs = File.OpenRead(dllPath); 
+            var hashBytes = sha.ComputeHash(fs); 
+            var hashStr = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant(); 
+             
+            // Обновляем хэш в JSON 
+            pluginsNode[plugin.Key] = hashStr; 
+            Console.WriteLine($"[Hash Pinning] {plugin.Key} -> {hashStr}"); 
+        } 
+        else 
+        { 
+            Console.WriteLine($"[WARNING] Plugin DLL not found: {dllPath}"); 
+        } 
+    } 
+} 
+ 
+File.WriteAllText(outputPath, node!.ToJsonString(new JsonSerializerOptions { WriteIndented = true })); 
+Console.WriteLine($"Manifest generated: {outputPath}"); 
+
+================================================================================
+END OF FILE: .\Vantuz.Builder\Program.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Builder\Vantuz.Builder.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk"> 
+  <PropertyGroup> 
+    <OutputType>Exe</OutputType> 
+    <TargetFramework>net8.0</TargetFramework> 
+    <ImplicitUsings>enable</ImplicitUsings> 
+    <Nullable>enable</Nullable> 
+  </PropertyGroup> 
+</Project> 
+
+================================================================================
+END OF FILE: .\Vantuz.Builder\Vantuz.Builder.csproj
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Core\Contracts.cs
+================================================================================
+namespace Vantuz.Core;
+
+using System;
+using System.Collections.Concurrent;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+
+public interface IStatusReporter
+{
+    void ReportProgress(string taskName, double percentage);
+    void ReportState(string message);
+}
+
+public class ExecutionContext
+{
+    public ConcurrentDictionary<string, object> Payload { get; } = new ();
+    public bool IsAborted { get; private set; }
+    public string? AbortReason { get; private set; }
+    
+    public CancellationToken CancellationToken { get; }
+    public IStatusReporter Reporter { get; }
+
+    public ExecutionContext(CancellationToken cancellationToken, IStatusReporter reporter)
+    {
+        CancellationToken = cancellationToken;
+        Reporter = reporter;
+    }
+
+    public void Abort(string reason)
+    {
+        IsAborted = true;
+        AbortReason = reason;
+    }
+
+    public T? Get<T>(string key) => Payload.TryGetValue(key, out var val) && val is T typedVal ? typedVal : default;
+    public void Set<T>(string key, T value) where T : notnull => Payload[key] = value;
+}
+
+public delegate Task MiddlewareDelegate(ExecutionContext context);
+
+public interface IVantuzPlugin : IAsyncDisposable
+{
+    string Name { get; }
+    Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next);
+}
+
+================================================================================
+END OF FILE: .\Vantuz.Core\Contracts.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Core\Vantuz.Core.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+</Project>
+
+================================================================================
+END OF FILE: .\Vantuz.Core\Vantuz.Core.csproj
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Host\PluginLoadContext.cs
+================================================================================
+using System; 
+using System.IO; 
+using System.Linq; 
+using System.Reflection; 
+using System.Runtime.Loader; 
+
+namespace Vantuz.Host 
+{ 
+    public class PluginLoadContext : AssemblyLoadContext 
+    { 
+        private readonly AssemblyDependencyResolver _resolver; 
+        private readonly string[] _sharedAssemblies; 
+        private readonly string _shadowDir; 
+
+        public PluginLoadContext(string shadowPluginFilePath, string[] sharedAssemblies) : base(isCollectible: true) 
+        { 
+            _sharedAssemblies = sharedAssemblies ?? Array.Empty<string>(); 
+            _shadowDir = Path.GetDirectoryName(shadowPluginFilePath) ?? string.Empty; 
+            _resolver = new AssemblyDependencyResolver(shadowPluginFilePath); 
+        } 
+
+        protected override Assembly? Load(AssemblyName assemblyName) 
+        { 
+            // 1. Делегируем общие сборки (контракты) системному загрузчику 
+            if (assemblyName.Name != null && _sharedAssemblies.Contains(assemblyName.Name)) 
+                return null; 
+
+            // 2. Официальный резолв через .deps.json 
+            string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName); 
+            
+            // 3. Прямой Fallback: если манифест слеп, ищем файл физически в теневой папке 
+            if (assemblyPath == null && assemblyName.Name != null) 
+            { 
+                string fallbackPath = Path.Combine(_shadowDir, $"{assemblyName.Name}.dll"); 
+                if (File.Exists(fallbackPath)) 
+                    assemblyPath = fallbackPath; 
+            } 
+
+            // 4. Безопасная загрузка (LoadFromAssemblyPath ЛЕГАЛЕН внутри Load) 
+            if (assemblyPath != null) 
+                return LoadFromAssemblyPath(assemblyPath); 
+
+            return null; 
+        } 
+
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName) 
+        { 
+            string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName); 
+            if (libraryPath != null) return LoadUnmanagedDllFromPath(libraryPath); 
+            return IntPtr.Zero; 
+        } 
+    } 
+} 
+
+================================================================================
+END OF FILE: .\Vantuz.Host\PluginLoadContext.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Host\PluginLoader.cs
+================================================================================
+using System; 
+using System.Collections.Generic; 
+using System.IO; 
+using System.Linq; 
+using System.Reflection; 
+using System.Runtime.Loader; 
+using Vantuz.Core; 
+
+namespace Vantuz.Host 
+{ 
+    public class PluginLoader 
+    { 
+        // УДЕРЖАНИЕ (Rooting) - защита от сборщика мусора 
+        private readonly List<AssemblyLoadContext> _activeContexts = new(); 
+        private readonly string[] _sharedAssemblies; 
+
+        public PluginLoader(string[] sharedAssemblies) 
+        { 
+            _sharedAssemblies = sharedAssemblies; 
+        } 
+
+        public IEnumerable<IVantuzPlugin> LoadPluginsFromDirectory(string pluginsPath) 
+        { 
+            var plugins = new List<IVantuzPlugin>(); 
+            if (!Directory.Exists(pluginsPath)) return plugins; 
+
+            foreach (var dllPath in Directory.GetFiles(pluginsPath, "*.dll")) 
+            { 
+                string shadowPath = PrepareShadowWorkspace(dllPath); 
+                var context = new PluginLoadContext(shadowPath, _sharedAssemblies); 
+                
+                // Спасаем от GC 
+                _activeContexts.Add(context); 
+
+                // ЖАДНАЯ ЗАГРУЗКА (Eager Loading) для обхода слепоты NuGet deps.json 
+                EagerLoadAssemblies(context, Path.GetDirectoryName(shadowPath)!); 
+
+                // Ищем плагины в загруженном контексте 
+                foreach (var assembly in context.Assemblies) 
+                { 
+                    var types = assembly.GetTypes() 
+                        .Where(t => typeof(IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
+                    
+                    foreach (var type in types) 
+                    { 
+                        if (Activator.CreateInstance(type) is IVantuzPlugin plugin) 
+                        { 
+                            plugins.Add(plugin); 
+                        } 
+                    } 
+                } 
+            } 
+            return plugins; 
+        } 
+
+        private void EagerLoadAssemblies(PluginLoadContext context, string shadowDir) 
+        { 
+            foreach (var file in Directory.GetFiles(shadowDir, "*.dll")) 
+            { 
+                var assemblyName = AssemblyName.GetAssemblyName(file); 
+                if (!_sharedAssemblies.Contains(assemblyName.Name)) 
+                { 
+                    try { context.LoadFromAssemblyPath(file); } catch { /* Игнорируем конфликты нативных DLL */ } 
+                } 
+            } 
+        } 
+
+        private string PrepareShadowWorkspace(string originalPluginFilePath) 
+        { 
+            string originalDir = Path.GetDirectoryName(originalPluginFilePath) ?? string.Empty; 
+            string baseShadowDir = Path.Combine(originalDir, ".shadow"); 
+            string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
+            
+            if (Directory.Exists(baseShadowDir)) 
+            { 
+                foreach (var dir in Directory.GetDirectories(baseShadowDir)) 
+                { 
+                    try { Directory.Delete(dir, true); } catch { } 
+                } 
+            } 
+            Directory.CreateDirectory(shadowDir); 
+            foreach (var file in Directory.GetFiles(originalDir, "*.*")) 
+            { 
+                File.Copy(file, Path.Combine(shadowDir, Path.GetFileName(file)), true); 
+            } 
+            return Path.Combine(shadowDir, Path.GetFileName(originalPluginFilePath)); 
+        } 
+    } 
+} 
+
+================================================================================
+END OF FILE: .\Vantuz.Host\PluginLoader.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Host\Vantuz.Host.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" />
+  </ItemGroup>
+</Project>
+
+================================================================================
+END OF FILE: .\Vantuz.Host\Vantuz.Host.csproj
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Host\VantuzEngine.cs
+================================================================================
+namespace Vantuz.Host; 
+
+using System; 
+using System.Collections.Generic; 
+using System.IO; 
+using System.Linq; 
+using System.Security.Cryptography; 
+using System.Text.Json; 
+using System.Threading; 
+using System.Threading.Tasks; 
+using Vantuz.Core; 
+
+public record BootManifest(Dictionary<string, string> Plugins, List<StepConfig> Pipeline); 
+public record StepConfig(string PluginName, JsonElement Config); 
+
+public class VantuzEngine 
+{ 
+    private readonly string _pluginsFolder; 
+    private readonly IStatusReporter _reporter; 
+
+    public VantuzEngine(string pluginsFolder, IStatusReporter reporter) 
+    { 
+        _pluginsFolder = pluginsFolder; 
+        _reporter = reporter; 
+    } 
+
+    public async Task RunAsync(string bootJsonPath, CancellationToken cancellationToken, IDictionary<string, object>? initialPayload = null) 
+    { 
+        try 
+        { 
+            var manifest = JsonSerializer.Deserialize<BootManifest>( 
+                await File.ReadAllTextAsync(bootJsonPath, cancellationToken), 
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) 
+                ?? throw new Exception("Invalid boot.json"); 
+
+            // 1. Валидация хэшей безопасности 
+            ValidateManifestHashes(manifest.Plugins); 
+
+            // 2. Изолированная загрузка плагинов через новый провайдер 
+            string[] shared = new[] { typeof(IVantuzPlugin).Assembly.GetName().Name! }; 
+            var loader = new PluginLoader(shared); 
+            var loadedPlugins = loader.LoadPluginsFromDirectory(_pluginsFolder).ToList(); 
+
+            try 
+            { 
+                // 3. Выполнение конвейера 
+                await ExecutePipelineAsync(loadedPlugins, manifest.Pipeline, cancellationToken, initialPayload); 
+            } 
+            finally 
+            { 
+                foreach (var plugin in loadedPlugins) await plugin.DisposeAsync(); 
+                loadedPlugins.Clear(); 
+            } 
+        } 
+        catch (Exception ex) 
+        { 
+            // Глобальный Краш-логгер (Observability) 
+            string crashLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.log"); 
+            string errorMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CRITICAL SYSTEM CRASH\n" + 
+                                  $"Message: {ex.Message}\n" + 
+                                  $"StackTrace:\n{ex.StackTrace}\n" + 
+                                  $"InnerException: {ex.InnerException?.Message}\n" + 
+                                  new string('-', 50) + "\n"; 
+            File.AppendAllText(crashLogPath, errorMessage); 
+            throw; 
+        } 
+    } 
+
+    private void ValidateManifestHashes(Dictionary<string, string> pluginsConfig) 
+    { 
+        foreach (var (dllName, expectedHash) in pluginsConfig) 
+        { 
+            string fullPath = Path.Combine(_pluginsFolder, Path.GetFileName(dllName)); 
+            if (!File.Exists(fullPath)) throw new FileNotFoundException($"Plugin not found: {fullPath}"); 
+
+            using var fs = File.OpenRead(fullPath); 
+            using var sha256 = SHA256.Create(); 
+            var hashBytes = sha256.ComputeHash(fs); 
+            var actualHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant(); 
+            
+            if (actualHash != expectedHash.ToLowerInvariant()) 
+                throw new Exception($"HASH MISMATCH for {dllName}"); 
+        } 
+    } 
+
+    private async Task ExecutePipelineAsync(List<IVantuzPlugin> loadedPlugins, List<StepConfig> pipelineSteps, CancellationToken ct, IDictionary<string, object>? initialPayload) 
+    { 
+        var contextData = new Vantuz.Core.ExecutionContext(ct, _reporter); 
+        if (initialPayload != null) foreach (var kvp in initialPayload) contextData.Set(kvp.Key, kvp.Value); 
+
+        MiddlewareDelegate pipeline = (ctx) => Task.CompletedTask; 
+        for (int i = pipelineSteps.Count - 1; i >= 0; i--) 
+        { 
+            var step = pipelineSteps[i]; 
+            var plugin = loadedPlugins.FirstOrDefault(p => p.Name == step.PluginName) 
+                ?? throw new Exception($"Plugin {step.PluginName} not found"); 
+
+            var next = pipeline; 
+            pipeline = async (ctx) => { 
+                if (ctx.IsAborted || ctx.CancellationToken.IsCancellationRequested) return; 
+                try { await plugin.InvokeAsync(ctx, step.Config, next); } 
+                catch (Exception ex) { ctx.Abort($"Plugin {plugin.Name} crashed: {ex.Message}"); } 
+            }; 
+        } 
+        await pipeline(contextData); 
+        if (contextData.IsAborted) throw new Exception(contextData.AbortReason); 
+    } 
+} 
+
+================================================================================
+END OF FILE: .\Vantuz.Host\VantuzEngine.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Auth\Vantuz.Plugins.Auth.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk"> 
+  <PropertyGroup> 
+    <TargetFramework>net8.0</TargetFramework> 
+    <Nullable>enable</Nullable> 
+    <ImplicitUsings>enable</ImplicitUsings> 
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies> 
+  </PropertyGroup> 
+  <ItemGroup> 
+    <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" /> 
+  </ItemGroup> 
+</Project>
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Auth\Vantuz.Plugins.Auth.csproj
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Auth\YggdrasilPlugin.cs
+================================================================================
+namespace Vantuz.Plugins.Auth; 
+  
+ using System; 
+ using System.Collections.Generic; 
+ using System.Net.Http; 
+ using System.Text; 
+ using System.Text.Json; 
+ using System.Threading.Tasks; 
+ using Vantuz.Core; 
+  
+ public class YggdrasilPlugin : IVantuzPlugin 
+ { 
+     public string Name => "Auth.Yggdrasil"; 
+  
+     public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+     { 
+         string authUrl = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing in step config"); 
+         bool ignoreSslErrors = stepConfig.TryGetProperty("ignoreSslErrors", out var sslProp) && sslProp.GetBoolean(); 
+  
+         authUrl = Interpolate(authUrl, context); 
+  
+         string? username = context.Get<string>("username"); 
+         string? password = context.Get<string>("password"); 
+  
+         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) 
+         { 
+             context.Abort("Логин или пароль не переданы в конвейер."); 
+             return; 
+         } 
+  
+         context.Reporter.ReportState("Авторизация на сервере..."); 
+  
+         var requestBody = new Dictionary<string, object>(); 
+          
+         foreach (var property in stepConfig.EnumerateObject()) 
+         { 
+             if (property.Name == "url" || property.Name == "ignoreSslErrors") continue; 
+              
+             string stringValue = property.Value.ValueKind == JsonValueKind.String  
+                 ? Interpolate(property.Value.GetString() ?? "", context)  
+                 : property.Value.GetRawText(); 
+                  
+             requestBody[property.Name] = stringValue; 
+         } 
+  
+         requestBody["username"] = username; 
+         requestBody["password"] = password; 
+         requestBody["clientToken"] = Guid.NewGuid().ToString("N"); 
+  
+         var handler = new HttpClientHandler(); 
+         if (ignoreSslErrors) 
+         { 
+             handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true; 
+         } 
+         using var httpClient = new HttpClient(handler); 
+  
+         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json"); 
+  
+         try 
+         { 
+             using var response = await httpClient.PostAsync(authUrl, content, context.CancellationToken); 
+             var responseText = await response.Content.ReadAsStringAsync(context.CancellationToken); 
+  
+             if (string.IsNullOrWhiteSpace(responseText)) 
+             { 
+                 context.Abort("Сервер авторизации вернул пустой ответ."); 
+                 return; 
+             } 
+  
+             using var doc = JsonDocument.Parse(responseText); 
+             var root = doc.RootElement; 
+  
+             if (root.TryGetProperty("error", out var errorElement)) 
+             { 
+                 string errorMsg = root.TryGetProperty("errorMessage", out var errMsgElement)  
+                     ? errMsgElement.GetString() ?? "Неизвестная ошибка сервера"  
+                     : "Неизвестная ошибка сервера"; 
+                  
+                 context.Abort($"Ошибка авторизации: {errorMsg}"); 
+                 return; 
+             } 
+  
+             if (root.TryGetProperty("has_access", out var accessElement) && !accessElement.GetBoolean()) 
+             { 
+                 context.Abort("Доступ закрыт. Оплатите активацию на сайте."); 
+                 return; 
+             } 
+  
+             var profile = root.GetProperty("selectedProfile"); 
+              
+             context.Set("accessToken", root.GetProperty("accessToken").GetString() ?? ""); 
+             context.Set("clientToken", root.GetProperty("clientToken").GetString() ?? ""); 
+             context.Set("uuid", profile.GetProperty("id").GetString() ?? ""); 
+             context.Set("playerName", profile.GetProperty("name").GetString() ?? "Player"); 
+              
+             if (root.TryGetProperty("is_admin", out var isAdmin)) context.Set("is_admin", isAdmin.GetBoolean()); 
+             if (root.TryGetProperty("is_tester", out var isTester)) context.Set("is_tester", isTester.GetBoolean()); 
+  
+             context.Reporter.ReportState("Авторизация успешна."); 
+         } 
+         catch (Exception ex) 
+         { 
+             context.Abort($"Сбой при обращении к серверу авторизации: {ex.Message}"); 
+             return; 
+         } 
+  
+         await next(context); 
+     } 
+  
+     private string Interpolate(string text, ExecutionContext context) 
+     { 
+         if (string.IsNullOrEmpty(text)) return text; 
+         foreach (var kvp in context.Payload) 
+         { 
+             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
+         } 
+         return text; 
+     } 
+  
+     public ValueTask DisposeAsync() => ValueTask.CompletedTask; 
+ } 
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Auth\YggdrasilPlugin.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Game\CmlLaunchPlugin.cs
+================================================================================
+namespace Vantuz.Plugins.Game; 
+  
+ using System; 
+ using System.IO; 
+ using System.Text.Json; 
+ using System.Threading.Tasks; 
+ using CmlLib.Core; 
+ using CmlLib.Core.Auth; 
+ using CmlLib.Core.ProcessBuilder; 
+ using Vantuz.Core; 
+  
+ public class CmlLaunchPlugin : IVantuzPlugin 
+ { 
+     public string Name => "Game.CmlLaunch"; 
+  
+     public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+     { 
+         string versionName = stepConfig.GetProperty("versionName").GetString() ?? throw new Exception("versionName is missing"); 
+         string? authlibPath = stepConfig.TryGetProperty("authlibPath", out var alp) ? alp.GetString() : null; 
+  
+         string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in Payload"); 
+         string javaPath = context.Get<string>("javaPath") ?? "java"; 
+         int ramMb = context.Get<int>("ramMb"); 
+         if (ramMb == 0) ramMb = 4096; 
+  
+         string accessToken = context.Get<string>("accessToken") ?? ""; 
+         string uuid = context.Get<string>("uuid") ?? ""; 
+         string playerName = context.Get<string>("playerName") ?? "Player"; 
+  
+         versionName = Interpolate(versionName, context); 
+         if (authlibPath != null)  
+         { 
+             authlibPath = Interpolate(authlibPath, context); 
+             authlibPath = Path.GetFullPath(authlibPath.Replace('/', Path.DirectorySeparatorChar)); 
+         } 
+  
+         context.Reporter.ReportState($"Подготовка файлов игры ({versionName})..."); 
+  
+         var path = new MinecraftPath(mcDir); 
+         var launcher = new MinecraftLauncher(path); 
+  
+         launcher.FileProgressChanged += (sender, args) => 
+         { 
+             context.Reporter.ReportProgress(args.Name ?? "Загрузка файлов...", (double)args.ProgressedTasks / args.TotalTasks * 100); 
+         }; 
+  
+         var version = await launcher.GetVersionAsync(versionName); 
+         await launcher.InstallAsync(version); 
+  
+         context.Reporter.ReportState("Генерация аргументов запуска..."); 
+  
+         var session = new MSession 
+         { 
+             Username = playerName, 
+             UUID = uuid, 
+             AccessToken = accessToken, 
+             UserType = "mojang" 
+         }; 
+  
+         var launchOption = new MLaunchOption 
+         { 
+             Session = session, 
+             MaximumRamMb = ramMb, 
+             JavaPath = javaPath 
+         }; 
+  
+         if (!string.IsNullOrEmpty(authlibPath)) 
+         { 
+             launchOption.ExtraJvmArguments = new[]  
+             {  
+                 new MArgument($"-javaagent:{authlibPath}=https://troglobit.webhm.pro/yggdrasil/")  
+             }; 
+         } 
+  
+         var process = await launcher.BuildProcessAsync(versionName, launchOption); 
+  
+         context.Set("gameCommand", process.StartInfo.FileName); 
+         context.Set("gameArgs", process.StartInfo.Arguments); 
+         context.Set("gameWorkDir", process.StartInfo.WorkingDirectory); 
+  
+         await next(context); 
+     } 
+  
+     private string Interpolate(string text, ExecutionContext context) 
+     { 
+         if (string.IsNullOrEmpty(text)) return text; 
+         foreach (var kvp in context.Payload) 
+         { 
+             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
+         } 
+         return text; 
+     } 
+  
+     public ValueTask DisposeAsync() => ValueTask.CompletedTask; 
+ } 
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Game\CmlLaunchPlugin.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Game\Vantuz.Plugins.Game.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk"> 
+  <PropertyGroup> 
+    <TargetFramework>net8.0</TargetFramework> 
+    <Nullable>enable</Nullable> 
+    <ImplicitUsings>enable</ImplicitUsings> 
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies> 
+  </PropertyGroup> 
+  <ItemGroup> 
+    <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" /> 
+  </ItemGroup> 
+  <ItemGroup> 
+    <PackageReference Include="CmlLib.Core" Version="4.0.6" /> 
+  </ItemGroup> 
+</Project> 
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Game\Vantuz.Plugins.Game.csproj
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Net\ApiReaderPlugin.cs
+================================================================================
+namespace Vantuz.Plugins.Net; 
+  
+ using System; 
+ using System.Net.Http; 
+ using System.Text.Json; 
+ using System.Threading.Tasks; 
+ using Vantuz.Core; 
+  
+ public class ApiReaderPlugin : IVantuzPlugin 
+ { 
+     public string Name => "Net.ApiReader"; 
+  
+     public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+     { 
+         string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing in step config"); 
+         string payloadKey = stepConfig.GetProperty("payloadKey").GetString() ?? throw new Exception("payloadKey is missing in step config"); 
+         bool ignoreSslErrors = stepConfig.TryGetProperty("ignoreSslErrors", out var sslProp) && sslProp.GetBoolean(); 
+         string? fallback = stepConfig.TryGetProperty("fallback", out var fallbackProp) ? fallbackProp.GetString() : null; 
+  
+         url = Interpolate(url, context); 
+          
+         // Анти-кэш 
+         url = url.Contains('?') ? $"{url}&t={DateTime.UtcNow.Ticks}" : $"{url}?t={DateTime.UtcNow.Ticks}"; 
+  
+         context.Reporter.ReportState($"Reading API: {url}..."); 
+  
+         var handler = new HttpClientHandler(); 
+         if (ignoreSslErrors) 
+         { 
+             handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true; 
+         } 
+  
+         using var httpClient = new HttpClient(handler) 
+         { 
+             Timeout = TimeSpan.FromSeconds(5) // Защита от зависаний 
+         }; 
+          
+         // Маскировка от ботов 
+         httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher/2.0"); 
+  
+         try 
+         { 
+             using var response = await httpClient.GetAsync(url, context.CancellationToken); 
+              
+             if (response.IsSuccessStatusCode) 
+             { 
+                 var result = await response.Content.ReadAsStringAsync(context.CancellationToken); 
+                 result = Interpolate(result.Trim(), context); 
+                 context.Set(payloadKey, result); 
+             } 
+             else 
+             { 
+                 throw new HttpRequestException($"HTTP Error: {response.StatusCode}"); 
+             } 
+         } 
+         catch (Exception ex) 
+         { 
+             // Паттерн Fallback (Graceful Degradation) 
+             if (fallback != null) 
+             { 
+                 context.Reporter.ReportState($"Сетевая ошибка API. Используем fallback для {payloadKey}."); 
+                 context.Set(payloadKey, Interpolate(fallback, context)); 
+             } 
+             else 
+             { 
+                 context.Abort($"Ошибка ApiReader при запросе {url}: {ex.Message}"); 
+                 return; 
+             } 
+         } 
+  
+         await next(context); 
+     } 
+  
+     private string Interpolate(string text, ExecutionContext context) 
+     { 
+         if (string.IsNullOrEmpty(text)) return text; 
+         foreach (var kvp in context.Payload) 
+         { 
+             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
+         } 
+         return text; 
+     } 
+  
+     public ValueTask DisposeAsync() => ValueTask.CompletedTask; 
+ } 
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Net\ApiReaderPlugin.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Net\DownloaderPlugin.cs
+================================================================================
+namespace Vantuz.Plugins.Net; 
+ 
+ using System; 
+ using System.IO; 
+ using System.Net.Http; 
+ using System.Text.Json; 
+ using System.Threading.Tasks; 
+ using Vantuz.Core; 
+ 
+ public class DownloaderPlugin : IVantuzPlugin 
+ { 
+     public string Name => "Net.Downloader"; 
+     private readonly HttpClient _httpClient; 
+ 
+     public DownloaderPlugin() 
+     { 
+         _httpClient = new HttpClient(); 
+         _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) VantuzLauncher/2.0"); 
+     } 
+ 
+     public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+     { 
+         string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing"); 
+         string destination = stepConfig.GetProperty("destination").GetString() ?? throw new Exception("Destination is missing"); 
+ 
+         url = Interpolate(url, context); 
+         destination = Interpolate(destination, context); 
+         destination = Path.GetFullPath(destination.Replace('/', Path.DirectorySeparatorChar)); 
+ 
+         // Вызываем скачивание. Когда метод завершится, ВСЕ ресурсы (вкл. FileStream) будут закрыты. 
+         await PerformDownloadAsync(url, destination, context); 
+ 
+         // Файл физически свободен. Передаем эстафету дальше. 
+         await next(context); 
+     } 
+ 
+     private async Task PerformDownloadAsync(string url, string destination, ExecutionContext context) 
+     { 
+         context.Reporter.ReportState($"Downloading {Path.GetFileName(destination)}..."); 
+ 
+         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, context.CancellationToken); 
+         response.EnsureSuccessStatusCode(); 
+ 
+         var totalBytes = response.Content.Headers.ContentLength ?? -1L; 
+         using var contentStream = await response.Content.ReadAsStreamAsync(context.CancellationToken); 
+         
+         var dir = Path.GetDirectoryName(destination); 
+         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir); 
+         
+         using var fileStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true); 
+ 
+         var buffer = new byte[8192]; 
+         long totalRead = 0; 
+         int bytesRead; 
+ 
+         while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, context.CancellationToken)) > 0) 
+         { 
+             await fileStream.WriteAsync(buffer, 0, bytesRead, context.CancellationToken); 
+             totalRead += bytesRead; 
+ 
+             if (totalBytes != -1) 
+             { 
+                 double progress = (double)totalRead / totalBytes * 100; 
+                 context.Reporter.ReportProgress(Name, progress); 
+             } 
+         } 
+ 
+         context.Reporter.ReportState("Download completed."); 
+     } 
+ 
+     private string Interpolate(string text, ExecutionContext context) 
+     { 
+         if (string.IsNullOrEmpty(text)) return text; 
+         foreach (var kvp in context.Payload) 
+         { 
+             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
+         } 
+         return text; 
+     } 
+ 
+     public ValueTask DisposeAsync() 
+     { 
+         _httpClient.Dispose(); 
+         return ValueTask.CompletedTask; 
+     } 
+ } 
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Net\DownloaderPlugin.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.Net\Vantuz.Plugins.Net.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" />
+  </ItemGroup>
+</Project>
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.Net\Vantuz.Plugins.Net.csproj
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.OS\ExecutorPlugin.cs
+================================================================================
+namespace Vantuz.Plugins.OS; 
+ 
+using System; 
+using System.Diagnostics; 
+using System.IO; 
+using System.Text.Json; 
+using System.Threading.Tasks; 
+using Vantuz.Core; 
+ 
+public class ExecutorPlugin : IVantuzPlugin 
+{ 
+    public string Name => "OS.Executor"; 
+ 
+    public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+    { 
+        string fileName = stepConfig.GetProperty("fileName").GetString() ?? throw new Exception("fileName is missing"); 
+         
+        string arguments = stepConfig.TryGetProperty("arguments", out var argsProp) ? argsProp.GetString() ?? "" : ""; 
+        string workDir = stepConfig.TryGetProperty("workDir", out var wdProp) ? wdProp.GetString() ?? AppContext.BaseDirectory : AppContext.BaseDirectory; 
+        bool waitForExit = stepConfig.TryGetProperty("waitForExit", out var waitProp) ? waitProp.GetBoolean() : true; 
+ 
+        // Интерполяция переменных: заменяем {{key}} на значения из Payload конвейера 
+        fileName = Interpolate(fileName, context); 
+        arguments = Interpolate(arguments, context); 
+        workDir = Interpolate(workDir, context); 
+ 
+        if (!File.Exists(fileName) && !IsSystemCommand(fileName)) 
+        { 
+            context.Abort($"Исполняемый файл не найден: {fileName}"); 
+            return; 
+        } 
+ 
+        context.Reporter.ReportState($"Запуск: {Path.GetFileName(fileName)}..."); 
+ 
+        var startInfo = new ProcessStartInfo 
+        { 
+            FileName = fileName, 
+            Arguments = arguments, 
+            WorkingDirectory = workDir, 
+            UseShellExecute = false, 
+            RedirectStandardOutput = true, 
+            RedirectStandardError = true, 
+            CreateNoWindow = true 
+        }; 
+ 
+        using var process = new Process { StartInfo = startInfo }; 
+ 
+        // Перенаправляем вывод процесса в наш UI через Reporter 
+        process.OutputDataReceived += (sender, e) => { 
+            if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[OUT] {e.Data}"); 
+        }; 
+        process.ErrorDataReceived += (sender, e) => { 
+            if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[ERR] {e.Data}"); 
+        }; 
+ 
+        try 
+        { 
+            process.Start(); 
+            process.BeginOutputReadLine(); 
+            process.BeginErrorReadLine(); 
+ 
+            if (waitForExit) 
+            { 
+                await process.WaitForExitAsync(context.CancellationToken); 
+                 
+                if (process.ExitCode != 0) 
+                { 
+                    context.Abort($"Процесс {Path.GetFileName(fileName)} завершился с ошибкой (ExitCode: {process.ExitCode})"); 
+                    return; 
+                } 
+            } 
+            else 
+            { 
+                // Если мы не ждем завершения (например, запуск самой игры), 
+                // просто даем процессу немного времени на старт перед тем, как отпустить конвейер 
+                await Task.Delay(2000, context.CancellationToken); 
+                if (process.HasExited && process.ExitCode != 0) 
+                { 
+                    context.Abort($"Процесс крашнулся при запуске (ExitCode: {process.ExitCode})"); 
+                    return; 
+                } 
+            } 
+        } 
+        catch (Exception ex) when (ex is not OperationCanceledException) 
+        { 
+            context.Abort($"Ошибка запуска процесса: {ex.Message}"); 
+            return; 
+        } 
+ 
+        await next(context); 
+    } 
+ 
+    private string Interpolate(string text, ExecutionContext context) 
+    { 
+        if (string.IsNullOrEmpty(text)) return text; 
+        foreach (var kvp in context.Payload) 
+        { 
+            text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
+        } 
+        return text; 
+    } 
+ 
+    private bool IsSystemCommand(string fileName) 
+    { 
+        // Простая эвристика для пропуска проверки File.Exists для системных команд вроде "java" или "cmd" 
+        return !fileName.Contains('/') && !fileName.Contains('\\') && !fileName.EndsWith(".exe"); 
+    } 
+ 
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask; 
+} 
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.OS\ExecutorPlugin.cs
+================================================================================
+
+================================================================================
+FILE: .\Vantuz.Plugins.OS\Vantuz.Plugins.OS.csproj
+================================================================================
+<Project Sdk="Microsoft.NET.Sdk"> 
+  <PropertyGroup> 
+    <TargetFramework>net8.0</TargetFramework> 
+    <Nullable>enable</Nullable> 
+    <ImplicitUsings>enable</ImplicitUsings> 
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies> 
+  </PropertyGroup> 
+  <ItemGroup> 
+    <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" /> 
+  </ItemGroup> 
+</Project>
+
+================================================================================
+END OF FILE: .\Vantuz.Plugins.OS\Vantuz.Plugins.OS.csproj
+================================================================================
+
