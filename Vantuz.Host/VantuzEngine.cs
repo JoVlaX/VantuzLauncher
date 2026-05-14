@@ -11,11 +11,7 @@ namespace Vantuz.Host;
  using System.Threading.Tasks; 
  using Vantuz.Core; 
  
- public record BootManifest( 
-     Dictionary<string, string> Plugins, 
-     List<StepConfig> Pipeline 
- ); 
- 
+ public record BootManifest(Dictionary<string, string> Plugins, List<StepConfig> Pipeline); 
  public record StepConfig(string PluginName, JsonElement Config); 
  
  public class VantuzEngine 
@@ -32,68 +28,88 @@ namespace Vantuz.Host;
  
      public async Task RunAsync(string bootJsonPath, CancellationToken cancellationToken, IDictionary<string, object>? initialPayload = null) 
      { 
-         var manifest = JsonSerializer.Deserialize<BootManifest>( 
-             await File.ReadAllTextAsync(bootJsonPath, cancellationToken), 
-             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) 
-             ?? throw new Exception("Invalid boot.json"); 
- 
          try 
          { 
-             LoadPlugins(manifest.Plugins); 
-             await ExecutePipelineAsync(manifest.Pipeline, cancellationToken, initialPayload); 
-         } 
-         finally 
-         { 
-             foreach (var plugin in _loadedPlugins) 
+             var manifest = JsonSerializer.Deserialize<BootManifest>( 
+                 await File.ReadAllTextAsync(bootJsonPath, cancellationToken), 
+                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) 
+                 ?? throw new Exception("Invalid boot.json"); 
+ 
+             try 
              { 
-                 await plugin.DisposeAsync(); 
+                 LoadPlugins(manifest.Plugins); 
+                 await ExecutePipelineAsync(manifest.Pipeline, cancellationToken, initialPayload); 
              } 
-             _loadedPlugins.Clear(); 
+             finally 
+             { 
+                 foreach (var plugin in _loadedPlugins) await plugin.DisposeAsync(); 
+                 _loadedPlugins.Clear(); 
+             } 
+         } 
+         catch (Exception ex) 
+         { 
+             // Глобальный Краш-логгер (Observability) 
+             string crashLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.log"); 
+             string errorMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CRITICAL SYSTEM CRASH\n" + 
+                                   $"Message: {ex.Message}\n" + 
+                                   $"StackTrace:\n{ex.StackTrace}\n" + 
+                                   $"InnerException: {ex.InnerException?.Message}\n" + 
+                                   new string('-', 50) + "\n"; 
+             File.AppendAllText(crashLogPath, errorMessage); 
+             throw; 
          } 
      } 
  
      private void LoadPlugins(Dictionary<string, string> pluginsConfig) 
      { 
-         // Динамическое определение имени сборки с контрактами 
-         var shared = new[] { typeof(IVantuzPlugin).Assembly.GetName().Name! }; 
+         string[] shared = new[] { typeof(IVantuzPlugin).Assembly.GetName().Name! }; 
  
          foreach (var (dllName, expectedHash) in pluginsConfig) 
          { 
-             var safeDllName = Path.GetFileName(dllName); 
-             string fullPath = Path.Combine(_pluginsFolder, safeDllName); 
-             
+             string fullPath = Path.Combine(_pluginsFolder, Path.GetFileName(dllName)); 
              if (!File.Exists(fullPath)) throw new FileNotFoundException($"Plugin not found: {fullPath}"); 
  
-             using (var fs = File.OpenRead(fullPath)) 
-             { 
-                 ValidateHash(fs, expectedHash, safeDllName); 
-             } 
+             using (var fs = File.OpenRead(fullPath)) ValidateHash(fs, expectedHash, dllName); 
              
-             // Передаем динамический список shared-сборок 
-             var context = new PluginLoadContext(fullPath, shared); 
+             // Подготовка теневой копии (SRP) 
+             string shadowPath = PrepareShadowWorkspace(fullPath); 
              
-             var assembly = context.LoadMainAssembly(); 
+             var context = new PluginLoadContext(shadowPath, shared); 
+             var assembly = context.LoadFromAssemblyPath(shadowPath); 
  
-             IEnumerable<Type> pluginTypes; 
-             try 
-             { 
-                 pluginTypes = assembly.GetTypes() 
-                     .Where(t => typeof (IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
-             } 
-             catch (ReflectionTypeLoadException ex) 
-             { 
-                 var loaderErrors = string.Join("; ", ex.LoaderExceptions.Select(e => e?.Message).Where(m => m != null)); 
-                 throw new Exception($"Критическая ошибка загрузки типов в {safeDllName}: {loaderErrors}"); 
-             } 
+             var types = assembly.GetTypes() 
+                 .Where(t => typeof(IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
  
-             foreach (var type in pluginTypes) 
+             foreach (var type in types) 
              { 
-                 if (Activator.CreateInstance(type) is IVantuzPlugin plugin) 
-                 { 
-                     _loadedPlugins.Add(plugin); 
-                 } 
+                 if (Activator.CreateInstance(type) is IVantuzPlugin plugin) _loadedPlugins.Add(plugin); 
              } 
          } 
+     } 
+ 
+     private string PrepareShadowWorkspace(string originalPluginFilePath) 
+     { 
+         string originalDir = Path.GetDirectoryName(originalPluginFilePath) ?? string.Empty; 
+         string pluginFileName = Path.GetFileName(originalPluginFilePath); 
+         string baseShadowDir = Path.Combine(originalDir, ".shadow"); 
+         string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
+         
+         if (Directory.Exists(baseShadowDir)) 
+         { 
+             foreach (var dir in Directory.GetDirectories(baseShadowDir)) 
+             { 
+                 try { Directory.Delete(dir, true); } catch { } 
+             } 
+         } 
+ 
+         Directory.CreateDirectory(shadowDir); 
+         foreach (var file in Directory.GetFiles(originalDir, "*.*")) 
+         { 
+             if (file.Contains(".shadow")) continue; 
+             File.Copy(file, Path.Combine(shadowDir, Path.GetFileName(file)), true); 
+         } 
+ 
+         return Path.Combine(shadowDir, pluginFileName); 
      } 
  
      private void ValidateHash(Stream fileStream, string expectedHash, string fileName) 
@@ -101,51 +117,30 @@ namespace Vantuz.Host;
          using var sha256 = SHA256.Create(); 
          var hashBytes = sha256.ComputeHash(fileStream); 
          var actualHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant(); 
- 
          if (actualHash != expectedHash.ToLowerInvariant()) 
-             throw new Exception($"HASH MISMATCH for {fileName}. Possible tampering detected!"); 
+             throw new Exception($"HASH MISMATCH for {fileName}"); 
      } 
  
      private async Task ExecutePipelineAsync(List<StepConfig> pipelineSteps, CancellationToken ct, IDictionary<string, object>? initialPayload) 
      { 
          var contextData = new Vantuz.Core.ExecutionContext(ct, _reporter); 
-         
-         if (initialPayload != null) 
-         { 
-             foreach (var kvp in initialPayload) 
-                 contextData.Set(kvp.Key, kvp.Value); 
-         } 
+         if (initialPayload != null) foreach (var kvp in initialPayload) contextData.Set(kvp.Key, kvp.Value); 
  
          MiddlewareDelegate pipeline = (ctx) => Task.CompletedTask; 
- 
          for (int i = pipelineSteps.Count - 1; i >= 0; i--) 
          { 
              var step = pipelineSteps[i]; 
              var plugin = _loadedPlugins.FirstOrDefault(p => p.Name == step.PluginName) 
-                 ?? throw new Exception($"Plugin {step.PluginName} not found in loaded DLLs"); 
+                 ?? throw new Exception($"Plugin {step.PluginName} not found"); 
  
              var next = pipeline; 
-             pipeline = async (ctx) => 
-             { 
+             pipeline = async (ctx) => { 
                  if (ctx.IsAborted || ctx.CancellationToken.IsCancellationRequested) return; 
-                 
-                 try 
-                 { 
-                     ctx.Reporter.ReportState($"Executing {plugin.Name}..."); 
-                     await plugin.InvokeAsync(ctx, step.Config, next); 
-                 } 
-                 catch (Exception ex) 
-                 { 
-                     ctx.Abort($"Plugin {plugin.Name} crashed: {ex.Message}"); 
-                 } 
+                 try { await plugin.InvokeAsync(ctx, step.Config, next); } 
+                 catch (Exception ex) { ctx.Abort($"Plugin {plugin.Name} crashed: {ex.Message}"); } 
              }; 
          } 
- 
          await pipeline(contextData); 
- 
-         if (contextData.IsAborted) 
-         { 
-             throw new Exception($"Конвейер прерван:\n{contextData.AbortReason}"); 
-         } 
+         if (contextData.IsAborted) throw new Exception(contextData.AbortReason); 
      } 
  } 
