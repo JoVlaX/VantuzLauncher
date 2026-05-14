@@ -41,7 +41,7 @@
        "pluginName": "OS.Executor", 
        "config": { 
          "fileName": "java", 
-         "arguments": "-jar \"{{mcDir}}/packwiz-installer-bootstrap.jar\" \"https://troglobit.webhm.pro/packs/main/pack.toml\" --side client --no-gui", 
+         "arguments": "-jar \"packwiz-installer-bootstrap.jar\" \"https://troglobit.webhm.pro/packs/main/pack.toml\" --side client --no-gui", 
          "workDir": "{{mcDir}}", 
          "waitForExit": true 
        } 
