@@ -1,5 +1,6 @@
 using System; 
  using System.IO; 
+ using System.Linq; 
  using System.Reflection; 
  using System.Runtime.Loader; 
  
@@ -8,44 +9,58 @@ using System;
      public class PluginLoadContext : AssemblyLoadContext 
      { 
          private readonly AssemblyDependencyResolver _resolver; 
-         private readonly string _shadowDir; 
+         private readonly string _shadowPluginPath; 
+         private readonly string[] _sharedAssemblies; 
  
-         public PluginLoadContext(string pluginFilePath) : base(isCollectible: true) 
+         public PluginLoadContext(string pluginFilePath, string[] sharedAssemblies) : base(isCollectible: true) 
          { 
+             _sharedAssemblies = sharedAssemblies ?? Array.Empty<string>(); 
+             
              string originalDir = Path.GetDirectoryName(pluginFilePath) ?? string.Empty; 
              string pluginFileName = Path.GetFileName(pluginFilePath); 
  
-             // 1. Кочевнический подход: создаем локальную теневую папку 
              string baseShadowDir = Path.Combine(originalDir, ".shadow"); 
-             _shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
+             string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
              
-             // 2. Жизнестойкость (Resilience): Очищаем старые теневые папки (оставшиеся после крашей) 
              CleanupOldShadows(baseShadowDir); 
-             Directory.CreateDirectory(_shadowDir); 
+             Directory.CreateDirectory(shadowDir); 
  
-             // 3. Копируем сам плагин и его .deps.json 
-             string shadowPluginPath = Path.Combine(_shadowDir, pluginFileName); 
-             File.Copy(pluginFilePath, shadowPluginPath, true); 
+             _shadowPluginPath = Path.Combine(shadowDir, pluginFileName); 
+             File.Copy(pluginFilePath, _shadowPluginPath, true); 
  
              string depsFile = Path.ChangeExtension(pluginFilePath, ".deps.json"); 
              if (File.Exists(depsFile)) 
              { 
-                 File.Copy(depsFile, Path.Combine(_shadowDir, Path.GetFileName(depsFile)), true); 
+                 File.Copy(depsFile, Path.Combine(shadowDir, Path.GetFileName(depsFile)), true); 
              } 
  
-             // 4. Копируем остальные DLL из папки (транзитивные зависимости) 
+             // Копируем зависимости, ИСКЛЮЧАЯ те, что помечены как общие (Shared) 
              foreach (var file in Directory.GetFiles(originalDir, "*.dll")) 
              { 
-                 var dest = Path.Combine(_shadowDir, Path.GetFileName(file)); 
+                 var fileNameWithoutExt = Path.GetFileNameWithoutExtension(file); 
+                 if (_sharedAssemblies.Contains(fileNameWithoutExt, StringComparer.OrdinalIgnoreCase)) 
+                     continue; 
+ 
+                 var dest = Path.Combine(shadowDir, Path.GetFileName(file)); 
                  if (!File.Exists(dest)) File.Copy(file, dest, true); 
              } 
  
-             // 5. Используем стандартный резолвер Microsoft, но нацеленный на ТЕНЕВУЮ копию 
-             _resolver = new AssemblyDependencyResolver(shadowPluginPath); 
+             _resolver = new AssemblyDependencyResolver(_shadowPluginPath); 
+         } 
+ 
+         public Assembly LoadMainAssembly() 
+         { 
+             return LoadFromAssemblyPath(_shadowPluginPath); 
          } 
  
          protected override Assembly? Load(AssemblyName assemblyName) 
          { 
+             // Динамическая проверка: если сборка общая, делегируем загрузку Default-контексту 
+             if (assemblyName.Name != null && _sharedAssemblies.Contains(assemblyName.Name, StringComparer.OrdinalIgnoreCase)) 
+             { 
+                 return null; 
+             } 
+ 
              string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName); 
              if (assemblyPath != null) 
              { 
@@ -71,7 +86,6 @@ using System;
              { 
                  foreach (var dir in Directory.GetDirectories(baseShadowDir)) 
                  { 
-                     // Пытаемся удалить. Если папка заблокирована другим запущенным лаунчером - пропускаем. 
                      try { Directory.Delete(dir, true); } catch { } 
                  } 
              } 

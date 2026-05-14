@@ -54,6 +54,9 @@ namespace Vantuz.Host;
  
      private void LoadPlugins(Dictionary<string, string> pluginsConfig) 
      { 
+         // Динамическое определение имени сборки с контрактами 
+         var shared = new[] { typeof(IVantuzPlugin).Assembly.GetName().Name! }; 
+ 
          foreach (var (dllName, expectedHash) in pluginsConfig) 
          { 
              var safeDllName = Path.GetFileName(dllName); 
@@ -61,17 +64,15 @@ namespace Vantuz.Host;
              
              if (!File.Exists(fullPath)) throw new FileNotFoundException($"Plugin not found: {fullPath}"); 
  
-             // Закрываем файл после валидации хэша, чтобы его можно было скопировать в .shadow 
              using (var fs = File.OpenRead(fullPath)) 
              { 
                  ValidateHash(fs, expectedHash, safeDllName); 
              } 
              
-             var context = new PluginLoadContext(fullPath); 
+             // Передаем динамический список shared-сборок 
+             var context = new PluginLoadContext(fullPath, shared); 
              
-             // Загружаем основную сборку плагина по ее имени через созданный контекст 
-             var assemblyName = new AssemblyName(Path.GetFileNameWithoutExtension(safeDllName)); 
-             var assembly = context.LoadFromAssemblyName(assemblyName); 
+             var assembly = context.LoadMainAssembly(); 
  
              IEnumerable<Type> pluginTypes; 
              try 
