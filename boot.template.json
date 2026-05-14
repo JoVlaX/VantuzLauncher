@@ -11,7 +11,8 @@
        "config": { 
          "url": "https://troglobit.webhm.pro/launcher_version.txt", 
          "payloadKey": "remoteVersion", 
-         "ignoreSslErrors": true 
+         "ignoreSslErrors": true, 
+         "fallback": "2.0-dev" 
        } 
      }, 
      { 
