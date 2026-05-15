@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks; 
 using Vantuz.Core; 
 
-public record BootManifest(Dictionary<string, string> Plugins, List<StepConfig> Pipeline); 
+public record BootManifest(Dictionary<string, string>? Variables, Dictionary<string, string> Plugins, List<StepConfig> Pipeline); 
 public record StepConfig(string PluginName, JsonElement Config); 
 
 public class VantuzEngine 
@@ -44,7 +44,7 @@ public class VantuzEngine
             try 
             { 
                 // 3. Выполнение конвейера 
-                await ExecutePipelineAsync(loadedPlugins, manifest.Pipeline, cancellationToken, initialPayload); 
+                await ExecutePipelineAsync(loadedPlugins, manifest.Pipeline, manifest.Variables, cancellationToken, initialPayload); 
             } 
             finally 
             { 
@@ -83,10 +83,21 @@ public class VantuzEngine
         } 
     } 
 
-    private async Task ExecutePipelineAsync(List<IVantuzPlugin> loadedPlugins, List<StepConfig> pipelineSteps, CancellationToken ct, IDictionary<string, object>? initialPayload) 
+    private async Task ExecutePipelineAsync(List<IVantuzPlugin> loadedPlugins, List<StepConfig> pipelineSteps, Dictionary<string, string>? manifestVariables, CancellationToken ct, IDictionary<string, object>? initialPayload) 
     { 
         var contextData = new Vantuz.Core.ExecutionContext(ct, _reporter); 
-        if (initialPayload != null) foreach (var kvp in initialPayload) contextData.Set(kvp.Key, kvp.Value); 
+        
+        // 1. Сначала вливаем переменные из манифеста 
+        if (manifestVariables != null) 
+        { 
+            foreach (var kvp in manifestVariables) contextData.Set(kvp.Key, kvp.Value); 
+        } 
+
+        // 2. Затем вливаем Payload из UI (он имеет приоритет и перезапишет ключи манифеста) 
+        if (initialPayload != null) 
+        { 
+            foreach (var kvp in initialPayload) contextData.Set(kvp.Key, kvp.Value); 
+        } 
 
         MiddlewareDelegate pipeline = (ctx) => Task.CompletedTask; 
         for (int i = pipelineSteps.Count - 1; i >= 0; i--) 

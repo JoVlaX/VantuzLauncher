@@ -49,13 +49,14 @@ namespace Vantuz.Plugins.Net
                 ZipFile.ExtractToDirectory(tempZip, pendingDir, overwriteFiles: true); 
                 File.Delete(tempZip); 
  
-                // 3. Генерация внешнего загрузчика (External Bootstrapper) 
+                // 3. Генерация внешнего загрузчика (External Bootstrapper) с абсолютной защитой путей 
                 string batContent = "@echo off\n" + 
-                                    "timeout /t 2 /nobreak > NUL\n" + // Ждем 2 секунды, пока процесс лаунчера точно умрет 
-                                    "xcopy /Y /S /E \".update_pending\\*\" \".\"\n" + // Копируем с заменой 
-                                    "rmdir /S /Q \".update_pending\"\n" + // Убираем мусор 
-                                    "start \"\" \"VantuzLauncher.exe\"\n" + // Запускаем новую версию 
-                                    "del \"%~f0\""; // Скрипт удаляет сам себя 
+                                    "cd /d \"%~dp0\"\n" + // ГАРАНТИЯ работы в правильной директории 
+                                    "timeout /t 2 /nobreak > NUL\n" + 
+                                    "xcopy /Y /S /E \".update_pending\\*\" \".\"\n" + 
+                                    "rmdir /S /Q \".update_pending\"\n" + 
+                                    "start \"\" \"VantuzLauncher.exe\"\n" + 
+                                    "del \"%~f0\""; 
                 File.WriteAllText(batPath, batContent); 
  
                 // 4. Сигнализируем Ядру о необходимости перезапуска 

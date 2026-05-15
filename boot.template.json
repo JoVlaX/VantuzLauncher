@@ -1,4 +1,7 @@
 { 
+   "variables": { 
+     "localVersion": "2.0-dev" 
+   }, 
    "plugins": { 
      "Vantuz.Plugins.Auth.dll": "", 
      "Vantuz.Plugins.Net.dll": "", 
