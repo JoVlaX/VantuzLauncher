@@ -57,12 +57,9 @@ public class VantuzEngine
         } 
         catch (Exception ex) 
         { 
-            // Глобальный Краш-логгер (Observability) 
             string errorMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CRITICAL SYSTEM CRASH\n" + 
-                                  $"Message: {ex.Message}\n" + 
-                                  $"StackTrace:\n{ex.StackTrace}\n" + 
-                                  $"InnerException: {ex.InnerException?.Message}\n" + 
-                                  new string('-', 50) + "\n"; 
+                                  $"Message: {ex.Message}\nStackTrace:\n{ex.StackTrace}\n" + 
+                                  $"InnerException: {ex.InnerException?.Message}\n" + new string('-', 50) + "\n"; 
             File.AppendAllText(_crashLogPath, errorMessage); 
             throw; 
         } 

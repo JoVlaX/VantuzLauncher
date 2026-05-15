@@ -2,7 +2,6 @@
 using System; 
 using System.Collections.Generic; 
 using System.IO; 
-using System.Management; 
 using System.Security.Cryptography; 
 using System.Text; 
 using System.Text.Json; 
@@ -28,12 +27,8 @@ namespace VantuzLauncher
         public MainWindow() 
         { 
             InitializeComponent(); 
-             
-            _mcDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuz"); 
-            if (!Directory.Exists(_mcDir)) Directory.CreateDirectory(_mcDir); 
- 
+            _mcDir = App.WorkspacePath; // Берем готовый путь из ядра приложения 
             _configPath = Path.Combine(_mcDir, "launcher_config.json"); 
-             
             InitializeRamLimits(); 
             LoadSavedConfig(); 
         } 
@@ -61,24 +56,14 @@ namespace VantuzLauncher
         { 
             try 
             { 
-                var searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem"); 
-                foreach (var obj in searcher.Get()) 
-                { 
-                    long totalBytes = Convert.ToInt64(obj["TotalPhysicalMemory"]); 
-                    _totalRamMb = (int)(totalBytes / 1024 / 1024); 
-                    int totalGb = _totalRamMb / 1024; 
-                    RamSlider.Maximum = totalGb * 1024; 
-                    RamSlider.Minimum = 1024; 
-                    _currentRamMb = Math.Clamp(_totalRamMb / 2, 1024, 4096); 
-                    break; 
-                } 
-            } 
-            catch 
-            { 
-                RamSlider.Maximum = 8192; 
+                long totalBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes; 
+                _totalRamMb = (int)(totalBytes / 1024 / 1024); 
+                int totalGb = _totalRamMb / 1024; 
+                RamSlider.Maximum = totalGb * 1024; 
                 RamSlider.Minimum = 1024; 
-                _currentRamMb = 4096; 
+                _currentRamMb = Math.Clamp(_totalRamMb / 2, 1024, 4096); 
             } 
+            catch { RamSlider.Maximum = 8192; RamSlider.Minimum = 1024; _currentRamMb = 4096; } 
         } 
  
         private void LoadSavedConfig() 
@@ -179,9 +164,7 @@ namespace VantuzLauncher
                     } 
                 ); 
 
-                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuz");
-                Directory.CreateDirectory(appData);
-                string logPath = Path.Combine(appData, "launcher_trace.log");
+                string logPath = Path.Combine(_mcDir, "launcher_trace.log");
                 fileReporter = new AsyncFileReporter(logPath);
 
                 var compositeReporter = new CompositeReporter(uiReporter, fileReporter);
@@ -204,7 +187,8 @@ namespace VantuzLauncher
                 Vantuz.Core.ExecutionContext runResult = null; 
                 _engineTask = Task.Run(async () => 
                 { 
-                    var engine = new VantuzEngine(pluginsDir, compositeReporter); 
+                    string crashLogPath = Path.Combine(_mcDir, "crash.log"); 
+                    var engine = new VantuzEngine(pluginsDir, compositeReporter, crashLogPath); 
                     runResult = await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
                 }); 
                 await _engineTask;
@@ -277,7 +261,7 @@ namespace VantuzLauncher
             try 
             { 
                 using Aes aes = Aes.Create(); 
-                using var rfc2898 = new Rfc2898DeriveBytes(Environment.MachineName + "Vantuz", Entropy, 1000, HashAlgorithmName.SHA256); 
+                using var rfc2898 = new Rfc2898DeriveBytes("VantuzNomadicProfile", Entropy, 1000, HashAlgorithmName.SHA256); 
                 aes.Key = rfc2898.GetBytes(aes.KeySize / 8); 
                 aes.IV = rfc2898.GetBytes(aes.BlockSize / 8); 
  
@@ -296,7 +280,7 @@ namespace VantuzLauncher
             try 
             { 
                 using Aes aes = Aes.Create(); 
-                using var rfc2898 = new Rfc2898DeriveBytes(Environment.MachineName + "Vantuz", Entropy, 1000, HashAlgorithmName.SHA256); 
+                using var rfc2898 = new Rfc2898DeriveBytes("VantuzNomadicProfile", Entropy, 1000, HashAlgorithmName.SHA256); 
                 aes.Key = rfc2898.GetBytes(aes.KeySize / 8); 
                 aes.IV = rfc2898.GetBytes(aes.BlockSize / 8); 
  

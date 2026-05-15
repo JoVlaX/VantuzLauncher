@@ -48,7 +48,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
     <PackageReference Include="Obfuscar" Version="2.2.38">
       <PrivateAssets>all</PrivateAssets>

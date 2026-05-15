@@ -86,7 +86,7 @@ namespace Vantuz.Host
             string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
             Directory.CreateDirectory(shadowDir); 
             
-            // Эвакуируем ВСЕ библиотеки в песочницу, чтобы плагинам было откуда брать зависимости 
+            // Эвакуируем ВСЕ библиотеки в песочницу для разрешения зависимостей 
             foreach (var file in Directory.GetFiles(originalDir, "*.dll")) 
             { 
                 string fileName = Path.GetFileName(file); 
