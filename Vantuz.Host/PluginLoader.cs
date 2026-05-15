@@ -40,14 +40,25 @@ namespace Vantuz.Host
                 // ЖАДНАЯ ЗАГРУЗКА (Eager Loading) для обхода слепоты NuGet deps.json 
                 EagerLoadAssemblies(context, shadowDir); 
 
-                // Инициализация типов, реализующих IVantuzPlugin
-                var assembly = context.LoadFromAssemblyPath(shadowPath);
-                var types = assembly.GetTypes() 
-                    .Where(t => typeof(IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
-                
-                foreach (var type in types) 
+                // Инициализация типов, реализующих IVantuzPlugin 
+                var assembly = context.LoadFromAssemblyPath(shadowPath); 
+                 
+                Type[] types; 
+                try 
                 { 
-                    if (Activator.CreateInstance(type) is IVantuzPlugin plugin) 
+                    types = assembly.GetTypes(); 
+                } 
+                catch (System.Reflection.ReflectionTypeLoadException ex) 
+                { 
+                    // Извлекаем спрятанные ошибки загрузки типов! 
+                    string loaderErrors = string.Join("\n", ex.LoaderExceptions.Where(e => e != null).Select(e => e.Message)); 
+                    throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex); 
+                } 
+ 
+                var pluginTypes = types.Where(t => typeof(Vantuz.Core.IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
+                foreach (var type in pluginTypes) 
+                { 
+                    if (Activator.CreateInstance(type) is Vantuz.Core.IVantuzPlugin plugin) 
                     { 
                         plugins.Add(plugin); 
                     } 
