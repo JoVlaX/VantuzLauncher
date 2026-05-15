@@ -189,12 +189,32 @@ namespace VantuzLauncher
                     throw new FileNotFoundException("Файл манифеста boot.json не найден!"); 
  
                 // Запускаем тяжелый конвейер в фоновом пуле потоков 
+                Vantuz.Core.ExecutionContext runResult = null; 
                 await Task.Run(async () => 
                 { 
                     var engine = new VantuzEngine(pluginsDir, reporter); 
-                    await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
+                    runResult = await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
                 }); 
  
+                if (runResult != null && runResult.Get<bool>("UpdateReady")) 
+                { 
+                    string scriptPath = runResult.Get<string>("UpdateScript")!; 
+                    string hostExe = runResult.Get<string>("hostExecutable") ?? "VantuzLauncher.exe"; 
+                    if (File.Exists(scriptPath)) 
+                    { 
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo 
+                        { 
+                            FileName = scriptPath, 
+                            Arguments = $"\"{hostExe}\"", 
+                            WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory, 
+                            UseShellExecute = true, 
+                            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden 
+                        }); 
+                        Application.Current.Shutdown(); 
+                        return; 
+                    } 
+                } 
+
                 StatusText.Text = "Запуск успешно завершен!"; 
                 this.Hide(); 
             } 

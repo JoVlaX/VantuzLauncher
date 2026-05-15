@@ -24,7 +24,7 @@ public class VantuzEngine
         _reporter = reporter; 
     } 
 
-    public async Task RunAsync(string bootJsonPath, CancellationToken cancellationToken, IDictionary<string, object>? initialPayload = null) 
+    public async Task<Vantuz.Core.ExecutionContext> RunAsync(string bootJsonPath, CancellationToken cancellationToken, IDictionary<string, object>? initialPayload = null) 
     { 
         try 
         { 
@@ -44,7 +44,7 @@ public class VantuzEngine
             try 
             { 
                 // 3. Выполнение конвейера 
-                await ExecutePipelineAsync(loadedPlugins, manifest.Pipeline, manifest.Variables, cancellationToken, initialPayload); 
+                return await ExecutePipelineAsync(loadedPlugins, manifest.Pipeline, manifest.Variables, cancellationToken, initialPayload); 
             } 
             finally 
             { 
@@ -83,15 +83,16 @@ public class VantuzEngine
         } 
     } 
 
-    private async Task ExecutePipelineAsync(List<IVantuzPlugin> loadedPlugins, List<StepConfig> pipelineSteps, Dictionary<string, string>? manifestVariables, CancellationToken ct, IDictionary<string, object>? initialPayload) 
+    private async Task<Vantuz.Core.ExecutionContext> ExecutePipelineAsync(List<IVantuzPlugin> loadedPlugins, List<StepConfig> pipelineSteps, Dictionary<string, string>? manifestVariables, CancellationToken ct, IDictionary<string, object>? initialPayload) 
     { 
         var contextData = new Vantuz.Core.ExecutionContext(ct, _reporter); 
         
-        // 1. Сначала вливаем переменные из манифеста 
+        // 0. Инъекция системных переменных 
         if (manifestVariables != null) 
         { 
             foreach (var kvp in manifestVariables) contextData.Set(kvp.Key, kvp.Value); 
         } 
+        contextData.Set("hostExecutable", System.IO.Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe")); 
 
         // 2. Затем вливаем Payload из UI (он имеет приоритет и перезапишет ключи манифеста) 
         if (initialPayload != null) 
@@ -116,22 +117,6 @@ public class VantuzEngine
         await pipeline(contextData); 
         if (contextData.IsAborted) throw new Exception(contextData.AbortReason); 
 
-        // ДОБАВЛЕНО: Внешняя мутация (External Bootstrapper) 
-        if (contextData.Get<bool>("UpdateReady")) 
-        { 
-            string scriptPath = contextData.Get<string>("UpdateScript")!; 
-            if (File.Exists(scriptPath)) 
-            { 
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo 
-                { 
-                    FileName = scriptPath, 
-                    UseShellExecute = true, 
-                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden 
-                }); 
-                 
-                // Жестко завершаем текущий процесс, чтобы ОС сняла блокировки с файлов 
-                Environment.Exit(0); 
-            } 
-        } 
+        return contextData; 
     } 
 } 

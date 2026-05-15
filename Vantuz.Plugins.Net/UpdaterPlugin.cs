@@ -21,12 +21,21 @@ namespace Vantuz.Plugins.Net
  
         public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
         { 
+            string currentVer = stepConfig.TryGetProperty("currentVersion", out var cv) ? Interpolate(cv.GetString() ?? "", context) : ""; 
+            string targetVer = stepConfig.TryGetProperty("targetVersion", out var tv) ? Interpolate(tv.GetString() ?? "", context) : ""; 
+
+            if (!string.IsNullOrEmpty(currentVer) && currentVer == targetVer) 
+            { 
+                context.Reporter.ReportState("Установлена актуальная версия."); 
+                await next(context); 
+                return; 
+            } 
+
             string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing in Updater"); 
             url = Interpolate(url, context); 
  
             string baseDir = AppDomain.CurrentDomain.BaseDirectory; 
             string pendingDir = Path.Combine(baseDir, ".update_pending"); 
-            string batPath = Path.Combine(baseDir, "update.bat"); 
             string tempZip = Path.Combine(baseDir, "update_temp.zip"); 
  
             try 
@@ -49,20 +58,21 @@ namespace Vantuz.Plugins.Net
                 ZipFile.ExtractToDirectory(tempZip, pendingDir, overwriteFiles: true); 
                 File.Delete(tempZip); 
  
-                // 3. Генерация внешнего загрузчика (External Bootstrapper) с абсолютной защитой путей 
-                string batContent = "@echo off\n" + 
-                                    "cd /d \"%~dp0\"\n" + // ГАРАНТИЯ работы в правильной директории 
-                                    "timeout /t 2 /nobreak > NUL\n" + 
-                                    "xcopy /Y /S /E \".update_pending\\*\" \".\"\n" + 
-                                    "rmdir /S /Q \".update_pending\"\n" + 
-                                    "start \"\" \"VantuzLauncher.exe\"\n" + 
-                                    "del \"%~f0\""; 
-                File.WriteAllText(batPath, batContent); 
- 
-                // 4. Сигнализируем Ядру о необходимости перезапуска 
-                context.Set("UpdateReady", true); 
-                context.Set("UpdateScript", batPath); 
-                context.Reporter.ReportState("Обновление готово. Инициализация перезапуска..."); 
+                // 3. Поиск скрипта обновления в распакованном архиве 
+                string scriptName = stepConfig.TryGetProperty("scriptName", out var sn) ? sn.GetString()! : "update.bat"; 
+                string scriptPath = Path.Combine(pendingDir, scriptName); 
+                
+                if (File.Exists(scriptPath)) 
+                { 
+                    // 4. Сигнализируем Ядру о необходимости перезапуска 
+                    context.Set("UpdateReady", true); 
+                    context.Set("UpdateScript", scriptPath); 
+                    context.Reporter.ReportState("Обновление готово. Инициализация перезапуска..."); 
+                } 
+                else 
+                { 
+                    context.Reporter.ReportState("Обновление распаковано, но скрипт не найден."); 
+                } 
             } 
             catch (Exception ex) 
             { 

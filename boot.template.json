@@ -19,6 +19,15 @@
        } 
      }, 
      { 
+       "pluginName": "Net.Updater", 
+       "config": { 
+         "url": "https://troglobit.webhm.pro/launcher.zip", 
+         "currentVersion": "{{localVersion}}", 
+         "targetVersion": "{{remoteVersion}}", 
+         "scriptName": "update.bat" 
+       } 
+     }, 
+     { 
        "pluginName": "Auth.Yggdrasil", 
        "config": { 
          "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate", 
