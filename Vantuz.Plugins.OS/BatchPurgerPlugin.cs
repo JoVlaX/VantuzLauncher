@@ -15,7 +15,14 @@ public class BatchPurgerPlugin : IVantuzPlugin
     public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
     {
         var deleteQueue = context.Get<List<string>>("DeleteQueue");
-        var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
+        var purgeZones = context.Get<List<string>>("PurgeZones");
+        
+        if ((deleteQueue == null || deleteQueue.Count == 0) && (purgeZones == null || purgeZones.Count == 0))
+        {
+            await next(context);
+            return;
+        }
+
         string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
 
         context.Reporter.ReportState("Сборка мусора и очистка...");

@@ -24,13 +24,14 @@ public class BatchDownloaderPlugin : IVantuzPlugin
     public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
     {
         var downloadQueue = context.Get<List<FileState>>("DownloadQueue");
-        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
 
         if (downloadQueue == null || downloadQueue.Count == 0)
         {
             await next(context);
             return;
         }
+
+        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
 
         context.Reporter.ReportState($"Загрузка файлов ({downloadQueue.Count})...");
 

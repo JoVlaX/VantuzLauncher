@@ -14,15 +14,17 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
 
     public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
     {
+        // ПАТТЕРН GRACEFUL SKIP 
         var targetState = context.Get<List<FileState>>("TargetState");
-        var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
-        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
-
         if (targetState == null || targetState.Count == 0)
         {
-            context.Abort("TargetState is empty. Analysis aborted.");
+            context.Reporter.ReportState("Синхронизация кастомных файлов не требуется.");
+            await next(context);
             return;
         }
+
+        var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
+        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
 
         context.Reporter.ReportState("Анализ изменений и дедупликация...");
 
