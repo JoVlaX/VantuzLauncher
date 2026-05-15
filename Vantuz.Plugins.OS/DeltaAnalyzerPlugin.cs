@@ -12,7 +12,7 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
 {
     public string Name => "OS.DeltaAnalyzer";
 
-    public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
+    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
     {
         var targetState = context.Get<List<FileState>>("TargetState");
         var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();

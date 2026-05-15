@@ -21,7 +21,7 @@ public class BatchDownloaderPlugin : IVantuzPlugin
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-BatchDownloader/2.0");
     }
 
-    public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
+    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
     {
         var downloadQueue = context.Get<List<FileState>>("DownloadQueue");
         string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");

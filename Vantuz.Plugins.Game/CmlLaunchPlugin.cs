@@ -34,18 +34,10 @@ namespace Vantuz.Plugins.Game;
              authlibPath = Path.GetFullPath(authlibPath.Replace('/', Path.DirectorySeparatorChar)); 
          } 
   
-         context.Reporter.ReportState($"Подготовка файлов игры ({versionName})..."); 
+         context.Reporter.ReportState($"Подготовка запуска игры ({versionName})..."); 
   
          var path = new MinecraftPath(mcDir); 
          var launcher = new MinecraftLauncher(path); 
-  
-         launcher.FileProgressChanged += (sender, args) => 
-         { 
-             context.Reporter.ReportProgress(args.Name ?? "Загрузка файлов...", (double)args.ProgressedTasks / args.TotalTasks * 100); 
-         }; 
-  
-         var version = await launcher.GetVersionAsync(versionName); 
-         await launcher.InstallAsync(version); 
   
          context.Reporter.ReportState("Генерация аргументов запуска..."); 
   

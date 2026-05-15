@@ -1,6 +1,7 @@
 { 
    "variables": { 
-     "localVersion": "2.0-dev" 
+     "localVersion": "2.0-dev",
+     "gameVersion": "1.20.1-forge-47.2.20"
    }, 
    "plugins": { 
      "Vantuz.Plugins.Auth.dll": "", 
@@ -35,7 +36,12 @@
          "launcherVersion": "{{remoteVersion}}" 
        } 
      }, 
-     { "pluginName": "Game.ManifestBuilder", "config": {} }, 
+     { 
+       "pluginName": "Game.ManifestBuilder", 
+       "config": { 
+         "versionName": "{{gameVersion}}" 
+       } 
+     }, 
      { "pluginName": "OS.DeltaAnalyzer", "config": {} },       
      { "pluginName": "OS.LocalMover", "config": {} },          
      { "pluginName": "Net.BatchDownloader", "config": {} },    
@@ -43,7 +49,7 @@
      { 
        "pluginName": "Game.CmlLaunch", 
        "config": { 
-         "versionName": "1.20.1-forge-47.2.20", 
+         "versionName": "{{gameVersion}}", 
          "authlibPath": "{{mcDir}}\\authlib-injector.jar" 
        } 
      }, 
