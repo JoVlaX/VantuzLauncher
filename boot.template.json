@@ -37,7 +37,7 @@
        } 
      }, 
      { 
-       "pluginName": "Game.ManifestBuilder", 
+       "pluginName": "Game.CmlLaunch", 
        "config": { 
          "versionName": "{{gameVersion}}" 
        } 
