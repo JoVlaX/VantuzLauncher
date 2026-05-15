@@ -13,46 +13,56 @@ namespace VantuzLauncher;
 public partial class App : Application
 {
     private Mutex? _instanceMutex;
+    private static bool _ownsMutex;
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        base.OnStartup(e);
-
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
             var ex = (Exception)args.ExceptionObject;
-            MessageBox.Show($"Критическая ошибка при запуске:\n{ex.Message}\n{ex.StackTrace}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Критическая ошибка:\n{ex.Message}\n{ex.StackTrace}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
         };
 
-        InitializeSingleInstanceLock();
+        if (!InitializeSingleInstanceLock())
+        {
+            Shutdown();
+            return;
+        }
+
+        base.OnStartup(e);
+        new MainWindow().Show();
     }
 
-    private void InitializeSingleInstanceLock()
+    private bool InitializeSingleInstanceLock()
     {
+        string basePath = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/').ToLowerInvariant();
+        string mutexName = $"Local\\VantuzLauncher_{CalculateStringMD5(basePath)}";
+
         try
         {
-            string exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe";
-            string mutexName = $"Local\\{CalculateMD5(exePath)}";
+            _instanceMutex = new Mutex(true, mutexName, out _ownsMutex);
 
-            _instanceMutex = new Mutex(true, mutexName, out bool createdNew);
-
-            if (!createdNew)
+            if (!_ownsMutex)
             {
                 MessageBox.Show("Лаунчер уже запущен.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                Shutdown();
+                return false;
             }
         }
         catch (UnauthorizedAccessException)
         {
-            // Возможный конфликт UAC или прав доступа, игнорируем или логируем
+            MessageBox.Show("Лаунчер уже запущен с другими правами.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Глобальный фолбэк
+            MessageBox.Show($"Ошибка блокировки: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            return false;
         }
+
+        return true;
     }
 
-    private static string CalculateMD5(string input)
+    private static string CalculateStringMD5(string input)
     {
         using var md5 = MD5.Create();
         byte[] inputBytes = Encoding.UTF8.GetBytes(input);
@@ -62,7 +72,10 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        _instanceMutex?.ReleaseMutex();
+        if (_ownsMutex && _instanceMutex != null)
+        {
+            try { _instanceMutex.ReleaseMutex(); } catch { }
+        }
         _instanceMutex?.Dispose();
         base.OnExit(e);
     }

@@ -19,34 +19,37 @@ namespace Vantuz.Host
             _sharedAssemblies = sharedAssemblies; 
         } 
 
-        public IEnumerable<IVantuzPlugin> LoadPluginsFromDirectory(string pluginsPath) 
+        public IEnumerable<IVantuzPlugin> LoadPluginsFromDirectory(string pluginsPath, List<string> allowedDlls) 
         { 
             var plugins = new List<IVantuzPlugin>(); 
             if (!Directory.Exists(pluginsPath)) return plugins; 
 
-            foreach (var dllPath in Directory.GetFiles(pluginsPath, "*.dll")) 
+            string shadowDir = PrepareShadowWorkspace(pluginsPath);
+
+            // Загружаем только те плагины, которые разрешены манифестом 
+            foreach (var dllName in allowedDlls) 
             { 
-                string shadowPath = PrepareShadowWorkspace(dllPath); 
+                string shadowPath = Path.Combine(shadowDir, dllName);
+                if (!File.Exists(shadowPath)) continue;
+
                 var context = new PluginLoadContext(shadowPath, _sharedAssemblies); 
                 
                 // Спасаем от GC 
                 _activeContexts.Add(context); 
 
                 // ЖАДНАЯ ЗАГРУЗКА (Eager Loading) для обхода слепоты NuGet deps.json 
-                EagerLoadAssemblies(context, Path.GetDirectoryName(shadowPath)!); 
+                EagerLoadAssemblies(context, shadowDir); 
 
-                // Ищем плагины в загруженном контексте 
-                foreach (var assembly in context.Assemblies) 
+                // Инициализация типов, реализующих IVantuzPlugin
+                var assembly = context.LoadFromAssemblyPath(shadowPath);
+                var types = assembly.GetTypes() 
+                    .Where(t => typeof(IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
+                
+                foreach (var type in types) 
                 { 
-                    var types = assembly.GetTypes() 
-                        .Where(t => typeof(IVantuzPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract); 
-                    
-                    foreach (var type in types) 
+                    if (Activator.CreateInstance(type) is IVantuzPlugin plugin) 
                     { 
-                        if (Activator.CreateInstance(type) is IVantuzPlugin plugin) 
-                        { 
-                            plugins.Add(plugin); 
-                        } 
+                        plugins.Add(plugin); 
                     } 
                 } 
             } 
@@ -65,25 +68,31 @@ namespace Vantuz.Host
             } 
         } 
 
-        private string PrepareShadowWorkspace(string originalPluginFilePath) 
+        private string PrepareShadowWorkspace(string originalDir) 
         { 
-            string originalDir = Path.GetDirectoryName(originalPluginFilePath) ?? string.Empty; 
-            string baseShadowDir = Path.Combine(originalDir, ".shadow"); 
-            string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
-            
-            if (Directory.Exists(baseShadowDir)) 
-            { 
-                foreach (var dir in Directory.GetDirectories(baseShadowDir)) 
-                { 
+            string hashStr; 
+            using (var md5 = System.Security.Cryptography.MD5.Create()) 
+                hashStr = BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(originalDir.ToLowerInvariant()))).Replace("-", ""); 
+ 
+            string baseShadowDir = Path.Combine(Path.GetTempPath(), "VantuzLauncher_Shadow_" + hashStr); 
+ 
+            // Сборка мусора: чистим зависшие сессии ЭТОГО лаунчера 
+            if (Directory.Exists(baseShadowDir)) { 
+                foreach (var dir in Directory.GetDirectories(baseShadowDir)) { 
                     try { Directory.Delete(dir, true); } catch { } 
                 } 
             } 
+ 
+            string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
             Directory.CreateDirectory(shadowDir); 
-            foreach (var file in Directory.GetFiles(originalDir, "*.*")) 
+            
+            // Эвакуируем ВСЕ библиотеки в песочницу, чтобы плагинам было откуда брать зависимости 
+            foreach (var file in Directory.GetFiles(originalDir, "*.dll")) 
             { 
-                File.Copy(file, Path.Combine(shadowDir, Path.GetFileName(file)), true); 
+                string fileName = Path.GetFileName(file); 
+                File.Copy(file, Path.Combine(shadowDir, fileName), true); 
             } 
-            return Path.Combine(shadowDir, Path.GetFileName(originalPluginFilePath)); 
+            return shadowDir; 
         } 
     } 
 } 

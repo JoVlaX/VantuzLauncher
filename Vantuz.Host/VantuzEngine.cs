@@ -17,11 +17,13 @@ public class VantuzEngine
 { 
     private readonly string _pluginsFolder; 
     private readonly IStatusReporter _reporter; 
+    private readonly string _crashLogPath;
 
-    public VantuzEngine(string pluginsFolder, IStatusReporter reporter) 
+    public VantuzEngine(string pluginsFolder, IStatusReporter reporter, string crashLogPath) 
     { 
         _pluginsFolder = pluginsFolder; 
         _reporter = reporter; 
+        _crashLogPath = crashLogPath;
     } 
 
     public async Task<Vantuz.Core.ExecutionContext> RunAsync(string bootJsonPath, CancellationToken cancellationToken, IDictionary<string, object>? initialPayload = null) 
@@ -39,7 +41,8 @@ public class VantuzEngine
             // 2. Изолированная загрузка плагинов через новый провайдер 
             string[] shared = new[] { typeof(IVantuzPlugin).Assembly.GetName().Name! }; 
             var loader = new PluginLoader(shared); 
-            var loadedPlugins = loader.LoadPluginsFromDirectory(_pluginsFolder).ToList(); 
+            var allowedDlls = manifest.Plugins.Keys.ToList();
+            var loadedPlugins = loader.LoadPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList(); 
 
             try 
             { 
@@ -55,13 +58,12 @@ public class VantuzEngine
         catch (Exception ex) 
         { 
             // Глобальный Краш-логгер (Observability) 
-            string crashLogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "crash.log"); 
             string errorMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CRITICAL SYSTEM CRASH\n" + 
                                   $"Message: {ex.Message}\n" + 
                                   $"StackTrace:\n{ex.StackTrace}\n" + 
                                   $"InnerException: {ex.InnerException?.Message}\n" + 
                                   new string('-', 50) + "\n"; 
-            File.AppendAllText(crashLogPath, errorMessage); 
+            File.AppendAllText(_crashLogPath, errorMessage); 
             throw; 
         } 
     } 
@@ -92,13 +94,15 @@ public class VantuzEngine
         { 
             foreach (var kvp in manifestVariables) contextData.Set(kvp.Key, kvp.Value); 
         } 
-        contextData.Set("hostExecutable", System.IO.Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe")); 
 
         // 2. Затем вливаем Payload из UI (он имеет приоритет и перезапишет ключи манифеста) 
         if (initialPayload != null) 
         { 
             foreach (var kvp in initialPayload) contextData.Set(kvp.Key, kvp.Value); 
         } 
+
+        string exeName = System.IO.Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe");
+        contextData.Set("hostExecutable", exeName);
 
         MiddlewareDelegate pipeline = (ctx) => Task.CompletedTask; 
         for (int i = pipelineSteps.Count - 1; i >= 0; i--) 

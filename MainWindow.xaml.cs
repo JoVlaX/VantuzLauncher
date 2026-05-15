@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading; 
 using System.Threading.Tasks; 
 using System.Windows; 
+using System.Windows.Controls;
 using System.Windows.Input; 
 using Vantuz.Core; 
 using Vantuz.Host; 
@@ -22,7 +23,8 @@ namespace VantuzLauncher
         private int _currentRamMb; 
         private int _totalRamMb = 8192; 
         private CancellationTokenSource _cts; 
- 
+        private Task _engineTask;
+
         public MainWindow() 
         { 
             InitializeComponent(); 
@@ -48,17 +50,13 @@ namespace VantuzLauncher
                 _updateProgress = updateProgress; 
             } 
  
-            public void ReportState(string message) 
-            { 
-                Application.Current.Dispatcher.Invoke(() => _updateState(message)); 
-            } 
- 
-            public void ReportProgress(string taskName, double percentage) 
-            { 
-                Application.Current.Dispatcher.Invoke(() => _updateProgress(taskName, percentage)); 
-            } 
+            public void ReportState(string message) => 
+                Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() => _updateState(message))); 
+
+            public void ReportProgress(string taskName, double percentage) => 
+                Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() => _updateProgress(taskName, percentage))); 
         } 
- 
+
         private void InitializeRamLimits() 
         { 
             try 
@@ -133,9 +131,15 @@ namespace VantuzLauncher
             if (e.ChangedButton == MouseButton.Left) this.DragMove(); 
         } 
  
-        private void BtnClose_Click(object sender, RoutedEventArgs e) 
+        private async void BtnClose_Click(object sender, RoutedEventArgs e) 
         { 
-            _cts?.Cancel(); 
+            if (_cts != null && !_cts.IsCancellationRequested) 
+            { 
+                if (sender is Button btn) btn.IsEnabled = false; 
+                StatusText.Text = "Безопасное завершение...";
+                _cts.Cancel(); 
+                if (_engineTask != null) { try { await _engineTask; } catch { } } 
+            } 
             Application.Current.Shutdown(); 
         } 
  
@@ -162,17 +166,25 @@ namespace VantuzLauncher
             LauncherProgress.Value = 0; 
              
             _cts = new CancellationTokenSource(); 
- 
+            AsyncFileReporter fileReporter = null;
+
             try 
             { 
-                // Инициализируем потокобезопасный репортер 
-                var reporter = new WpfReporter( 
+                // Инициализируем репортеры
+                var uiReporter = new WpfReporter( 
                     msg => StatusText.Text = msg, 
                     (task, prog) => { 
                         StatusText.Text = $"{task}... {prog:F1}%"; 
                         LauncherProgress.Value = prog; 
                     } 
                 ); 
+
+                string appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuz");
+                Directory.CreateDirectory(appData);
+                string logPath = Path.Combine(appData, "launcher_trace.log");
+                fileReporter = new AsyncFileReporter(logPath);
+
+                var compositeReporter = new CompositeReporter(uiReporter, fileReporter);
  
                 var initialPayload = new Dictionary<string, object> 
                 { 
@@ -190,30 +202,26 @@ namespace VantuzLauncher
  
                 // Запускаем тяжелый конвейер в фоновом пуле потоков 
                 Vantuz.Core.ExecutionContext runResult = null; 
-                await Task.Run(async () => 
+                _engineTask = Task.Run(async () => 
                 { 
-                    var engine = new VantuzEngine(pluginsDir, reporter); 
+                    var engine = new VantuzEngine(pluginsDir, compositeReporter); 
                     runResult = await engine.RunAsync(bootJsonPath, _cts.Token, initialPayload); 
                 }); 
- 
-                if (runResult != null && runResult.Get<bool>("UpdateReady")) 
-                { 
-                    string scriptPath = runResult.Get<string>("UpdateScript")!; 
-                    string hostExe = runResult.Get<string>("hostExecutable") ?? "VantuzLauncher.exe"; 
-                    if (File.Exists(scriptPath)) 
-                    { 
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo 
-                        { 
-                            FileName = scriptPath, 
-                            Arguments = $"\"{hostExe}\"", 
-                            WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory, 
-                            UseShellExecute = true, 
-                            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden 
-                        }); 
-                        Application.Current.Shutdown(); 
-                        return; 
-                    } 
-                } 
+                await _engineTask;
+
+                if (runResult != null && runResult.Get<bool>("UpdateReady"))
+                {
+                    string hostExe = runResult.Get<string>("hostExecutable") ?? "VantuzLauncher.exe";
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = runResult.Get<string>("UpdateScript")!,
+                        Arguments = $"\"{hostExe}\"",
+                        UseShellExecute = true,
+                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                    });
+                    Application.Current.Shutdown();
+                    return;
+                }
 
                 StatusText.Text = "Запуск успешно завершен!"; 
                 this.Hide(); 
@@ -228,6 +236,7 @@ namespace VantuzLauncher
             } 
             finally 
             { 
+                if (fileReporter != null) await fileReporter.DisposeAsync();
                 // Гарантированная разблокировка UI 
                 BtnPlay.IsEnabled = true; 
                 BtnPlay.Opacity = 1.0; 
