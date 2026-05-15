@@ -11,7 +11,7 @@ public class LocalMoverPlugin : IVantuzPlugin
 {
     public string Name => "OS.LocalMover";
 
-    public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
+    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
     {
         var localMoveQueue = context.Get<List<MoveOperation>>("LocalMoveQueue");
         if (localMoveQueue == null || localMoveQueue.Count == 0)

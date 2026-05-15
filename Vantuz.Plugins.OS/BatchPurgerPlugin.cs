@@ -12,7 +12,7 @@ public class BatchPurgerPlugin : IVantuzPlugin
 {
     public string Name => "OS.BatchPurger";
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
+    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
     {
         var deleteQueue = context.Get<List<string>>("DeleteQueue");
         var purgeZones = context.Get<List<string>>("PurgeZones");

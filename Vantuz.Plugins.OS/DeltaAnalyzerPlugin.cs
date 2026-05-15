@@ -12,7 +12,7 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
 {
     public string Name => "OS.DeltaAnalyzer";
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
+    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
     {
         // ПАТТЕРН GRACEFUL SKIP 
         var targetState = context.Get<List<FileState>>("TargetState");

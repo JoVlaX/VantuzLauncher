@@ -21,7 +21,7 @@ public class BatchDownloaderPlugin : IVantuzPlugin
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-BatchDownloader/2.0");
     }
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next)
+    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
     {
         var downloadQueue = context.Get<List<FileState>>("DownloadQueue");
 
