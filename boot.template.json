@@ -35,45 +35,11 @@
          "launcherVersion": "{{remoteVersion}}" 
        } 
      }, 
-     { 
-       "pluginName": "Net.Downloader", 
-       "config": { 
-         "url": "https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar", 
-         "destination": "{{mcDir}}\\authlib-injector.jar" 
-       } 
-     }, 
-     { 
-       "pluginName": "Net.Downloader", 
-       "config": { 
-         "url": "https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar", 
-         "destination": "{{mcDir}}\\packwiz-installer-bootstrap.jar" 
-       } 
-     }, 
-     { 
-       "pluginName": "Net.Downloader", 
-       "config": { 
-         "url": "https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.2.20/forge-1.20.1-47.2.20-installer.jar", 
-         "destination": "{{mcDir}}\\forge-installer.jar" 
-       } 
-     }, 
-     { 
-       "pluginName": "OS.Executor", 
-       "config": { 
-         "fileName": "java", 
-         "arguments": "-jar \"packwiz-installer-bootstrap.jar\" \"https://troglobit.webhm.pro/packs/main/pack.toml\" --side client --no-gui", 
-         "workDir": "{{mcDir}}", 
-         "waitForExit": true 
-       } 
-     }, 
-     { 
-       "pluginName": "OS.Executor", 
-       "config": { 
-         "fileName": "java", 
-         "arguments": "-Djava.awt.headless=true -jar \"forge-installer.jar\" --installClient \"{{mcDir}}\"", 
-         "workDir": "{{mcDir}}", 
-         "waitForExit": true 
-       } 
-     }, 
+     { "pluginName": "Game.ManifestBuilder", "config": {} }, 
+     { "pluginName": "OS.DeltaAnalyzer", "config": {} },       
+     { "pluginName": "OS.LocalMover", "config": {} },          
+     { "pluginName": "Net.BatchDownloader", "config": {} },    
+     { "pluginName": "OS.BatchPurger", "config": {} }, 
      { 
        "pluginName": "Game.CmlLaunch", 
        "config": { 

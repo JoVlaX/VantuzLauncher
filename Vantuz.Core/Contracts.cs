@@ -39,6 +39,9 @@ public class ExecutionContext
 
 public delegate Task MiddlewareDelegate(ExecutionContext context);
 
+public record FileState(string RelativePath, string Hash, long Size, string? Url);
+public record MoveOperation(string SourcePath, string DestPath);
+
 public interface IVantuzPlugin : IAsyncDisposable
 {
     string Name { get; }
