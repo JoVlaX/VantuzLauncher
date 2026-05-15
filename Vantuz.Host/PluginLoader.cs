@@ -32,7 +32,7 @@ namespace Vantuz.Host
                 string shadowPath = Path.Combine(shadowDir, dllName);
                 if (!File.Exists(shadowPath)) continue;
 
-                var context = new PluginLoadContext(shadowPath, _sharedAssemblies); 
+                var context = new PluginLoadContext(shadowPath); 
                 
                 // Спасаем от GC 
                 _activeContexts.Add(context); 
@@ -86,11 +86,11 @@ namespace Vantuz.Host
             string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
             Directory.CreateDirectory(shadowDir); 
             
-            // Эвакуируем ВСЕ библиотеки в песочницу для разрешения зависимостей 
-            foreach (var file in Directory.GetFiles(originalDir, "*.dll")) 
+            // Эвакуируем ВСЕ файлы (включая .deps.json и .pdb) для разрешения зависимостей 
+            foreach (var file in System.IO.Directory.GetFiles(originalDir)) 
             { 
-                string fileName = Path.GetFileName(file); 
-                File.Copy(file, Path.Combine(shadowDir, fileName), true); 
+                string fileName = System.IO.Path.GetFileName(file); 
+                System.IO.File.Copy(file, System.IO.Path.Combine(shadowDir, fileName), true); 
             } 
             return shadowDir; 
         } 
