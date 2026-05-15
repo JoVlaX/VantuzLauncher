@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -15,7 +16,7 @@ public partial class App : Application
     private Mutex? _instanceMutex;
     private static bool _ownsMutex;
 
-    public static string WorkspacePath { get; private set; }
+    public static string WorkspacePath { get; private set; } = string.Empty;
 
     public static string DetermineWorkspace()
     {
