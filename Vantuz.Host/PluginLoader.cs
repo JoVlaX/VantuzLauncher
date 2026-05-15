@@ -86,11 +86,14 @@ namespace Vantuz.Host
             string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
             Directory.CreateDirectory(shadowDir); 
             
-            // Эвакуируем ВСЕ файлы (включая .deps.json и .pdb) для разрешения зависимостей 
-            foreach (var file in System.IO.Directory.GetFiles(originalDir)) 
+            // Рекурсивное копирование всех файлов и папок (включая runtimes и .deps.json) 
+            foreach (string dirPath in System.IO.Directory.GetDirectories(originalDir, "*", System.IO.SearchOption.AllDirectories)) 
             { 
-                string fileName = System.IO.Path.GetFileName(file); 
-                System.IO.File.Copy(file, System.IO.Path.Combine(shadowDir, fileName), true); 
+                System.IO.Directory.CreateDirectory(dirPath.Replace(originalDir, shadowDir)); 
+            } 
+            foreach (string newPath in System.IO.Directory.GetFiles(originalDir, "*.*", System.IO.SearchOption.AllDirectories)) 
+            { 
+                System.IO.File.Copy(newPath, newPath.Replace(originalDir, shadowDir), true); 
             } 
             return shadowDir; 
         } 

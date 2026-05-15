@@ -7,13 +7,13 @@ using System.Text.Json;
 using System.Threading.Tasks; 
 using Vantuz.Core; 
  
-public class ExecutorPlugin : IVantuzPlugin 
-{ 
-    public string Name => "OS.Executor"; 
- 
-    public async Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+    public class ExecutorPlugin : Vantuz.Core.IVantuzPlugin 
     { 
-        string fileName = stepConfig.GetProperty("fileName").GetString() ?? throw new Exception("fileName is missing"); 
+        public string Name => "OS.Executor"; 
+ 
+        public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next) 
+        { 
+            string fileName = stepConfig.GetProperty("fileName").GetString() ?? throw new Exception("fileName is missing"); 
          
         string arguments = stepConfig.TryGetProperty("arguments", out var argsProp) ? argsProp.GetString() ?? "" : ""; 
         string workDir = stepConfig.TryGetProperty("workDir", out var wdProp) ? wdProp.GetString() ?? AppContext.BaseDirectory : AppContext.BaseDirectory; 
