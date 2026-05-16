@@ -17,25 +17,38 @@ namespace Vantuz.Host
             _pluginDir = System.IO.Path.GetDirectoryName(pluginPath) ?? string.Empty; 
         } 
 
-        protected override System.Reflection.Assembly Load(System.Reflection.AssemblyName assemblyName) 
+        protected override System.Reflection.Assembly? Load(System.Reflection.AssemblyName assemblyName) 
         { 
-            // 1. Попытка стандартного резолва (через .deps.json) 
-            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName); 
+            if (assemblyName.Name == null) return null; 
+ 
+            // 1. Делегирование общих сборок (используй свою логику с _sharedAssemblies, если она есть) 
+            // if (_sharedAssemblies != null && _sharedAssemblies.Contains(assemblyName.Name)) return null; 
+ 
+            // 2. Стандартный резолв 
+            string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName); 
             if (assemblyPath != null) 
             { 
                 return LoadFromAssemblyPath(assemblyPath); 
             } 
-
-            // 2. АГРЕССИВНЫЙ FALLBACK: Ищем DLL физически в папке плагина 
+ 
+            // 3. АГРЕССИВНЫЙ РЕКУРСИВНЫЙ FALLBACK 
             if (!string.IsNullOrEmpty(_pluginDir)) 
             { 
-                string fallbackPath = System.IO.Path.Combine(_pluginDir, assemblyName.Name + ".dll"); 
-                if (System.IO.File.Exists(fallbackPath)) 
+                try 
                 { 
-                    return LoadFromAssemblyPath(fallbackPath); 
+                    // Ищем библиотеку во всех вложенных папках песочницы 
+                    string[] files = System.IO.Directory.GetFiles(_pluginDir, assemblyName.Name + ".dll", System.IO.SearchOption.AllDirectories); 
+                    if (files.Length > 0 && files[0] != null) 
+                    { 
+                        return LoadFromAssemblyPath(files[0]); 
+                    } 
+                } 
+                catch 
+                { 
+                    // Игнорируем ошибки доступа при поиске 
                 } 
             } 
-
+ 
             return null; 
         } 
     } 

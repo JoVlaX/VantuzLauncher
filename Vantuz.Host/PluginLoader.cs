@@ -51,7 +51,7 @@ namespace Vantuz.Host
                 catch (System.Reflection.ReflectionTypeLoadException ex) 
                 { 
                     // Извлекаем спрятанные ошибки загрузки типов! 
-                    string loaderErrors = string.Join("\n", ex.LoaderExceptions.Where(e => e != null).Select(e => e.Message)); 
+                    string loaderErrors = string.Join("\n", (ex.LoaderExceptions ?? Array.Empty<Exception>()).Where(e => e != null).Select(e => e!.Message)); 
                     throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex); 
                 } 
  
