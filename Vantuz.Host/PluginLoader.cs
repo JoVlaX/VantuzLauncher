@@ -40,8 +40,8 @@ namespace Vantuz.Host
                 // ЖАДНАЯ ЗАГРУЗКА (Eager Loading) для обхода слепоты NuGet deps.json 
                 EagerLoadAssemblies(context, shadowDir); 
 
-                // Инициализация типов, реализующих IVantuzPlugin 
-                var assembly = context.LoadFromAssemblyPath(shadowPath); 
+                // Инициализация типов, реализующих IVantuzPlugin (stream-based загрузка согласно .traerules)
+                var assembly = context.LoadFromAssemblyStream(shadowPath); 
                  
                 Type[] types; 
                 try 
@@ -65,7 +65,58 @@ namespace Vantuz.Host
                 } 
             } 
             return plugins; 
-        } 
+        }
+
+        /// <summary>
+        /// Загружает QuantizedNode из директории плагинов.
+        /// Согласно .traerules:98 - новый паттерн вместо free-form async.
+        /// </summary>
+        public IEnumerable<QuantizedNode> LoadQuantizedNodesFromDirectory(string pluginsPath, List<string> allowedDlls)
+        {
+            var nodes = new List<QuantizedNode>();
+            if (!Directory.Exists(pluginsPath)) return nodes;
+
+            string shadowDir = PrepareShadowWorkspace(pluginsPath);
+
+            foreach (var dllName in allowedDlls)
+            {
+                string shadowPath = Path.Combine(shadowDir, dllName);
+                if (!File.Exists(shadowPath)) continue;
+
+                var context = new PluginLoadContext(shadowPath);
+                _activeContexts.Add(context);
+
+                EagerLoadAssemblies(context, shadowDir);
+
+                var assembly = context.LoadFromAssemblyStream(shadowPath);
+
+                Type[] types;
+                try
+                {
+                    types = assembly.GetTypes();
+                }
+                catch (System.Reflection.ReflectionTypeLoadException ex)
+                {
+                    string loaderErrors = string.Join("\n", (ex.LoaderExceptions ?? Array.Empty<Exception>()).Where(e => e != null).Select(e => e!.Message));
+                    throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex);
+                }
+
+                // Ищем классы, наследующиеся от QuantizedNode
+                var nodeTypes = types.Where(t =>
+                    typeof(Vantuz.Core.QuantizedNode).IsAssignableFrom(t) &&
+                    !t.IsInterface &&
+                    !t.IsAbstract);
+
+                foreach (var type in nodeTypes)
+                {
+                    if (Activator.CreateInstance(type) is Vantuz.Core.QuantizedNode node)
+                    {
+                        nodes.Add(node);
+                    }
+                }
+            }
+            return nodes;
+        }
 
         private void EagerLoadAssemblies(PluginLoadContext context, string shadowDir) 
         { 
@@ -74,7 +125,7 @@ namespace Vantuz.Host
                 var assemblyName = AssemblyName.GetAssemblyName(file); 
                 if (!_sharedAssemblies.Contains(assemblyName.Name)) 
                 { 
-                    try { context.LoadFromAssemblyPath(file); } catch { /* Игнорируем конфликты нативных DLL */ } 
+                    try { context.LoadFromAssemblyStream(file); } catch { /* Игнорируем конфликты нативных DLL */ } 
                 } 
             } 
         } 

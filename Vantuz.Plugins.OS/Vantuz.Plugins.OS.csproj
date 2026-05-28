@@ -3,7 +3,9 @@
     <TargetFramework>net8.0</TargetFramework> 
     <Nullable>enable</Nullable> 
     <ImplicitUsings>enable</ImplicitUsings> 
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies> 
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- .traerules:52 - compiler_trace_hiding: FORBIDDEN -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup> 
   <ItemGroup> 
     <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" /> 

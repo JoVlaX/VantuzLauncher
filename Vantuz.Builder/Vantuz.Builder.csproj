@@ -3,6 +3,8 @@
     <OutputType>Exe</OutputType> 
     <TargetFramework>net8.0</TargetFramework> 
     <ImplicitUsings>enable</ImplicitUsings> 
-    <Nullable>enable</Nullable> 
+    <Nullable>enable</Nullable>
+    <!-- .traerules:52 - compiler_trace_hiding: FORBIDDEN -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup> 
 </Project> 

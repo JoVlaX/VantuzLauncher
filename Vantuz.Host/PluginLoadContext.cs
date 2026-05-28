@@ -17,30 +17,36 @@ namespace Vantuz.Host
             _pluginDir = System.IO.Path.GetDirectoryName(pluginPath) ?? string.Empty; 
         } 
 
-        protected override System.Reflection.Assembly? Load(System.Reflection.AssemblyName assemblyName) 
+        /// <summary>
+        /// Загружает сборку из файла через MemoryStream (stream-based загрузка согласно .traerules ARM001)
+        /// </summary>
+        public Assembly LoadFromAssemblyStream(string assemblyPath)
+        {
+            byte[] assemblyBytes = File.ReadAllBytes(assemblyPath);
+            using var stream = new MemoryStream(assemblyBytes);
+            return LoadFromStream(stream);
+        }
+
+        protected override Assembly? Load(AssemblyName assemblyName) 
         { 
             if (assemblyName.Name == null) return null; 
  
-            // 1. Делегирование общих сборок (используй свою логику с _sharedAssemblies, если она есть) 
-            // if (_sharedAssemblies != null && _sharedAssemblies.Contains(assemblyName.Name)) return null; 
- 
-            // 2. Стандартный резолв 
+            // 1. Стандартный резолв через resolver 
             string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName); 
             if (assemblyPath != null) 
             { 
-                return LoadFromAssemblyPath(assemblyPath); 
+                return LoadFromAssemblyStream(assemblyPath); 
             } 
  
-            // 3. АГРЕССИВНЫЙ РЕКУРСИВНЫЙ FALLBACK 
+            // 2. АГРЕССИВНЫЙ РЕКУРСИВНЫЙ FALLBACK (stream-based) 
             if (!string.IsNullOrEmpty(_pluginDir)) 
             { 
                 try 
                 { 
-                    // Ищем библиотеку во всех вложенных папках песочницы 
-                    string[] files = System.IO.Directory.GetFiles(_pluginDir, assemblyName.Name + ".dll", System.IO.SearchOption.AllDirectories); 
+                    string[] files = Directory.GetFiles(_pluginDir, assemblyName.Name + ".dll", SearchOption.AllDirectories); 
                     if (files.Length > 0 && files[0] != null) 
                     { 
-                        return LoadFromAssemblyPath(files[0]); 
+                        return LoadFromAssemblyStream(files[0]); 
                     } 
                 } 
                 catch 

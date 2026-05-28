@@ -13,6 +13,10 @@ using Vantuz.Core;
 public record BootManifest(Dictionary<string, string>? Variables, Dictionary<string, string> Plugins, List<StepConfig> Pipeline); 
 public record StepConfig(string PluginName, JsonElement Config); 
 
+/// <summary>
+/// VantuzEngine с поддержкой QuantizedNode (квантованного выполнения).
+/// Согласно .traerules:96-98 и .traerules:169-174.
+/// </summary>
 public class VantuzEngine 
 { 
     private readonly string _pluginsFolder; 
@@ -119,5 +123,129 @@ public class VantuzEngine
         if (contextData.IsAborted) throw new Exception(contextData.AbortReason); 
 
         return contextData; 
-    } 
+    }
+
+    /// <summary>
+    /// Запускает pipeline с квантованным выполнением (QuantizedNode).
+    /// Это предпочтительный метод согласно .traerules:98.
+    /// </summary>
+    public async Task<QuantumExecutionResult> RunQuantumAsync(
+        string bootJsonPath,
+        CancellationToken cancellationToken,
+        IDictionary<string, object>? initialPayload = null)
+    {
+        try
+        {
+            var manifest = JsonSerializer.Deserialize<BootManifest>(
+                await File.ReadAllTextAsync(bootJsonPath, cancellationToken),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                ?? throw new Exception("Invalid boot.json");
+
+            // 1. Валидация хэшей безопасности
+            ValidateManifestHashes(manifest.Plugins);
+
+            // 2. Загрузка плагинов
+            string[] shared = new[]
+            {
+                typeof(IVantuzPlugin).Assembly.GetName().Name!,
+                typeof(QuantizedNode).Assembly.GetName().Name!
+            };
+            var loader = new PluginLoader(shared);
+            var allowedDlls = manifest.Plugins.Keys.ToList();
+            var loadedPlugins = loader.LoadPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList();
+
+            // 3. Загрузка QuantizedNode (новый паттерн)
+            var quantizedNodes = loader.LoadQuantizedNodesFromDirectory(_pluginsFolder, allowedDlls).ToList();
+
+            try
+            {
+                // 4. Подготовка payload
+                var payload = new Dictionary<string, object>();
+                if (manifest.Variables != null)
+                {
+                    foreach (var kvp in manifest.Variables) payload[kvp.Key] = kvp.Value;
+                }
+                if (initialPayload != null)
+                {
+                    foreach (var kvp in initialPayload) payload[kvp.Key] = kvp.Value;
+                }
+                string exeName = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe");
+                payload["hostExecutable"] = exeName;
+
+                // 5. Выполнение через QuantumScheduler
+                var scheduler = new QuantumScheduler(_reporter, payload);
+                var pipeline = BuildQuantumPipeline(manifest.Pipeline, loadedPlugins, quantizedNodes);
+
+                var result = await scheduler.ExecutePipelineAsync(pipeline, cancellationToken);
+
+                return new QuantumExecutionResult
+                {
+                    Success = result.IsSuccess,
+                    Payload = result.FinalPayload,
+                    ErrorMessage = result.ErrorMessage
+                };
+            }
+            finally
+            {
+                foreach (var plugin in loadedPlugins) await plugin.DisposeAsync();
+                foreach (var node in quantizedNodes) await node.DisposeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] CRITICAL SYSTEM CRASH\n" +
+                                  $"Message: {ex.Message}\nStackTrace:\n{ex.StackTrace}\n" +
+                                  $"InnerException: {ex.InnerException?.Message}\n" + new string('-', 50) + "\n";
+            File.AppendAllText(_crashLogPath, errorMessage);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Собирает pipeline из QuantizedNode и legacy плагинов.
+    /// Legacy плагины оборачиваются в LegacyPluginAdapter.
+    /// </summary>
+    private List<(QuantizedNode Node, JsonElement Config)> BuildQuantumPipeline(
+        List<StepConfig> steps,
+        List<IVantuzPlugin> legacyPlugins,
+        List<QuantizedNode> quantizedNodes)
+    {
+        var result = new List<(QuantizedNode, JsonElement)>();
+
+        foreach (var step in steps)
+        {
+            // Сначала ищем QuantizedNode
+            var node = quantizedNodes.FirstOrDefault(n => n.Name == step.PluginName);
+            if (node != null)
+            {
+                result.Add((node, step.Config));
+                continue;
+            }
+
+            // Затем ищем legacy плагин и оборачиваем его
+            var legacy = legacyPlugins.FirstOrDefault(p => p.Name == step.PluginName);
+            if (legacy != null)
+            {
+                // Создаём временный ExecutionContext для адаптера
+                var context = new Vantuz.Core.ExecutionContext(CancellationToken.None, _reporter);
+                var adapter = new LegacyPluginAdapter(legacy, context);
+                result.Add((adapter, step.Config));
+                continue;
+            }
+
+            throw new Exception($"Plugin {step.PluginName} not found");
+        }
+
+        return result;
+    }
+}
+
+/// <summary>
+/// Результат квантованного выполнения
+/// </summary>
+public readonly record struct QuantumExecutionResult
+{
+    public bool Success { get; init; }
+    public IReadOnlyDictionary<string, object>? Payload { get; init; }
+    public string? ErrorMessage { get; init; }
 } 
