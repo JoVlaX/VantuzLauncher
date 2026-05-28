@@ -66,10 +66,10 @@
   </Target>
 
   <ItemGroup> 
-    <PluginNetFiles Include="$(SolutionDir)Vantuz.Plugins.Net\bin\$(Configuration)\net8.0\**\*.*" /> 
-    <PluginAuthFiles Include="$(SolutionDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" /> 
-    <PluginOSFiles Include="$(SolutionDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" /> 
-    <PluginGameFiles Include="$(SolutionDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginNetFiles Include="$(ProjectDir)Vantuz.Plugins.Net\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginAuthFiles Include="$(ProjectDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginOSFiles Include="$(ProjectDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginGameFiles Include="$(ProjectDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" /> 
   </ItemGroup> 
  
   <Target Name="AssembleVantuz" AfterTargets="Build"> 
@@ -80,7 +80,7 @@
     <Copy SourceFiles="@(PluginGameFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
      
     <Message Text="[Vantuz Assembler] Running Manifest Builder for Hash Pinning..." Importance="high" /> 
-    <Exec Command="dotnet run --project &quot;$(SolutionDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 
+    <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 
   </Target> 
 
 </Project>

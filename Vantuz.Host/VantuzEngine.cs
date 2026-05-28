@@ -73,6 +73,10 @@ public class VantuzEngine
     { 
         foreach (var (dllName, expectedHash) in pluginsConfig) 
         { 
+            // Пропускаем валидацию если хэш пустой (dev-режим)
+            if (string.IsNullOrWhiteSpace(expectedHash))
+                continue;
+
             string fullPath = Path.Combine(_pluginsFolder, Path.GetFileName(dllName)); 
             if (!File.Exists(fullPath)) throw new FileNotFoundException($"Plugin not found: {fullPath}"); 
 
