@@ -29,7 +29,11 @@ namespace Vantuz.Host
             // Загружаем только те плагины, которые разрешены манифестом 
             foreach (var dllName in allowedDlls) 
             { 
-                string shadowPath = Path.Combine(shadowDir, dllName);
+                // Автоматически добавляем .dll если не указано расширение
+                string actualDllName = dllName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) 
+                    ? dllName 
+                    : dllName + ".dll";
+                string shadowPath = Path.Combine(shadowDir, actualDllName);
                 if (!File.Exists(shadowPath)) continue;
 
                 var context = new PluginLoadContext(shadowPath); 
@@ -148,13 +152,19 @@ namespace Vantuz.Host
             string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
             Directory.CreateDirectory(shadowDir); 
             
-            // Рекурсивное копирование всех файлов и папок (включая runtimes и .deps.json) 
+            // Рекурсивное копирование всех файлов и папок (включая runtimes и .deps.json)
+            // Исключаем shared assemblies - они загружаются в default context
             foreach (string dirPath in System.IO.Directory.GetDirectories(originalDir, "*", System.IO.SearchOption.AllDirectories)) 
             { 
                 System.IO.Directory.CreateDirectory(dirPath.Replace(originalDir, shadowDir)); 
             } 
             foreach (string newPath in System.IO.Directory.GetFiles(originalDir, "*.*", System.IO.SearchOption.AllDirectories)) 
             { 
+                // Пропускаем shared assemblies - они загружаются в default context
+                string fileName = Path.GetFileName(newPath);
+                string assemblyName = Path.GetFileNameWithoutExtension(fileName);
+                if (_sharedAssemblies.Contains(assemblyName))
+                    continue;
                 System.IO.File.Copy(newPath, newPath.Replace(originalDir, shadowDir), true); 
             } 
             return shadowDir; 
