@@ -8,11 +8,15 @@ using Vantuz.Core;
 
 namespace Vantuz.Plugins.OS;
 
-public class DeltaAnalyzerPlugin : IVantuzPlugin
+/// <summary>
+/// ARM005 CQRS Query: Анализ дельты между текущим и целевым состоянием.
+/// Per .traerules:76-78 - только чтение, нет side effects.
+/// </summary>
+public class DeltaAnalyzerQuery : IQueryPlugin
 {
     public string Name => "OS.DeltaAnalyzer";
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
+    public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
         // ПАТТЕРН GRACEFUL SKIP 
         var targetState = context.Get<List<FileState>>("TargetState");
@@ -28,12 +32,11 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
         if (targetState == null || targetState.Count == 0)
         {
             context.Reporter.ReportState("Синхронизация кастомных файлов не требуется.");
-            await next(context);
-            return;
+            return new DeltaAnalyzerResult(new List<FileState>(), new List<string>(), new List<MoveOperation>());
         }
 
         var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
-        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
+        string mcDir = context.Get<string>("mcDir") ?? throw new InvalidOperationException("mcDir is missing in context");
         
         context.Reporter.ReportState("Анализ изменений и дедупликация...");
 
@@ -123,14 +126,19 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
             }
         }
 
-        context.Set("DownloadQueue", downloadQueue);
-        context.Set("DeleteQueue", deleteQueue);
-        context.Set("LocalMoveQueue", localMoveQueue);
-
         context.Reporter.ReportState($"Анализ завершен: {downloadQueue.Count} к загрузке, {localMoveQueue.Count} локальных перемещений, {deleteQueue.Count} к удалению.");
 
-        await next(context);
+        return new DeltaAnalyzerResult(downloadQueue, deleteQueue, localMoveQueue);
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
+
+/// <summary>
+/// Результат анализа дельты для передачи через мутации.
+/// </summary>
+public record DeltaAnalyzerResult(
+    List<FileState> DownloadQueue,
+    List<string> DeleteQueue,
+    List<MoveOperation> LocalMoveQueue
+);

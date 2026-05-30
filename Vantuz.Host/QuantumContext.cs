@@ -113,3 +113,28 @@ internal sealed class ReadOnlyPayload : IReadOnlyPayload
     /// </summary>
     internal IReadOnlyDictionary<string, object> GetAllInternal() => _data;
 }
+
+/// <summary>
+/// Адаптер IReadOnlyPayload для совместимости с Dictionary.
+/// Используется для передачи существующих данных в QueryContext.
+/// </summary>
+internal sealed class PayloadAdapter : IReadOnlyPayload
+{
+    private readonly IReadOnlyDictionary<string, object> _source;
+
+    public PayloadAdapter(IReadOnlyDictionary<string, object> source)
+    {
+        _source = source;
+    }
+
+    public T? Get<T>(string key)
+    {
+        if (_source.TryGetValue(key, out var value) && value is T typed)
+            return typed;
+        return default;
+    }
+
+    public bool Contains(string key) => _source.ContainsKey(key);
+
+    internal IReadOnlyDictionary<string, object> GetAllInternal() => _source;
+}

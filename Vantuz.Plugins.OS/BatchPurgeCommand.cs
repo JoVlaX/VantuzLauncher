@@ -8,22 +8,25 @@ using Vantuz.Core;
 
 namespace Vantuz.Plugins.OS;
 
-public class BatchPurgerPlugin : IVantuzPlugin
+/// <summary>
+/// ARM005 CQRS Command: Пакетная очистка файлов и пустых директорий.
+/// Per .traerules:76-78 - только запись/модификация состояния (удаление).
+/// </summary>
+public class BatchPurgeCommand : ICommandPlugin
 {
-    public string Name => "OS.BatchPurger";
+    public string Name => "OS.BatchPurge";
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
+    public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         var deleteQueue = context.Get<List<string>>("DeleteQueue");
         var purgeZones = context.Get<List<string>>("PurgeZones");
-        
+
         if ((deleteQueue == null || deleteQueue.Count == 0) && (purgeZones == null || purgeZones.Count == 0))
         {
-            await next(context);
-            return;
+            return new CommandResult(true);
         }
 
-        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
+        string mcDir = context.Get<string>("mcDir") ?? throw new InvalidOperationException("mcDir is missing in context");
 
         context.Reporter.ReportState("Сборка мусора и очистка...");
 
@@ -60,10 +63,12 @@ public class BatchPurgerPlugin : IVantuzPlugin
             }
         }
 
-        await next(context);
+        int deletedFiles = deleteQueue?.Count ?? 0;
+        context.Set("BatchPurgeDeletedFiles", deletedFiles);
+        return new CommandResult(true);
     }
 
-    private void DeleteEmptyDirs(string startLocation)
+    private static void DeleteEmptyDirs(string startLocation)
     {
         foreach (var directory in Directory.GetDirectories(startLocation))
         {

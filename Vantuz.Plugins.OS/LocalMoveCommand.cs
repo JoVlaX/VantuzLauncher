@@ -7,21 +7,25 @@ using Vantuz.Core;
 
 namespace Vantuz.Plugins.OS;
 
-public class LocalMoverPlugin : IVantuzPlugin
+/// <summary>
+/// ARM005 CQRS Command: Локальное перемещение файлов (дедупликация).
+/// Per .traerules:76-78 - только запись/модификация состояния.
+/// </summary>
+public class LocalMoveCommand : ICommandPlugin
 {
-    public string Name => "OS.LocalMover";
+    public string Name => "OS.LocalMove";
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
+    public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         var localMoveQueue = context.Get<List<MoveOperation>>("LocalMoveQueue");
         if (localMoveQueue == null || localMoveQueue.Count == 0)
-        {              
-            await next(context);
-            return;
+        {
+            return new CommandResult(true);
         }
 
         context.Reporter.ReportState($"Локальное перемещение файлов ({localMoveQueue.Count})...");
 
+        int successCount = 0;
         foreach (var op in localMoveQueue)
         {
             try
@@ -31,6 +35,7 @@ public class LocalMoverPlugin : IVantuzPlugin
                     // PathHelper.GetSafePath в DeltaAnalyzer уже гарантирует существование папки назначения
                     if (File.Exists(op.DestPath)) File.Delete(op.DestPath);
                     File.Move(op.SourcePath, op.DestPath);
+                    successCount++;
                 }
             }
             catch (Exception ex)
@@ -40,7 +45,8 @@ public class LocalMoverPlugin : IVantuzPlugin
             }
         }
 
-        await next(context);
+        context.Set("LocalMoveSuccessCount", successCount);
+        return new CommandResult(true);
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

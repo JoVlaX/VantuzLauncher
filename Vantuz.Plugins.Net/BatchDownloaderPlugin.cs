@@ -9,29 +9,33 @@ using Vantuz.Core;
 
 namespace Vantuz.Plugins.Net;
 
-public class BatchDownloaderPlugin : IVantuzPlugin
+/// <summary>
+/// ARM005 CQRS Command: Пакетная загрузка файлов с транзакционным коммитом.
+/// Per .traerules:76-78 - только запись/модификация состояния.
+/// </summary>
+public class DownloadCommand : ICommandPlugin
 {
-    public string Name => "Net.BatchDownloader";
+    public string Name => "Net.Download";
     private readonly HttpClient _httpClient;
-    private readonly SemaphoreSlim _semaphore = new(4); // 4 одновременных загрузки
+    private readonly SemaphoreSlim _semaphore = new(4);
 
-    public BatchDownloaderPlugin()
+    public DownloadCommand()
     {
         _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-BatchDownloader/2.0");
+        _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-DownloadCommand/2.0");
     }
 
-    public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next)
+    public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         var downloadQueue = context.Get<List<FileState>>("DownloadQueue");
 
         if (downloadQueue == null || downloadQueue.Count == 0)
         {
-            await next(context);
-            return;
+            return new CommandResult(true);
         }
 
-        string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
+        string mcDir = context.Get<string>("mcDir")
+            ?? throw new InvalidOperationException("mcDir is missing in context");
 
         context.Reporter.ReportState($"Загрузка файлов ({downloadQueue.Count})...");
 
@@ -49,13 +53,17 @@ public class BatchDownloaderPlugin : IVantuzPlugin
                     await _semaphore.WaitAsync(context.CancellationToken);
                     try
                     {
-                        if (string.IsNullOrEmpty(file.Url)) throw new Exception($"URL missing for {file.RelativePath}");
+                        if (string.IsNullOrEmpty(file.Url))
+                            throw new InvalidOperationException($"URL missing for {file.RelativePath}");
 
                         string finalPath = PathHelper.GetSafePath(mcDir, file.RelativePath);
                         string tmpPath = finalPath + ".tmp";
                         string backupPath = finalPath + ".backup";
 
-                        using (var response = await _httpClient.GetAsync(file.Url, HttpCompletionOption.ResponseHeadersRead, context.CancellationToken))
+                        using (var response = await _httpClient.GetAsync(
+                            file.Url,
+                            HttpCompletionOption.ResponseHeadersRead,
+                            context.CancellationToken))
                         {
                             response.EnsureSuccessStatusCode();
                             using (var fs = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -68,14 +76,16 @@ public class BatchDownloaderPlugin : IVantuzPlugin
                         string downloadedHash = PathHelper.CalculateHash(tmpPath);
                         if (downloadedHash != file.Hash)
                         {
-                            throw new Exception($"Hash mismatch for {file.RelativePath}. Expected: {file.Hash}, Actual: {downloadedHash}");
+                            throw new InvalidOperationException(
+                                $"Hash mismatch for {file.RelativePath}. Expected: {file.Hash}, Actual: {downloadedHash}");
                         }
 
                         lock (successfulDownloads)
                         {
                             successfulDownloads.Add((finalPath, tmpPath, backupPath));
                             completedCount++;
-                            context.Reporter.ReportProgress("Загрузка", (double)completedCount / downloadQueue.Count * 100);
+                            context.Reporter.ReportProgress("Загрузка",
+                                (double)completedCount / downloadQueue.Count * 100);
                         }
                     }
                     finally
@@ -122,21 +132,26 @@ public class BatchDownloaderPlugin : IVantuzPlugin
                     }
                     catch { }
                 }
-                throw new Exception("Ошибка I/O блокировки, состояние восстановлено");
+                return new CommandResult(false, "Ошибка I/O блокировки, состояние восстановлено");
             }
+
+            context.Set("DownloadSuccess", true);
+            context.Set("DownloadedCount", successfulDownloads.Count);
+            return new CommandResult(true);
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
         {
             // Очистка временных файлов при любой ошибке
             foreach (var item in successfulDownloads)
             {
                 try { if (File.Exists(item.tmpPath)) File.Delete(item.tmpPath); } catch { }
             }
-            context.Abort($"Ошибка при загрузке: {ex.Message}");
-            return;
+            return new CommandResult(false, $"Ошибка при загрузке: {ex.Message}");
         }
-
-        await next(context);
     }
 
     public ValueTask DisposeAsync()

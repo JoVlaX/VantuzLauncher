@@ -184,7 +184,7 @@ namespace VantuzLauncher
                     throw new FileNotFoundException("Файл манифеста boot.json не найден!"); 
  
                 // Запускаем тяжелый конвейер в фоновом пуле потоков 
-                Vantuz.Core.ExecutionContext runResult = null; 
+                QuantumExecutionResult runResult = default;
                 _engineTask = Task.Run(async () => 
                 { 
                     string crashLogPath = Path.Combine(_mcDir, "crash.log"); 
@@ -193,18 +193,24 @@ namespace VantuzLauncher
                 }); 
                 await _engineTask;
 
-                if (runResult != null && runResult.Get<bool>("UpdateReady"))
+                if (runResult.Payload != null && 
+                    runResult.Payload.TryGetValue("UpdateReady", out var updateReadyObj) &&
+                    updateReadyObj is bool updateReady && updateReady)
                 {
-                    string hostExe = runResult.Get<string>("hostExecutable") ?? "VantuzLauncher.exe";
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    string hostExe = runResult.Payload.TryGetValue("hostExecutable", out var hostExeObj) && hostExeObj is string he ? he : "VantuzLauncher.exe";
+                    string updateScript = runResult.Payload.TryGetValue("UpdateScript", out var scriptObj) && scriptObj is string s ? s : null;
+                    if (!string.IsNullOrEmpty(updateScript))
                     {
-                        FileName = runResult.Get<string>("UpdateScript")!,
-                        Arguments = $"\"{hostExe}\"",
-                        UseShellExecute = true,
-                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
-                    });
-                    Application.Current.Shutdown();
-                    return;
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = updateScript,
+                            Arguments = $"\"{hostExe}\"",
+                            UseShellExecute = true,
+                            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                        });
+                        Application.Current.Shutdown();
+                        return;
+                    }
                 }
 
                 StatusText.Text = "Запуск успешно завершен!"; 

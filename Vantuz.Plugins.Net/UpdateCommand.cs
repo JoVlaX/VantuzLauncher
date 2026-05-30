@@ -8,30 +8,34 @@ using Vantuz.Core;
  
 namespace Vantuz.Plugins.Net 
 { 
-    public class UpdaterPlugin : IVantuzPlugin 
+    /// <summary>
+    /// ARM005 CQRS Command: Скачивание и подготовка обновлений лаунчера.
+    /// Per .traerules:76-78 - только запись/модификация состояния.
+    /// </summary>
+    public class UpdateCommand : ICommandPlugin 
     { 
-        public string Name => "Net.Updater"; 
+        public string Name => "Net.Update"; 
         private readonly HttpClient _httpClient; 
  
-        public UpdaterPlugin() 
+        public UpdateCommand() 
         { 
             _httpClient = new HttpClient(); 
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-Updater/2.0"); 
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-UpdateCommand/2.0"); 
         } 
  
-        public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next) 
+        public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig) 
         { 
             string currentVer = stepConfig.TryGetProperty("currentVersion", out var cv) ? Interpolate(cv.GetString() ?? "", context) : ""; 
             string targetVer = stepConfig.TryGetProperty("targetVersion", out var tv) ? Interpolate(tv.GetString() ?? "", context) : ""; 
 
-            if (!string.IsNullOrEmpty(currentVer) && currentVer == targetVer) 
-            { 
-                context.Reporter.ReportState("Установлена актуальная версия."); 
-                await next(context); 
-                return; 
+            if (!string.IsNullOrEmpty(currentVer) && currentVer == targetVer)
+            {
+                context.Reporter.ReportState("Установлена актуальная версия.");
+                return new CommandResult(true);
             } 
 
-            string url = stepConfig.GetProperty("url").GetString() ?? throw new Exception("URL is missing in Updater"); 
+            string url = stepConfig.GetProperty("url").GetString()
+                ?? throw new InvalidOperationException("URL is missing in UpdateCommand"); 
             url = Interpolate(url, context); 
  
             string baseDir = AppDomain.CurrentDomain.BaseDirectory; 
@@ -69,25 +73,24 @@ namespace Vantuz.Plugins.Net
                     context.Set("UpdateScript", scriptPath); 
                     context.Reporter.ReportState("Обновление готово. Инициализация перезапуска..."); 
                 } 
-                else 
-                { 
-                    context.Reporter.ReportState("Обновление распаковано, но скрипт не найден."); 
-                } 
-            } 
-            catch (Exception ex) 
-            { 
-                context.Abort($"Сбой подготовки обновления: {ex.Message}"); 
-                return; 
-            } 
- 
-            // Передаем управление дальше. Ядро само решит, когда остановиться. 
-            await next(context); 
+                else
+                {
+                    context.Reporter.ReportState("Обновление распаковано, но скрипт не найден.");
+                }
+
+                return new CommandResult(true);
+            }
+            catch (Exception ex)
+            {
+                return new CommandResult(false, $"Сбой подготовки обновления: {ex.Message}");
+            }
         } 
  
-        private string Interpolate(string text, Vantuz.Core.ExecutionContext context) 
+        private static string Interpolate(string text, CommandContext context) 
         { 
             if (string.IsNullOrEmpty(text)) return text; 
-            foreach (var kvp in context.Payload) 
+            var mutations = context.GetMutations();
+            foreach (var kvp in mutations) 
             { 
                 text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
             } 

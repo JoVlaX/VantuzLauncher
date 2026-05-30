@@ -1,19 +1,24 @@
-namespace Vantuz.Plugins.OS; 
+namespace Vantuz.Plugins.OS;
+
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Vantuz.Core;
+
+/// <summary>
+/// ARM005 CQRS Command: Запуск исполняемых процессов.
+/// Per .traerules:76-78 - только запись/модификация состояния (запуск процесса).
+/// </summary>
+public class ExecuteCommand : ICommandPlugin
+{
+    public string Name => "OS.Execute"; 
  
-using System; 
-using System.Diagnostics; 
-using System.IO; 
-using System.Text.Json; 
-using System.Threading.Tasks; 
-using Vantuz.Core; 
- 
-    public class ExecutorPlugin : Vantuz.Core.IVantuzPlugin 
-    { 
-        public string Name => "OS.Executor"; 
- 
-        public async Task InvokeAsync(Vantuz.Core.ExecutionContext context, System.Text.Json.JsonElement stepConfig, Vantuz.Core.MiddlewareDelegate next) 
-        { 
-            string fileName = stepConfig.GetProperty("fileName").GetString() ?? throw new Exception("fileName is missing"); 
+    public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
+    {
+        string fileName = stepConfig.GetProperty("fileName").GetString()
+            ?? throw new InvalidOperationException("fileName is missing"); 
          
         string arguments = stepConfig.TryGetProperty("arguments", out var argsProp) ? argsProp.GetString() ?? "" : ""; 
         string workDir = stepConfig.TryGetProperty("workDir", out var wdProp) ? wdProp.GetString() ?? AppContext.BaseDirectory : AppContext.BaseDirectory; 
@@ -24,10 +29,9 @@ using Vantuz.Core;
         arguments = Interpolate(arguments, context); 
         workDir = Interpolate(workDir, context); 
  
-        if (!File.Exists(fileName) && !IsSystemCommand(fileName)) 
-        { 
-            context.Abort($"Исполняемый файл не найден: {fileName}"); 
-            return; 
+        if (!File.Exists(fileName) && !IsSystemCommand(fileName))
+        {
+            return new CommandResult(false, $"Исполняемый файл не найден: {fileName}");
         } 
  
         context.Reporter.ReportState($"Запуск: {Path.GetFileName(fileName)}..."); 
@@ -63,10 +67,9 @@ using Vantuz.Core;
             { 
                 await process.WaitForExitAsync(context.CancellationToken); 
                  
-                if (process.ExitCode != 0) 
-                { 
-                    context.Abort($"Процесс {Path.GetFileName(fileName)} завершился с ошибкой (ExitCode: {process.ExitCode})"); 
-                    return; 
+                if (process.ExitCode != 0)
+                {
+                    return new CommandResult(false, $"Процесс {Path.GetFileName(fileName)} завершился с ошибкой (ExitCode: {process.ExitCode})");
                 } 
             } 
             else 
@@ -74,37 +77,36 @@ using Vantuz.Core;
                 // Если мы не ждем завершения (например, запуск самой игры), 
                 // просто даем процессу немного времени на старт перед тем, как отпустить конвейер 
                 await Task.Delay(2000, context.CancellationToken); 
-                if (process.HasExited && process.ExitCode != 0) 
-                { 
-                    context.Abort($"Процесс крашнулся при запуске (ExitCode: {process.ExitCode})"); 
-                    return; 
+                if (process.HasExited && process.ExitCode != 0)
+                {
+                    return new CommandResult(false, $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode})");
                 } 
             } 
         } 
-        catch (Exception ex) when (ex is not OperationCanceledException) 
-        { 
-            context.Abort($"Ошибка запуска процесса: {ex.Message}"); 
-            return; 
-        } 
- 
-        await next(context); 
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return new CommandResult(false, $"Ошибка запуска процесса: {ex.Message}");
+        }
+
+        return new CommandResult(true); 
     } 
  
-    private string Interpolate(string text, ExecutionContext context) 
-    { 
-        if (string.IsNullOrEmpty(text)) return text; 
-        foreach (var kvp in context.Payload) 
-        { 
-            text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? ""); 
-        } 
-        return text; 
+    private static string Interpolate(string text, CommandContext context) 
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        var mutations = context.GetMutations();
+        foreach (var kvp in mutations)
+        {
+            text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? "");
+        }
+        return text;
     } 
  
-    private bool IsSystemCommand(string fileName) 
+    private static bool IsSystemCommand(string fileName) 
     { 
         // Простая эвристика для пропуска проверки File.Exists для системных команд вроде "java" или "cmd" 
         return !fileName.Contains('/') && !fileName.Contains('\\') && !fileName.EndsWith(".exe"); 
     } 
  
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask; 
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 } 

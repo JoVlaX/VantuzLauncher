@@ -1,7 +1,6 @@
 namespace Vantuz.Core;
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
@@ -157,39 +156,3 @@ public record LaunchOptions(
     Dictionary<string, object>? ExtraOptions = null
 );
 
-// LEGACY: Устаревший контекст для обратной совместимости во время миграции
-[Obsolete("Используйте QueryContext или CommandContext вместо ExecutionContext согласно ARM005")]
-public class ExecutionContext
-{
-    public ConcurrentDictionary<string, object> Payload { get; } = new();
-    public bool IsAborted { get; private set; }
-    public string? AbortReason { get; private set; }
-    public CancellationToken CancellationToken { get; }
-    public IStatusReporter Reporter { get; }
-
-    public ExecutionContext(CancellationToken cancellationToken, IStatusReporter reporter)
-    {
-        CancellationToken = cancellationToken;
-        Reporter = reporter;
-    }
-
-    public void Abort(string reason)
-    {
-        IsAborted = true;
-        AbortReason = reason;
-    }
-
-    public T? Get<T>(string key) => Payload.TryGetValue(key, out var val) && val is T typedVal ? typedVal : default;
-    public void Set<T>(string key, T value) where T : notnull => Payload[key] = value;
-}
-
-[Obsolete("Используйте QueryDelegate или CommandDelegate согласно ARM005")]
-public delegate Task MiddlewareDelegate(ExecutionContext context);
-
-// LEGACY: Устаревший интерфейс для обратной совместимости
-[Obsolete("Используйте IQueryPlugin или ICommandPlugin согласно ARM005")]
-public interface IVantuzPlugin : IAsyncDisposable
-{
-    string Name { get; }
-    Task InvokeAsync(ExecutionContext context, JsonElement stepConfig, MiddlewareDelegate next);
-}
