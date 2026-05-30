@@ -4,24 +4,26 @@ using System.Security.Cryptography;
 using System.Text.Json; 
 using System.Text.Json.Nodes; 
  
-if (args.Length < 3) 
-{ 
-    Console.WriteLine("Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>"); 
-    return; 
+if (args.Length < 3)
+{
+    Console.Error.WriteLine("Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>");
+    return 1;
 } 
  
 string templatePath = args[0]; 
 string pluginsDir = args[1]; 
 string outputPath = args[2]; 
  
-if (!File.Exists(templatePath)) 
-{ 
-    Console.WriteLine($"Template not found: {templatePath}"); 
-    return; 
+if (!File.Exists(templatePath))
+{
+    Console.Error.WriteLine($"Template not found: {templatePath}");
+    return 1;
 } 
  
-var jsonString = File.ReadAllText(templatePath); 
-var node = JsonNode.Parse(jsonString); 
+try
+{
+    var jsonString = File.ReadAllText(templatePath);
+    var node = JsonNode.Parse(jsonString); 
  
 if (node?["plugins"] is JsonObject pluginsNode) 
 { 
@@ -46,5 +48,12 @@ if (node?["plugins"] is JsonObject pluginsNode)
     } 
 } 
  
-File.WriteAllText(outputPath, node!.ToJsonString(new JsonSerializerOptions { WriteIndented = true })); 
-Console.WriteLine($"Manifest generated: {outputPath}"); 
+File.WriteAllText(outputPath, node!.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+    Console.WriteLine($"Manifest generated: {outputPath}");
+    return 0;
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"[ERROR] {ex.Message}");
+    return 1;
+} 
