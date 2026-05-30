@@ -56,9 +56,12 @@ internal sealed class QuantumScheduler
             {
                 case QuantumStatus.Complete:
                     // Применяем мутации к глобальному payload
-                    foreach (var kvp in result.Mutations)
+                    if (result.Mutations != null)
                     {
-                        mergedPayload[kvp.Key] = kvp.Value;
+                        foreach (var kvp in result.Mutations)
+                        {
+                            mergedPayload[kvp.Key] = kvp.Value;
+                        }
                     }
                     stateSnapshots.Remove(node);
                     break;

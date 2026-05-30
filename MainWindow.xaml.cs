@@ -169,12 +169,12 @@ namespace VantuzLauncher
 
                 var compositeReporter = new CompositeReporter(uiReporter, fileReporter);
  
-                var initialPayload = new Dictionary<string, object> 
-                { 
-                    { "username", username }, 
-                    { "password", password }, 
-                    { "ramMb", _currentRamMb }, 
-                    { "mcDir", _mcDir } 
+                var initialPayload = new Dictionary<string, object>
+                {
+                    { "username", username },
+                    { "password", password },
+                    { "ramMb", _currentRamMb }
+                    // mcDir теперь определяется в boot.json переменных (Nomadic-конфигурация)
                 }; 
  
                 string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json"); 

@@ -148,7 +148,7 @@ public enum DescriptorType
 }
 
 /// <summary>
-/// Extension methods для интеграции VirtualDescriptor с ExecutionContext
+/// Extension methods для интеграции VirtualDescriptor с CommandContext и QueryContext
 /// </summary>
 public static class VirtualDescriptorExtensions
 {

@@ -64,16 +64,22 @@ public class VantuzEngine
 
             try
             {
-                // 4. Подготовка payload
+                // 4. Подготовка payload с интерполяцией переменных
                 var payload = new Dictionary<string, object>();
-                if (manifest.Variables != null)
-                {
-                    foreach (var kvp in manifest.Variables) payload[kvp.Key] = kvp.Value;
-                }
+
+                // Сначала добавляем initialPayload (runtime значения имеют приоритет)
                 if (initialPayload != null)
                 {
                     foreach (var kvp in initialPayload) payload[kvp.Key] = kvp.Value;
                 }
+
+                // Интерполируем переменные из manifest используя payload
+                if (manifest.Variables != null)
+                {
+                    var interpolatedVars = InterpolateVariables(manifest.Variables, payload);
+                    foreach (var kvp in interpolatedVars) payload[kvp.Key] = kvp.Value;
+                }
+
                 string exeName = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe");
                 payload["hostExecutable"] = exeName;
 
@@ -124,6 +130,105 @@ public class VantuzEngine
             if (actualHash != expectedHash.ToLowerInvariant())
                 throw new Exception($"HASH MISMATCH for {dllName}");
         }
+    }
+
+    /// <summary>
+    /// Интерполирует переменные вида {{key}} используя значения из payload.
+    /// Поддерживает ${env:VAR} и ${special:Folder} для Nomadic конфигурации.
+    /// Согласно .traerules:42 (Explicit Input Payloads) и :65 (No hardcoded paths).
+    /// </summary>
+    private static Dictionary<string, string> InterpolateVariables(
+        Dictionary<string, string> variables,
+        Dictionary<string, object> payload)
+    {
+        var result = new Dictionary<string, string>();
+
+        foreach (var kvp in variables)
+        {
+            string value = kvp.Value;
+
+            // 1. Заменяем ${env:VAR} на значения переменных окружения
+            value = InterpolateEnvironmentVariables(value);
+
+            // 2. Заменяем ${special:Folder} на пути SpecialFolder
+            value = InterpolateSpecialFolders(value);
+
+            // 3. Заменяем все placeholder-ы {{key}} на значения из payload
+            foreach (var payloadKvp in payload)
+            {
+                string placeholder = "{{" + payloadKvp.Key + "}}";
+                if (value.Contains(placeholder))
+                {
+                    string replacement = payloadKvp.Value?.ToString() ?? string.Empty;
+                    value = value.Replace(placeholder, replacement);
+                }
+            }
+
+            result[kvp.Key] = value;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Заменяет ${env:VAR} на значение переменной окружения.
+    /// </summary>
+    private static string InterpolateEnvironmentVariables(string value)
+    {
+        int startIndex = 0;
+        while (true)
+        {
+            int envStart = value.IndexOf("${env:", startIndex);
+            if (envStart == -1) break;
+
+            int envEnd = value.IndexOf("}", envStart);
+            if (envEnd == -1) break;
+
+            string varName = value.Substring(envStart + 6, envEnd - envStart - 6);
+            string varValue = Environment.GetEnvironmentVariable(varName) ?? string.Empty;
+
+            value = value.Substring(0, envStart) + varValue + value.Substring(envEnd + 1);
+            startIndex = envStart + varValue.Length;
+        }
+        return value;
+    }
+
+    /// <summary>
+    /// Заменяет ${special:Folder} на путь SpecialFolder.
+    /// </summary>
+    private static string InterpolateSpecialFolders(string value)
+    {
+        var specialFolders = new Dictionary<string, Environment.SpecialFolder>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ApplicationData"] = Environment.SpecialFolder.ApplicationData,
+            ["LocalApplicationData"] = Environment.SpecialFolder.LocalApplicationData,
+            ["UserProfile"] = Environment.SpecialFolder.UserProfile,
+            ["MyDocuments"] = Environment.SpecialFolder.MyDocuments,
+            ["Desktop"] = Environment.SpecialFolder.Desktop,
+            ["ProgramFiles"] = Environment.SpecialFolder.ProgramFiles,
+            ["ProgramFilesX86"] = Environment.SpecialFolder.ProgramFilesX86,
+            ["System"] = Environment.SpecialFolder.System,
+            ["Windows"] = Environment.SpecialFolder.Windows
+        };
+
+        int startIndex = 0;
+        while (true)
+        {
+            int specialStart = value.IndexOf("${special:", startIndex);
+            if (specialStart == -1) break;
+
+            int specialEnd = value.IndexOf("}", specialStart);
+            if (specialEnd == -1) break;
+
+            string folderName = value.Substring(specialStart + 10, specialEnd - specialStart - 10);
+            string folderPath = specialFolders.TryGetValue(folderName, out var folder)
+                ? Environment.GetFolderPath(folder)
+                : string.Empty;
+
+            value = value.Substring(0, specialStart) + folderPath + value.Substring(specialEnd + 1);
+            startIndex = specialStart + folderPath.Length;
+        }
+        return value;
     }
 
     /// <summary>

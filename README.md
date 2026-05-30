@@ -22,10 +22,18 @@
 - **Vantuz.Host**: Ядро (Engine). Отвечает за загрузку плагинов, валидацию хэшей и работу конвейера.
 - **Vantuz.Builder**: CLI-утилита для автоматической сборки `boot.json` и вычисления хэшей плагинов.
 - **Vantuz.Plugins.***: Набор независимых лезвий:
-  - `Auth.Yggdrasil`: Авторизация по протоколу Yggdrasil.
-  - `Net.Downloader`: Универсальный загрузчик файлов.
-  - `OS.Executor`: Запуск процессов с перехватом вывода.
-  - `Game.CmlLaunch`: Подготовка Minecraft (на базе CmlLib.Core).
+  - `Auth.YggdrasilCommand`: Авторизация по протоколу Yggdrasil (CQRS Command).
+  - `Net.DownloadCommand`: Пакетная загрузка файлов с транзакционным коммитом.
+  - `Net.ApiReaderQuery`: Чтение данных из API (CQRS Query).
+  - `Net.UpdateCommand`: Скачивание и подготовка обновлений лаунчера.
+  - `OS.ExecuteCommand`: Запуск процессов с перехватом вывода (CQRS Command).
+  - `OS.DeltaAnalyzerQuery`: Анализ дельты файлов (CQRS Query).
+  - `OS.LocalMoveCommand`: Локальное перемещение файлов (дедупликация).
+  - `OS.BatchPurgeCommand`: Пакетная очистка файлов.
+  - `Game.InstallerCommand`: Установка игровых версий.
+  - `Game.LaunchCommand`: Подготовка запуска игры.
+  - `Game.VersionValidatorQuery`: Проверка установленных версий.
+  - `Game.MinecraftProvider`: Провайдер Minecraft (CmlLib.Core).
 
 ---
 
