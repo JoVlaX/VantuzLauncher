@@ -122,6 +122,145 @@ namespace Vantuz.Host
             return nodes;
         }
 
+        /// <summary>
+        /// Загружает CQRS плагины (ICommandPlugin, IQueryPlugin) из директории плагинов.
+        /// Оборачивает их в QuantizedNode адаптеры.
+        /// Согласно .traerules:98 - возвращаем QuantizedNode для квантованного выполнения.
+        /// </summary>
+        public IEnumerable<QuantizedNode> LoadCqrsPluginsFromDirectory(string pluginsPath, List<string> allowedDlls)
+        {
+            var nodes = new List<QuantizedNode>();
+            if (!Directory.Exists(pluginsPath)) return nodes;
+
+            string shadowDir = PrepareShadowWorkspace(pluginsPath);
+
+            foreach (var dllName in allowedDlls)
+            {
+                // Автоматически добавляем .dll если не указано расширение
+                string actualDllName = dllName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                    ? dllName
+                    : dllName + ".dll";
+                string shadowPath = Path.Combine(shadowDir, actualDllName);
+                if (!File.Exists(shadowPath)) continue;
+
+                var context = new PluginLoadContext(shadowPath);
+                _activeContexts.Add(context);
+
+                EagerLoadAssemblies(context, shadowDir);
+
+                var assembly = context.LoadFromAssemblyStream(shadowPath);
+
+                Type[] types;
+                try
+                {
+                    types = assembly.GetTypes();
+                }
+                catch (System.Reflection.ReflectionTypeLoadException ex)
+                {
+                    string loaderErrors = string.Join("\n", (ex.LoaderExceptions ?? Array.Empty<Exception>()).Where(e => e != null).Select(e => e!.Message));
+                    throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex);
+                }
+
+                // Ищем ICommandPlugin implementations
+                var commandTypes = types.Where(t =>
+                    typeof(Vantuz.Core.ICommandPlugin).IsAssignableFrom(t) &&
+                    !t.IsInterface &&
+                    !t.IsAbstract);
+
+                foreach (var type in commandTypes)
+                {
+                    if (Activator.CreateInstance(type) is Vantuz.Core.ICommandPlugin commandPlugin)
+                    {
+                        nodes.Add(new CqrsCommandAdapter(commandPlugin));
+                    }
+                }
+
+                // Ищем IQueryPlugin implementations
+                var queryTypes = types.Where(t =>
+                    typeof(Vantuz.Core.IQueryPlugin).IsAssignableFrom(t) &&
+                    !t.IsInterface &&
+                    !t.IsAbstract);
+
+                foreach (var type in queryTypes)
+                {
+                    if (Activator.CreateInstance(type) is Vantuz.Core.IQueryPlugin queryPlugin)
+                    {
+                        nodes.Add(new CqrsQueryAdapter(queryPlugin));
+                    }
+                }
+            }
+            return nodes;
+        }
+
+        /// <summary>
+        /// Загружает CQRS плагины как legacy IVantuzPlugin для обратной совместимости с RunAsync().
+        /// Оборачивает ICommandPlugin и IQueryPlugin в IVantuzPlugin адаптеры.
+        /// </summary>
+        public IEnumerable<IVantuzPlugin> LoadLegacyCqrsPluginsFromDirectory(string pluginsPath, List<string> allowedDlls)
+        {
+            var plugins = new List<IVantuzPlugin>();
+            if (!Directory.Exists(pluginsPath)) return plugins;
+
+            string shadowDir = PrepareShadowWorkspace(pluginsPath);
+
+            foreach (var dllName in allowedDlls)
+            {
+                // Автоматически добавляем .dll если не указано расширение
+                string actualDllName = dllName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
+                    ? dllName
+                    : dllName + ".dll";
+                string shadowPath = Path.Combine(shadowDir, actualDllName);
+                if (!File.Exists(shadowPath)) continue;
+
+                var context = new PluginLoadContext(shadowPath);
+                _activeContexts.Add(context);
+
+                EagerLoadAssemblies(context, shadowDir);
+
+                var assembly = context.LoadFromAssemblyStream(shadowPath);
+
+                Type[] types;
+                try
+                {
+                    types = assembly.GetTypes();
+                }
+                catch (System.Reflection.ReflectionTypeLoadException ex)
+                {
+                    string loaderErrors = string.Join("\n", (ex.LoaderExceptions ?? Array.Empty<Exception>()).Where(e => e != null).Select(e => e!.Message));
+                    throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex);
+                }
+
+                // Ищем ICommandPlugin implementations
+                var commandTypes = types.Where(t =>
+                    typeof(Vantuz.Core.ICommandPlugin).IsAssignableFrom(t) &&
+                    !t.IsInterface &&
+                    !t.IsAbstract);
+
+                foreach (var type in commandTypes)
+                {
+                    if (Activator.CreateInstance(type) is Vantuz.Core.ICommandPlugin commandPlugin)
+                    {
+                        plugins.Add(new LegacyCqrsCommandAdapter(commandPlugin));
+                    }
+                }
+
+                // Ищем IQueryPlugin implementations
+                var queryTypes = types.Where(t =>
+                    typeof(Vantuz.Core.IQueryPlugin).IsAssignableFrom(t) &&
+                    !t.IsInterface &&
+                    !t.IsAbstract);
+
+                foreach (var type in queryTypes)
+                {
+                    if (Activator.CreateInstance(type) is Vantuz.Core.IQueryPlugin queryPlugin)
+                    {
+                        plugins.Add(new LegacyCqrsQueryAdapter(queryPlugin));
+                    }
+                }
+            }
+            return plugins;
+        }
+
         private void EagerLoadAssemblies(PluginLoadContext context, string shadowDir) 
         { 
             foreach (var file in Directory.GetFiles(shadowDir, "*.dll")) 

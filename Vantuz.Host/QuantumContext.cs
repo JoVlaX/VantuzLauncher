@@ -107,4 +107,9 @@ internal sealed class ReadOnlyPayload : IReadOnlyPayload
     }
 
     public bool Contains(string key) => _data.ContainsKey(key);
+
+    /// <summary>
+    /// Возвращает все данные payload (используется CQRS адаптерами).
+    /// </summary>
+    internal IReadOnlyDictionary<string, object> GetAllInternal() => _data;
 }

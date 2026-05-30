@@ -20,6 +20,7 @@
     <Compile Remove="Vantuz.Plugins.Net\**" />
     <Compile Remove="Vantuz.Plugins.OS\**" />
     <Compile Remove="Vantuz.Plugins.Game\**" />
+    <Compile Remove="Vantuz.Plugins.Minecraft\**" />
     <Compile Remove="Vantuz.Builder\**" />
     <EmbeddedResource Remove="Vantuz.Core\**" />
     <EmbeddedResource Remove="Vantuz.Host\**" />
@@ -27,6 +28,7 @@
     <EmbeddedResource Remove="Vantuz.Plugins.Net\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.OS\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.Game\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.Minecraft\**" />
     <EmbeddedResource Remove="Vantuz.Builder\**" />
     <None Remove="Vantuz.Core\**" />
     <None Remove="Vantuz.Host\**" />
@@ -34,6 +36,7 @@
     <None Remove="Vantuz.Plugins.Net\**" />
     <None Remove="Vantuz.Plugins.OS\**" />
     <None Remove="Vantuz.Plugins.Game\**" />
+    <None Remove="Vantuz.Plugins.Minecraft\**" />
     <None Remove="Vantuz.Builder\**" />
     <Page Remove="Vantuz.Core\**" />
     <Page Remove="Vantuz.Host\**" />
@@ -41,6 +44,7 @@
     <Page Remove="Vantuz.Plugins.Net\**" />
     <Page Remove="Vantuz.Plugins.OS\**" />
     <Page Remove="Vantuz.Plugins.Game\**" />
+    <Page Remove="Vantuz.Plugins.Minecraft\**" />
     <Page Remove="Vantuz.Builder\**" />
   </ItemGroup>
 
@@ -70,6 +74,7 @@
     <PluginAuthFiles Include="$(ProjectDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" /> 
     <PluginOSFiles Include="$(ProjectDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" /> 
     <PluginGameFiles Include="$(ProjectDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" /> 
+    <PluginMinecraftFiles Include="$(ProjectDir)Vantuz.Plugins.Minecraft\bin\$(Configuration)\net8.0\**\*.*" /> 
   </ItemGroup> 
  
   <Target Name="AssembleVantuz" AfterTargets="Build"> 
@@ -78,6 +83,7 @@
     <Copy SourceFiles="@(PluginAuthFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
     <Copy SourceFiles="@(PluginOSFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
     <Copy SourceFiles="@(PluginGameFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    <Copy SourceFiles="@(PluginMinecraftFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
      
     <Message Text="[Vantuz Assembler] Running Manifest Builder for Hash Pinning..." Importance="high" /> 
     <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 

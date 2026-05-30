@@ -10,7 +10,5 @@
   <ItemGroup> 
     <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" /> 
   </ItemGroup> 
-  <ItemGroup> 
-    <PackageReference Include="CmlLib.Core" Version="4.0.6" /> 
-  </ItemGroup> 
+  <!-- Per .traerules:126 - no game-specific dependencies here, universal only --> 
 </Project> 

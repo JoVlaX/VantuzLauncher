@@ -62,6 +62,18 @@ public delegate Task CommandDelegate(CommandContext context);
 public record FileState(string RelativePath, string Hash, long Size, string? Url);
 public record MoveOperation(string SourcePath, string DestPath);
 
+/// <summary>
+/// Result of modpack manifest loading for delta-updates
+/// </summary>
+public class ModpackManifestResult
+{
+    public string Version { get; set; } = "";
+    public string MinecraftVersion { get; set; } = "";
+    public List<FileState> Files { get; set; } = new();
+    public List<string> RemovedFiles { get; set; } = new();
+    public object? RawManifest { get; set; }  // Original manifest for advanced processing
+}
+
 // ARM005: Строгое разделение CQRS - Query плагины только читают
 public interface IQueryPlugin : IAsyncDisposable
 {
@@ -77,6 +89,73 @@ public interface ICommandPlugin : IAsyncDisposable
 }
 
 public record CommandResult(bool Success, string? ErrorMessage = null);
+
+// ============================================
+// UNIVERSAL GAME PROVIDER ABSTRACTION
+// Per .traerules:126 - isolate external dependencies
+// Per .traerules:72 - Anticorruption Layer for game-specific APIs
+// ============================================
+
+/// <summary>
+/// Universal game provider contract. Implementations are game-specific (Minecraft, Terraria, etc.)
+/// </summary>
+public interface IGameProvider : IAsyncDisposable
+{
+    string ProviderName { get; }
+    
+    /// <summary>
+    /// Check if version exists locally
+    /// </summary>
+    Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct);
+    
+    /// <summary>
+    /// Install/update the specified version
+    /// </summary>
+    Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct);
+    
+    /// <summary>
+    /// Build launch parameters for OS.Executor
+    /// </summary>
+    Task<LaunchParameters> BuildLaunchParametersAsync(string version, string installDir, LaunchOptions options, CancellationToken ct);
+}
+
+/// <summary>
+/// Result of version check operation
+/// </summary>
+public record VersionCheckResult(
+    bool Exists, 
+    string? ErrorMessage = null
+);
+
+/// <summary>
+/// Result of install operation
+/// </summary>
+public record InstallResult(
+    bool Success, 
+    string? ErrorMessage = null
+);
+
+/// <summary>
+/// Launch parameters for OS.Executor
+/// </summary>
+public record LaunchParameters(
+    string ExecutablePath,
+    string Arguments,
+    string WorkingDirectory,
+    Dictionary<string, string>? EnvironmentVariables = null
+);
+
+/// <summary>
+/// Options for launching a game
+/// </summary>
+public record LaunchOptions(
+    string PlayerName,
+    string? AccessToken = null,
+    string? Uuid = null,
+    int RamMb = 4096,
+    string? JavaPath = null,
+    Dictionary<string, object>? ExtraOptions = null
+);
 
 // LEGACY: Устаревший контекст для обратной совместимости во время миграции
 [Obsolete("Используйте QueryContext или CommandContext вместо ExecutionContext согласно ARM005")]

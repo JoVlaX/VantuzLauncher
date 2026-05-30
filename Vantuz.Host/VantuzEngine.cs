@@ -46,7 +46,11 @@ public class VantuzEngine
             string[] shared = new[] { typeof(IVantuzPlugin).Assembly.GetName().Name! }; 
             var loader = new PluginLoader(shared); 
             var allowedDlls = manifest.Plugins.Keys.ToList();
-            var loadedPlugins = loader.LoadPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList(); 
+            var loadedPlugins = loader.LoadPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList();
+
+            // 2.5 Загрузка CQRS плагинов (ICommandPlugin, IQueryPlugin) для legacy пути
+            var cqrsPlugins = loader.LoadLegacyCqrsPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList();
+            loadedPlugins.AddRange(cqrsPlugins);
 
             try 
             { 
@@ -160,6 +164,10 @@ public class VantuzEngine
 
             // 3. Загрузка QuantizedNode (новый паттерн)
             var quantizedNodes = loader.LoadQuantizedNodesFromDirectory(_pluginsFolder, allowedDlls).ToList();
+
+            // 4. Загрузка CQRS плагинов (ICommandPlugin, IQueryPlugin) через адаптеры
+            var cqrsNodes = loader.LoadCqrsPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList();
+            quantizedNodes.AddRange(cqrsNodes);
 
             try
             {

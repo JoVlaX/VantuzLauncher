@@ -16,6 +16,15 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
     {
         // ПАТТЕРН GRACEFUL SKIP 
         var targetState = context.Get<List<FileState>>("TargetState");
+        
+        // Check for modpack manifest result from Net.ModpackManifest
+        var manifestResult = context.Get<ModpackManifestResult>("Net.ModpackManifest.Result");
+        if (manifestResult != null)
+        {
+            targetState = manifestResult.Files;
+            context.Reporter.ReportState($"Модпак {manifestResult.Version}: {targetState.Count} файлов для синхронизации.");
+        }
+        
         if (targetState == null || targetState.Count == 0)
         {
             context.Reporter.ReportState("Синхронизация кастомных файлов не требуется.");
@@ -25,12 +34,25 @@ public class DeltaAnalyzerPlugin : IVantuzPlugin
 
         var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
         string mcDir = context.Get<string>("mcDir") ?? throw new Exception("mcDir is missing in context");
-
+        
         context.Reporter.ReportState("Анализ изменений и дедупликация...");
 
         var downloadQueue = new List<FileState>();
         var deleteQueue = new List<string>();
         var localMoveQueue = new List<MoveOperation>();
+        
+        // Handle removed files from modpack manifest
+        if (manifestResult?.RemovedFiles != null && manifestResult.RemovedFiles.Count > 0)
+        {
+            foreach (var removedFile in manifestResult.RemovedFiles)
+            {
+                string fullPath = PathHelper.GetSafePath(mcDir, removedFile);
+                if (File.Exists(fullPath))
+                {
+                    deleteQueue.Add(fullPath);
+                }
+            }
+        }
 
         // 1. Проверка локальных файлов
         foreach (var file in targetState)
