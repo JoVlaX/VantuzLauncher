@@ -1,4 +1,4 @@
-# Invariant Theory of .traerules
+# Invariant Theory of Armatura
 
 ## A Compositional, Falsifiable, and Ergodic Foundation for Architectural Constitutions
 
@@ -6,7 +6,7 @@
 
 ## Abstract
 
-This document presents a formal mathematical theory establishing the epistemological and ontological foundations of the `.traerules` architectural constitution. The theory is grounded in Popperian falsifiability, invariance principles, compositional algebra, Occam's razor, causality, and ergodic theory. It provides rigorous justification for why `.traerules` rules exist in their specific forms and how they collectively ensure system correctness, maintainability, and nomadic portability.
+This document presents a formal mathematical theory establishing the epistemological and ontological foundations of the Armatura architectural constitution. The theory is grounded in Popperian falsifiability, invariance principles, compositional algebra, Occam's razor, causality, and ergodic theory. It provides rigorous justification for why Armatura rules exist in their specific forms and how they collectively ensure system correctness, maintainability, and nomadic portability.
 
 **Keywords:** architectural invariants, compositional algebra, falsifiability, nomadic computing, CQRS, static verification
 
@@ -84,7 +84,7 @@ Equivalently: R(c) ∩ W(c) = ∅ for all side-effectful operations
 ```
 
 **Category-Theoretic Interpretation:**
-The system forms a category **Trae** where:
+The system forms a category **Armatura** where:
 - Objects: System states (State₁, State₂, ...)
 - Morphisms: Commands (mutations) and Queries (projections)
 - **Invariant:** No morphism is both epic (Command) and monic (Query) simultaneously in the same component.
@@ -170,7 +170,7 @@ MUST rules: Maximum falsifiability (absolute compliance checkable)
 ```
 
 **Degenerate Case:**
-A rule like "code should be good" is unfalsifiable—no concrete F_r exists. Such rules are excluded from .traerules by the `measurability` axiom.
+A rule like "code should be good" is unfalsifiable—no concrete F_r exists. Such rules are excluded from Armatura by the `measurability` axiom.
 
 ---
 
@@ -225,7 +225,7 @@ For metric M (e.g., "build success rate"):
     
     Time average          Ensemble average
     
-Consequence: A single long-running .traerules-compliant system
+Consequence: A single long-running Armatura-compliant system
 exhibits the same statistical properties as an ensemble of such systems.
 ```
 
@@ -249,14 +249,14 @@ This ensures: Detection of one violation doesn't predict others.
 
 ### 7.1 Minimum Description Length
 
-**Statement:** Among all valid architectural constitutions, .traerules minimizes description length.
+**Statement:** Among all valid architectural constitutions, Armatura minimizes description length.
 
 **MDL Criterion:**
 ```
 Let H = set of all possible architectural constitutions
 Let L(h) = Kolmogorov complexity of constitution h
 
-.traerules = argmin_{h ∈ ValidConstitutions} L(h)
+Armatura = argmin_{h ∈ ValidConstitutions} L(h)
 
 Subject to:
     ∀h: Valid(h) ⟹ System(h) satisfies requirements
@@ -328,7 +328,7 @@ system stability under load.
 
 ### 9.1 Consistency
 
-**Theorem:** .traerules is consistent (no contradictions).
+**Theorem:** Armatura is consistent (no contradictions).
 
 **Proof:**
 ```
@@ -336,24 +336,24 @@ All FORBIDDEN/MANDATORY pairs are disjoint:
     ∀r: ¬(FORBIDDEN(r) ∧ MANDATORY(r))
     
 All rules are satisfiable simultaneously in the reference implementation.
-∴ ∃Model ⊨ .traerules
-∴ .traerules is consistent.
+∴ ∃Model ⊨ Armatura
+∴ Armatura is consistent.
 ```
 
 ### 9.2 Completeness (within scope)
 
-**Theorem:** .traerules is complete for its domain.
+**Theorem:** Armatura is complete for its domain.
 
 **Definition:**
 ```
 For any architectural decision d in {DI, CQRS, state management, ...}:
-    either: d is covered by some rule r ∈ .traerules
+    either: d is covered by some rule r ∈ Armatura
     or:    d is explicitly excluded from scope (e.g., "UI layer exempt")
 ```
 
 ### 9.3 Independence from Implementation
 
-**Theorem:** .traerules specifies WHAT, not HOW.
+**Theorem:** Armatura specifies WHAT, not HOW.
 
 **Evidence:**
 - No specific class names (except examples)
@@ -366,14 +366,14 @@ For any architectural decision d in {DI, CQRS, state management, ...}:
 
 ### 10.1 Epistemological Status
 
-.traerules is a **normative scientific theory**:
+Armatura is a **normative scientific theory**:
 - **Descriptive:** It describes patterns that work (empirical generalization)
 - **Prescriptive:** It mandates patterns that should be used (normative force)
 - **Falsifiable:** Each rule can be empirically tested (Popperian)
 
 ### 10.2 Ontological Commitments
 
-.traerules commits to the existence of:
+Armatura commits to the existence of:
 1. **Components** (reified as classes/modules)
 2. **Flows** (reified as method calls/events)
 3. **States** (reified as data structures)
@@ -383,7 +383,7 @@ These are **pragmatic posits**—not metaphysical necessities, but useful fictio
 
 ### 10.3 Unity of Principles
 
-All principles in .traerules derive from four meta-principles:
+All principles in Armatura derive from four meta-principles:
 
 1. **Explicitness over Implicitness** (convention→configuration, magic→manifest)
 2. **Unidirectionality over Cyclicity** (DAGs→graphs, strict→loose coupling)
@@ -396,7 +396,7 @@ All principles in .traerules derive from four meta-principles:
 
 ### A. Gödelian Limitations
 
-**Theorem:** .traerules cannot prove its own consistency (by Gödel's Second Incompleteness Theorem).
+**Theorem:** Armatura cannot prove its own consistency (by Gödel's Second Incompleteness Theorem).
 
 **Response:**
 Consistency is established by:
@@ -417,14 +417,14 @@ These remain outside current scope to maintain decidability.
 
 ## Conclusion
 
-.traerules represents a **scientific architectural constitution** grounded in:
+Armatura represents a **scientific architectural constitution** grounded in:
 - **Mathematical rigor** (formal invariants, compositional algebra)
 - **Scientific methodology** (Popperian falsifiability, empirical testability)
 - **Philosophical coherence** (Occam's razor, causality, ergodicity)
 
-This theory provides the epistemological foundation for why .traerules rules exist, why they have their specific forms, and how they collectively ensure system correctness, maintainability, and nomadic portability.
+This theory provides the epistemological foundation for why Armatura rules exist, why they have their specific forms, and how they collectively ensure system correctness, maintainability, and nomadic portability.
 
-**The theory itself is falsifiable:** If any rule in .traerules is shown to be:
+**The theory itself is falsifiable:** If any rule in Armatura is shown to be:
 1. Unverifiable (no static check possible), or
 2. Unjustified (no causal benefit), or
 3. Redundant (covered by other rules), or
