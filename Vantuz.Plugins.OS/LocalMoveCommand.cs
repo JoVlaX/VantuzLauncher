@@ -25,25 +25,29 @@ public class LocalMoveCommand : ICommandPlugin
 
         context.Reporter.ReportState($"Локальное перемещение файлов ({localMoveQueue.Count})...");
 
-        int successCount = 0;
-        foreach (var op in localMoveQueue)
+        int successCount = await Task.Run(() =>
         {
-            try
+            int count = 0;
+            foreach (var op in localMoveQueue)
             {
-                if (File.Exists(op.SourcePath))
+                try
                 {
-                    // PathHelper.GetSafePath в DeltaAnalyzer уже гарантирует существование папки назначения
-                    if (File.Exists(op.DestPath)) File.Delete(op.DestPath);
-                    File.Move(op.SourcePath, op.DestPath);
-                    successCount++;
+                    if (File.Exists(op.SourcePath))
+                    {
+                        // PathHelper.GetSafePath в DeltaAnalyzer уже гарантирует существование папки назначения
+                        if (File.Exists(op.DestPath)) File.Delete(op.DestPath);
+                        File.Move(op.SourcePath, op.DestPath);
+                        count++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    context.Reporter.ReportState($"[WARN] Не удалось переместить {Path.GetFileName(op.SourcePath)}: {ex.Message}");
+                    // Не прерываем весь процесс из-за одной ошибки перемещения, файл просто попадет в очередь загрузки в следующий раз
                 }
             }
-            catch (Exception ex)
-            {
-                context.Reporter.ReportState($"[WARN] Не удалось переместить {Path.GetFileName(op.SourcePath)}: {ex.Message}");
-                // Не прерываем весь процесс из-за одной ошибки перемещения, файл просто попадет в очередь загрузки в следующий раз
-            }
-        }
+            return count;
+        });
 
         context.Set("LocalMoveSuccessCount", successCount);
         return new CommandResult(true);

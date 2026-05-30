@@ -30,38 +30,44 @@ public class BatchPurgeCommand : ICommandPlugin
 
         context.Reporter.ReportState("Сборка мусора и очистка...");
 
-        // 1. Удаление файлов
-        if (deleteQueue != null)
+        await Task.Run(() =>
         {
-            foreach (var filePath in deleteQueue)
+            // 1. Удаление файлов
+            if (deleteQueue != null)
             {
-                try
+                foreach (var filePath in deleteQueue)
                 {
-                    if (File.Exists(filePath)) File.Delete(filePath);
-                }
-                catch (IOException)
-                {
-                    // Игнорируем заблокированные файлы
+                    try
+                    {
+                        if (File.Exists(filePath)) File.Delete(filePath);
+                    }
+                    catch (IOException)
+                    {
+                        // Игнорируем заблокированные файлы
+                    }
                 }
             }
-        }
 
-        // 2. Удаление пустых папок (Bottom-Up)
-        foreach (var zone in purgeZones)
-        {
-            try
+            // 2. Удаление пустых папок (Bottom-Up)
+            if (purgeZones != null)
             {
-                string zonePath = PathHelper.GetSafePath(mcDir, zone);
-                if (Directory.Exists(zonePath))
+                foreach (var zone in purgeZones)
                 {
-                    DeleteEmptyDirs(zonePath);
+                    try
+                    {
+                        string zonePath = PathHelper.GetSafePath(mcDir, zone);
+                        if (Directory.Exists(zonePath))
+                        {
+                            DeleteEmptyDirs(zonePath);
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // Игнорируем ошибки доступа к папкам
+                    }
                 }
             }
-            catch (IOException)
-            {
-                // Игнорируем ошибки доступа к папкам
-            }
-        }
+        });
 
         int deletedFiles = deleteQueue?.Count ?? 0;
         context.Set("BatchPurgeDeletedFiles", deletedFiles);
