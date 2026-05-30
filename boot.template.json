@@ -32,7 +32,7 @@
       }
     },
     {
-      "pluginName": "Auth.Yggdrasil",
+      "pluginName": "Auth.YggdrasilCommand",
       "config": {
         "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate",
         "ignoreSslErrors": true,
