@@ -1,3 +1,5 @@
+#pragma warning disable ARM010 // TODO: Refactor FileStream to host-managed resource
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -161,3 +163,5 @@ public class DownloadCommand : ICommandPlugin
         return ValueTask.CompletedTask;
     }
 }
+
+#pragma warning restore ARM010

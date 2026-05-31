@@ -7,10 +7,11 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <PackageId>Armatura.Core.Sdk</PackageId>
     <PackageVersion>1.0.0</PackageVersion>
     <Authors>Armatura</Authors>
-    <Description>Roslyn analyzers for Armatura architectural constitution. Enforces ARM005 (CQRS Separation) and ARM007 (QuantizedNode Inheritance) at compile-time.</Description>
+    <Description>Roslyn analyzers for Armatura architectural constitution. Enforces ARM005-ARM010: CQRS Separation, QuantizedNode Inheritance, Free-form Async, Runtime DI, and Resource Cleanup rules at compile-time.</Description>
     <PackageTags>roslyn;analyzer;architecture;armatura;cqrs;quantized</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
@@ -20,6 +21,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
 
   <Target Name="_AddAnalyzersToOutput">

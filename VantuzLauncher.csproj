@@ -9,7 +9,7 @@
     <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <!-- .traerules:52 - compiler_trace_hiding: FORBIDDEN -->
+    <!-- INVARIANT_THEORY.md:45 - static verification required for falsifiability -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
 
@@ -22,6 +22,7 @@
     <Compile Remove="Vantuz.Plugins.Game\**" />
     <Compile Remove="Vantuz.Plugins.Minecraft\**" />
     <Compile Remove="Vantuz.Builder\**" />
+    <Compile Remove="Armatura.Core.Sdk\**" />
     <EmbeddedResource Remove="Vantuz.Core\**" />
     <EmbeddedResource Remove="Vantuz.Host\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.Auth\**" />

@@ -39,4 +39,26 @@ public static class DiagnosticDescriptors
         isEnabledByDefault: true,
         description: "Free-form async Task methods are forbidden. All async operations must be within ExecuteQuantumAsync() quantum boundaries."
     );
+
+    // ARM009: Runtime DI Container Forbidden
+    public static readonly DiagnosticDescriptor RuntimeDIContainer = new(
+        id: "ARM009",
+        title: "Runtime DI Container Forbidden",
+        messageFormat: "ARM009: Method '{0}' creates runtime DI service provider. Compile-time dependency resolution required per Armatura architectural constitution.",
+        category: "Architecture",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Runtime DI container creation is forbidden. All dependencies must be resolved at compile-time with explicit constructor injection."
+    );
+
+    // ARM010: Plugin-side Resource Cleanup Forbidden
+    public static readonly DiagnosticDescriptor PluginResourceCleanup = new(
+        id: "ARM010",
+        title: "Plugin-side Resource Cleanup Forbidden",
+        messageFormat: "ARM010: {0} - Resource cleanup must be host-managed through DAG Ref Counting",
+        category: "Architecture",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        description: "Plugin-side resource cleanup is forbidden. The host must manage all resource lifecycles through DAG Ref Counting."
+    );
 }

@@ -63,11 +63,9 @@ public class QuantizedNodeAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(diagnostic);
         }
 
-        // Check for free-form async methods
-        if (inheritsQuantizedNode)
-        {
-            CheckForFreeFormAsync(context, classDeclaration, classSymbol);
-        }
+        // INVARIANT_THEORY.md:188 - FORBIDDEN: free-form async Task
+        // Check for free-form async methods in ALL plugin classes
+        CheckForFreeFormAsync(context, classDeclaration, classSymbol);
     }
 
     private static bool IsInPluginNamespace(INamedTypeSymbol classSymbol)
@@ -112,6 +110,19 @@ public class QuantizedNodeAnalyzer : DiagnosticAnalyzer
             if (methodSymbol.Name == "ExecuteQuantumAsync" &&
                 methodSymbol.IsOverride &&
                 methodSymbol.DeclaredAccessibility == Accessibility.Public)
+            {
+                continue;
+            }
+
+            // Skip ExecuteAsync - interface method for IQueryPlugin/ICommandPlugin (allowed)
+            if (methodSymbol.Name == "ExecuteAsync" &&
+                methodSymbol.DeclaredAccessibility == Accessibility.Public)
+            {
+                continue;
+            }
+
+            // Skip IGameProvider methods - helper class, not pipeline plugin
+            if (ImplementsInterface(classSymbol, "IGameProvider"))
             {
                 continue;
             }

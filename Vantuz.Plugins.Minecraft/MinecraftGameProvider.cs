@@ -1,3 +1,5 @@
+#pragma warning disable ARM007 // MinecraftGameProvider is a helper class, not a pipeline plugin
+
 namespace Vantuz.Plugins.Minecraft;
 
 using System;
@@ -115,3 +117,5 @@ public class MinecraftGameProvider : IGameProvider
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
+
+#pragma warning restore ARM007
