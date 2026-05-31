@@ -8,7 +8,7 @@
 
 This document presents a formal mathematical theory establishing the epistemological and ontological foundations of the Armatura architectural constitution. The theory is grounded in Popperian falsifiability, invariance principles, compositional algebra, Occam's razor, causality, and ergodic theory. It provides rigorous justification for why Armatura rules exist in their specific forms and how they collectively ensure system correctness, maintainability, and nomadic portability.
 
-**Keywords:** architectural invariants, compositional algebra, falsifiability, nomadic computing, CQRS, static verification
+**Keywords:** architectural invariants, compositional algebra, falsifiability, nomadic computing, CQRS, static verification, meta-invariance, agentic execution
 
 ---
 
@@ -525,12 +525,131 @@ These remain outside current scope to maintain decidability.
 
 ---
 
+## 11. Meta-Invariance Axiom (Temporal Invariance)
+
+### 11.1 Statement
+
+**Statement:** Valid code remains valid under context evolution without modification.
+
+**Formalization:**
+```
+Let C = {c₁, c₂, ...} be the set of code artifacts
+Let T = {t₀, t₁, ...} be discrete time points
+Let Context(t) be the system context at time t
+Let Valid(c, context) ⟺ code c is correct in given context
+
+Meta-Invariance: ∀c ∈ C, ∀tᵢ, tⱼ ∈ T:
+    Valid(c, Context(tᵢ)) ⟹ Valid(c, Context(tⱼ))
+    where Context(tⱼ) = Evolution(Context(tᵢ), Δrules)
+    
+Corollary: Validity is preserved under rule evolution
+```
+
+### 11.2 Explicit Configuration Invariant
+
+**Statement:** Context-dependency MUST be externalized to manifests, not embedded in code.
+
+**Formalization:**
+```
+Let H(c) = {hardcoded values in c}
+Let M = manifest state (external configuration)
+
+Meta-Invariant Code: ∀c: H(c) = ∅ ∨ H(c) ⊆ {universal constants}
+
+∀contextual_value v: 
+    ¬(v ∈ H(c)) ⟹ v ∈ M
+    where M is independently versioned, validated, and migrated
+```
+
+**Justification (Occam's Razor):**
+Hardcoding duplicates context state into code. Externalizing eliminates this redundancy, achieving minimum description length across the code+manifest system.
+
+**Justification (SRP):**
+Code contains logic. Manifests contain context. Separation ensures single reason for change: logic changes for new requirements, manifest changes for new environments.
+
+### 11.3 Temporal Falsifiability
+
+**Statement:** Code validity MUST be verifiable without execution in target context.
+
+**Formalization:**
+```
+∀c: Valid(c, Context(tⱼ)) ⟺ ∃V: V(c, M(tⱼ)) = Valid
+where V is static verification function
+      M(tⱼ) is manifest at time tⱼ
+
+Note: V(c, M(tⱼ)) = Valid ⟹ Execution(c, Context(tⱼ)) = Success
+      with high probability (not guaranteed due to runtime factors)
+```
+
+**Verification Hierarchy:**
+1. **Static Analysis:** Type checking, linting, SRP enforcement
+2. **Manifest Validation:** Variable resolution, path interpolation
+3. **Contract Verification:** Interface conformance, null checks
+4. **Integration Testing:** Component interaction (requires execution)
+
+### 11.4 Context Evolution Protocol
+
+**Statement:** Context changes MUST be explicit, versioned, and reversible.
+
+**Formalization:**
+```
+Evolution(Context(tᵢ), Δ) = Context(tᵢ₊₁)
+
+Requirements:
+1. Explicit: Δ is declared, not emergent
+2. Versioned: ∃version(Context(tᵢ₊₁)) > version(Context(tᵢ))
+3. Reversible: ∃Δ⁻¹: Evolution(Context(tᵢ₊₁), Δ⁻¹) = Context(tᵢ)
+4. Validated: Valid(c, Context(tᵢ₊₁)) is checked before deployment
+```
+
+**Corollary:** No "magic" configuration changes. All context evolution is tracked, reviewed, and tested.
+
+### 11.5 Agentic Execution Invariant
+
+**Statement:** Code MUST be executable by autonomous agents without human interpretation.
+
+**Formalization:**
+```
+Let A = autonomous agent (AI, CI/CD, automated tool)
+Let Interpretable(code, agent) ⟺ agent can execute code correctly
+
+Meta-Invariant Code: ∀c, ∀A ∈ ValidAgents: Interpretable(c, A)
+
+Requirements for Interpretable:
+1. No implicit conventions (configuration is explicit)
+2. No undocumented assumptions (all preconditions in manifest)
+3. No human-in-the-loop decisions (deterministic branching)
+4. No environment-dependent implicit state (all state explicit)
+```
+
+**Justification (Composability):**
+Human-dependent code cannot be composed automatically. Agentic code enables: automated testing, CI/CD integration, autonomous deployment, AI-assisted development.
+
+**Example (Agent-Executable):**
+```csharp
+// Explicit configuration from manifest
+string mcDir = variables["mcDir"];
+string version = variables["gameVersion"];
+var forgeVersion = ForgeVersionParser.Parse(version);
+// No ambiguity: parser behavior is deterministic and documented
+```
+
+**Example (Non-Agentic):**
+```csharp
+// Implicit assumption, hardcoded logic
+if (version.Contains("forge")) { /* guess format */ }
+// Ambiguity: what if format changes? Agent cannot know intent.
+```
+
+---
+
 ## Conclusion
 
 Armatura represents a **scientific architectural constitution** grounded in:
 - **Mathematical rigor** (formal invariants, compositional algebra)
 - **Scientific methodology** (Popperian falsifiability, empirical testability)
 - **Philosophical coherence** (Occam's razor, causality, ergodicity)
+- **Meta-invariance** (temporal stability, agentic executability)
 
 This theory provides the epistemological foundation for why Armatura rules exist, why they have their specific forms, and how they collectively ensure system correctness, maintainability, and nomadic portability.
 
@@ -544,6 +663,6 @@ This theory provides the epistemological foundation for why Armatura rules exist
 
 ---
 
-*Document version: 1.0*
-*Last updated: 2026-05-30*
-*Status: Formalized Invariant Theory*
+*Document version: 1.1*
+*Last updated: 2026-05-31*
+*Status: Formalized Invariant Theory with Meta-Invariance Axiom*
