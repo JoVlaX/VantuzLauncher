@@ -21,10 +21,29 @@ namespace Vantuz.Plugins.Net
         { 
             _httpClient = new HttpClient(); 
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "VantuzLauncher-UpdateCommand/2.0"); 
+            // Per INVARIANT_THEORY.md §4.3 - timeout for HostManaged resource (HTTP download)
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
         } 
  
         public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig) 
         { 
+            // Per INVARIANT_THEORY.md §498 Explicitness - check for .dev marker file
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            bool isDevMode = File.Exists(Path.Combine(baseDir, ".dev"));
+            if (isDevMode)
+            {
+                context.Reporter.ReportState("[DEV MODE] Update check skipped per .dev marker file");
+                return new CommandResult(true);
+            }
+
+            // Per INVARIANT_THEORY.md §498 - explicit config flag also supported
+            bool skipUpdate = stepConfig.TryGetProperty("_skipUpdate", out var skipProp) && skipProp.GetBoolean();
+            if (skipUpdate)
+            {
+                context.Reporter.ReportState("[DEV MODE] Update check skipped per _skipUpdate config");
+                return new CommandResult(true);
+            }
+
             string currentVer = stepConfig.TryGetProperty("currentVersion", out var cv) ? Interpolate(cv.GetString() ?? "", context) : ""; 
             string targetVer = stepConfig.TryGetProperty("targetVersion", out var tv) ? Interpolate(tv.GetString() ?? "", context) : ""; 
 
@@ -38,7 +57,7 @@ namespace Vantuz.Plugins.Net
                 ?? throw new InvalidOperationException("URL is missing in UpdateCommand"); 
             url = Interpolate(url, context); 
  
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory; 
+            // baseDir already defined at method start for dev mode check
             string pendingDir = Path.Combine(baseDir, ".update_pending"); 
             string tempZip = Path.Combine(baseDir, "update_temp.zip"); 
  

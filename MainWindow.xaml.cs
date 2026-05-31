@@ -150,7 +150,30 @@ namespace VantuzLauncher
             StatusText.Text = "Инициализация движка..."; 
             LauncherProgress.Value = 0; 
              
-            _cts = new CancellationTokenSource(); 
+            string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json");
+            
+            // Per INVARIANT_THEORY.md §3.2 Nomadic Invariant - read timeout from manifest, not hardcoded
+            TimeSpan operationTimeout = TimeSpan.FromMinutes(5); // Default per Legacy Compatibility (§9.4)
+            try
+            {
+                if (File.Exists(bootJsonPath))
+                {
+                    var manifestJson = File.ReadAllText(bootJsonPath);
+                    using var doc = JsonDocument.Parse(manifestJson);
+                    if (doc.RootElement.TryGetProperty("variables", out var variables) &&
+                        variables.TryGetProperty("operationTimeout", out var timeoutProp))
+                    {
+                        var timeoutStr = timeoutProp.GetString();
+                        if (!string.IsNullOrEmpty(timeoutStr) && TimeSpan.TryParse(timeoutStr, out var parsed))
+                        {
+                            operationTimeout = parsed;
+                        }
+                    }
+                }
+            }
+            catch { /* Fallback to default per robustness principle */ }
+            
+            _cts = new CancellationTokenSource(operationTimeout); 
             AsyncFileReporter fileReporter = null;
 
             try 
@@ -166,6 +189,7 @@ namespace VantuzLauncher
 
                 string logPath = Path.Combine(_mcDir, "launcher_trace.log");
                 fileReporter = new AsyncFileReporter(logPath);
+                fileReporter.ReportState($"[CONFIG] operationTimeout from manifest: {operationTimeout}");
 
                 var compositeReporter = new CompositeReporter(uiReporter, fileReporter);
  
@@ -177,7 +201,6 @@ namespace VantuzLauncher
                     // mcDir теперь определяется в boot.json переменных (Nomadic-конфигурация)
                 }; 
  
-                string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json"); 
                 string pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"); 
                  
                 if (!File.Exists(bootJsonPath)) 

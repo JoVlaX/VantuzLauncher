@@ -1,10 +1,13 @@
 ﻿{
+  "_description": "Production manifest per INVARIANT_THEORY.md - explicit host-independent configuration",
   "variables": {
     "localVersion": "2.0-dev",
     "gameProvider": "Minecraft",
     "gameVersion": "1.20.1-forge-47.2.20",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
-    "installDir": "{{mcDir}}\\.minecraft"
+    "installDir": "{{mcDir}}\\.minecraft",
+    "operationTimeout": "00:05:00",
+    "_justification_timeout": "Per INVARIANT_THEORY.md §3.2 Nomadic Invariant - configurable per environment, travels with manifest"
   },
   "plugins": {
     "Vantuz.Plugins.Auth.dll": "",

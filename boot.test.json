@@ -6,7 +6,9 @@
     "gameProvider": "Minecraft",
     "gameVersion": "1.20.1-forge-47.2.20",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
-    "installDir": "{{mcDir}}\\.minecraft"
+    "installDir": "{{mcDir}}\\.minecraft",
+    "operationTimeout": "00:01:00",
+    "_justification_timeout": "Test mode uses shorter timeout per INVARIANT_THEORY.md §1.2 - faster feedback"
   },
   "plugins": {
     "Vantuz.Plugins.Auth.dll": "",

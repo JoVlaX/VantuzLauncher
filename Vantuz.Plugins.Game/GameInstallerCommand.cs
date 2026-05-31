@@ -65,14 +65,16 @@ public class GameInstallerCommand : ICommandPlugin
                 return new CommandResult(true);
             }
 
-            context.Reporter.ReportState($"Установка версии {versionName}...");
+            context.Reporter.ReportState($"[GameInstaller] Starting installation for {versionName}...");
 
             // Resolve provider
             var gameProvider = ResolveProvider(context, providerName);
             if (gameProvider == null)
             {
+                context.Reporter.ReportState($"[GameInstaller ERROR] Provider '{providerName}' not found in context");
                 return new CommandResult(false, $"Game provider '{providerName}' not found");
             }
+            context.Reporter.ReportState($"[GameInstaller] Provider resolved: {providerName}");
 
             // Install version
             var installResult = await gameProvider.InstallVersionAsync(
@@ -84,16 +86,22 @@ public class GameInstallerCommand : ICommandPlugin
 
             if (!installResult.Success)
             {
+                context.Reporter.ReportState($"[GameInstaller ERROR] Installation failed: {installResult.ErrorMessage}");
                 return new CommandResult(false, installResult.ErrorMessage ?? "Installation failed");
             }
 
-            context.Reporter.ReportState($"Версия {versionName} успешно установлена.");
+            context.Reporter.ReportState($"[GameInstaller] Version {versionName} installed successfully");
             context.Set("InstallSuccess", true);
             
             return new CommandResult(true);
         }
         catch (Exception ex)
         {
+            context.Reporter.ReportState($"[GameInstaller EXCEPTION] {ex.GetType().Name}: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                context.Reporter.ReportState($"[GameInstaller EXCEPTION] Inner: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
+            }
             return new CommandResult(false, ex.Message);
         }
     }

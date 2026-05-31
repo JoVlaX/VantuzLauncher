@@ -89,6 +89,10 @@
     <!-- Copy test manifest per INVARIANT_THEORY.md Explicitness - separate test configuration -->
     <Copy SourceFiles="$(ProjectDir)boot.test.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Message Text="[Vantuz Assembler] Test manifest copied: boot.test.json" Importance="high" />
+    
+    <!-- Copy .dev marker only for Debug builds per INVARIANT_THEORY.md §498 - explicit dev mode detection -->
+    <Copy SourceFiles="$(ProjectDir).dev" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'$(Configuration)' == 'Debug'" />
+    <Message Text="[Vantuz Assembler] Dev marker copied: .dev (Debug only)" Importance="high" Condition="'$(Configuration)' == 'Debug'" />
      
     <Message Text="[Vantuz Assembler] Running Manifest Builder for Hash Pinning..." Importance="high" /> 
     <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 

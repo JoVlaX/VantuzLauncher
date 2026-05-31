@@ -40,8 +40,13 @@ public class MinecraftGameProvider : IGameProvider
     {
         try
         {
+            reporter.ReportState($"[INSTALL] Initializing MinecraftPath for {version}...");
             var path = new MinecraftPath(installDir);
+            reporter.ReportState($"[INSTALL] MinecraftPath created: {path.BasePath}");
+            
+            reporter.ReportState($"[INSTALL] Creating MinecraftLauncher...");
             var launcher = new MinecraftLauncher(path);
+            reporter.ReportState($"[INSTALL] MinecraftLauncher created successfully");
 
             // Wire up progress reporting
             launcher.FileProgressChanged += (sender, args) =>
@@ -52,13 +57,24 @@ public class MinecraftGameProvider : IGameProvider
                 reporter.ReportProgress($"Downloading {args.Name}", progress);
             };
 
-            reporter.ReportState($"Installing Minecraft {version}...");
+            reporter.ReportState($"[INSTALL] Starting InstallAsync for {version}...");
             await launcher.InstallAsync(version);
+            reporter.ReportState($"[INSTALL] InstallAsync completed successfully");
             
             return new InstallResult(true);
         }
+        catch (OperationCanceledException)
+        {
+            reporter.ReportState($"[INSTALL ERROR] Installation cancelled (timeout or user abort)");
+            throw;
+        }
         catch (Exception ex)
         {
+            reporter.ReportState($"[INSTALL ERROR] {ex.GetType().Name}: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                reporter.ReportState($"[INSTALL ERROR] Inner: {ex.InnerException.Message}");
+            }
             return new InstallResult(false, ex.Message);
         }
     }
