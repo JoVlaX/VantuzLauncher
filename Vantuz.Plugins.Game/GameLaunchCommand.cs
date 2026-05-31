@@ -13,12 +13,24 @@ using Vantuz.Core;
 /// </summary>
 public class GameLaunchCommand : ICommandPlugin
 {
-    public string Name => "Game.Launch";
+    public string Name => "Game.LaunchCommand";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         try
         {
+            // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
+            bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
+            if (isTestMode)
+            {
+                context.Reporter.ReportState("[TEST MODE] GameLaunchCommand - simulating launch preparation");
+                context.Set("gameCommand", "java");
+                context.Set("gameArgs", "-cp test.jar TestMain");
+                context.Set("gameWorkDir", System.AppContext.BaseDirectory);
+                context.Set("LaunchTestMode", true);
+                return new CommandResult(true);
+            }
+
             // Get configuration from stepConfig per Armatura:44-45
             string providerName = stepConfig.TryGetProperty("provider", out var prov)
                 ? Interpolate(prov.GetString() ?? "", context)

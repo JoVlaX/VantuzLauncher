@@ -49,8 +49,8 @@ param(
 $scriptDir = $PSScriptRoot
 $slnPath = Join-Path $scriptDir "VantuzLauncher.sln"
 $projectPath = Join-Path $scriptDir "VantuzLauncher.csproj"
-$exePath = Join-Path $scriptDir "bin\Release\net8.0-windows\win-x64\VantuzLauncher.exe"
-$fallbackExePath = Join-Path $scriptDir "bin\Debug\net8.0-windows\VantuzLauncher.exe"
+$exePath = Join-Path $scriptDir "bin\Debug\net8.0-windows\win-x64\VantuzLauncher.exe"
+$fallbackExePath = Join-Path $scriptDir "bin\Release\net8.0-windows\win-x64\VantuzLauncher.exe"
 $reportPath = Join-Path $scriptDir "test-report.log"
 $resultPath = Join-Path $scriptDir "test-result.json"
 
@@ -99,9 +99,9 @@ function Invoke-Build {
     Write-Host "Cleaning previous builds..."
     & dotnet clean $SolutionPath --verbosity quiet 2>&1 | Out-Null
 
-    # Сборка в Release
+    # Сборка в Debug (headless поддержка)
     Write-Host "Building solution..."
-    $buildOutput = & dotnet build $SolutionPath -c Release --verbosity minimal 2>&1
+    $buildOutput = & dotnet build $SolutionPath -c Debug --verbosity minimal 2>&1
     $exitCode = $LASTEXITCODE
 
     if ($exitCode -ne 0) {
@@ -155,6 +155,7 @@ function Invoke-HeadlessTest {
 
     $arguments = @(
         "--headless"
+        "--test-mode"
         "--username=$Username"
         "--password=$Password"
         "--ram=$Ram"

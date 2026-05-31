@@ -14,12 +14,25 @@ namespace Vantuz.Plugins.OS;
 /// </summary>
 public class BatchPurgeCommand : ICommandPlugin
 {
-    public string Name => "OS.BatchPurge";
+    public string Name => "OS.BatchPurgeCommand";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         var deleteQueue = context.Get<List<string>>("DeleteQueue");
         var purgeZones = context.Get<List<string>>("PurgeZones");
+
+        // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
+        bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
+        bool isDryRun = stepConfig.TryGetProperty("_dryRun", out var dryRunProp) && dryRunProp.GetBoolean();
+
+        if (isTestMode || isDryRun)
+        {
+            int wouldDelete = deleteQueue?.Count ?? 0;
+            context.Reporter.ReportState($"[TEST MODE] BatchPurgeCommand - would delete {wouldDelete} files (dry-run)");
+            context.Set("BatchPurgeDeletedFiles", 0); // No actual deletions in test/dry-run mode
+            context.Set("BatchPurgeTestMode", true);
+            return new CommandResult(true);
+        }
 
         if ((deleteQueue == null || deleteQueue.Count == 0) && (purgeZones == null || purgeZones.Count == 0))
         {

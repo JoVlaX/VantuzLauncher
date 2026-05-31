@@ -250,7 +250,8 @@ function Start-AutoFixCycle {
     Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor $colors.Iteration
     
     $state = Initialize-State
-    Add-History "Orchestrator started (AutoFix: $AutoFix)"
+    $autoFixFlag = if ($AutoFix) { "Enabled" } else { "Disabled" }
+    Add-History "Orchestrator started (AutoFix: $autoFixFlag)"
     
     while ($true) {
         $state.iterations++
@@ -366,7 +367,12 @@ function Start-AutoFixCycle {
         Write-Host "║                 ✅ SUCCESS" -ForegroundColor $colors.Success
         Write-Host "║     Iterations: $($state.iterations)" -ForegroundColor $colors.Success
         Write-Host "║     Fixes applied: $($state.fixesApplied)" -ForegroundColor $colors.Success
-        Write-Host "║     Duration: $([DateTime]::UtcNow - [DateTime]$state.startTime)" -ForegroundColor $colors.Success
+        $duration = if ($state.startTime) { 
+            ([DateTime]::UtcNow - [DateTime]$state.startTime).ToString()
+        } else { 
+            "N/A" 
+        }
+        Write-Host "║     Duration: $duration" -ForegroundColor $colors.Success
         Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor $colors.Success
         
         return @{
@@ -375,7 +381,6 @@ function Start-AutoFixCycle {
             FixesApplied = $state.fixesApplied
             TestResult = $testResult.Result
         }
-    }
 }
 
 # ============================================

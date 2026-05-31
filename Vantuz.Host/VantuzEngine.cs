@@ -62,6 +62,12 @@ public class VantuzEngine
             var cqrsNodes = loader.LoadCqrsPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList();
             quantizedNodes.AddRange(cqrsNodes);
 
+            // Report plugin loading diagnostics per INVARIANT_THEORY.md Measurability (§1.2)
+            foreach (var log in loader.Diagnostics.Logs)
+            {
+                _reporter.ReportState(log);
+            }
+
             try
             {
                 // 4. Подготовка payload с интерполяцией переменных

@@ -13,7 +13,7 @@ using Vantuz.Core;
 /// </summary>
 public class ApiReaderQuery : IQueryPlugin
 {
-    public string Name => "Net.ApiReader";
+    public string Name => "Net.ApiReaderQuery";
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {

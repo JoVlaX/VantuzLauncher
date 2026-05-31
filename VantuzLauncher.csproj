@@ -85,6 +85,10 @@
     <Copy SourceFiles="@(PluginOSFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
     <Copy SourceFiles="@(PluginGameFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
     <Copy SourceFiles="@(PluginMinecraftFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" /> 
+    
+    <!-- Copy test manifest per INVARIANT_THEORY.md Explicitness - separate test configuration -->
+    <Copy SourceFiles="$(ProjectDir)boot.test.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Message Text="[Vantuz Assembler] Test manifest copied: boot.test.json" Importance="high" />
      
     <Message Text="[Vantuz Assembler] Running Manifest Builder for Hash Pinning..." Importance="high" /> 
     <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" /> 

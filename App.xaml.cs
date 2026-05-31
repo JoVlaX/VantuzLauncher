@@ -118,7 +118,8 @@ public partial class App : Application
         {
             Username = dict.GetValueOrDefault("username", "test"),
             Password = dict.GetValueOrDefault("password", "test"),
-            RamMb = int.TryParse(dict.GetValueOrDefault("ram", "4096"), out var ram) ? ram : 4096
+            RamMb = int.TryParse(dict.GetValueOrDefault("ram", "4096"), out var ram) ? ram : 4096,
+            TestMode = dict.ContainsKey("test-mode") || dict.ContainsKey("test")  // Phase 2: Nomadic testing
         };
 
         return true;

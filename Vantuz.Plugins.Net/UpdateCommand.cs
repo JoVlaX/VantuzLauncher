@@ -14,7 +14,7 @@ namespace Vantuz.Plugins.Net
     /// </summary>
     public class UpdateCommand : ICommandPlugin 
     { 
-        public string Name => "Net.Update"; 
+        public string Name => "Net.UpdateCommand"; 
         private readonly HttpClient _httpClient; 
  
         public UpdateCommand() 

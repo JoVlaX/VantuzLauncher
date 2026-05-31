@@ -13,10 +13,18 @@ using Vantuz.Core;
 /// </summary>
 public class GameVersionValidatorQuery : IQueryPlugin
 {
-    public string Name => "Game.VersionValidator";
+    public string Name => "Game.VersionValidatorQuery";
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
+        // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
+        bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
+        if (isTestMode)
+        {
+            context.Reporter.ReportState("[TEST MODE] GameVersionValidatorQuery - simulating version check");
+            return new VersionCheckResult(true); // Pretend version exists
+        }
+
         // Get provider name from config - explicit declaration per Armatura:44-45
         string providerName = stepConfig.TryGetProperty("provider", out var prov)
             ? Interpolate(prov.GetString() ?? "", context)

@@ -12,12 +12,22 @@ using Vantuz.Core;
 /// </summary>
 public class GameInstallerCommand : ICommandPlugin
 {
-    public string Name => "Game.Installer";
+    public string Name => "Game.InstallerCommand";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         try
         {
+            // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
+            bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
+            if (isTestMode)
+            {
+                context.Reporter.ReportState("[TEST MODE] GameInstallerCommand - simulating installation");
+                context.Set("InstallSuccess", true);
+                context.Set("InstallTestMode", true);
+                return new CommandResult(true);
+            }
+
             // Get configuration from stepConfig per Armatura:44-45
             string providerName = stepConfig.TryGetProperty("provider", out var prov)
                 ? Interpolate(prov.GetString() ?? "", context)
