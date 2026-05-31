@@ -1,7 +1,9 @@
 namespace Vantuz.Plugins.Game;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Vantuz.Core;
@@ -43,6 +45,9 @@ public class GameInstallerCommand : ICommandPlugin
 
             installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
+            // Per INVARIANT_THEORY.md §3.2 Nomadic - extract variables for path interpolation
+            var variables = ExtractVariables(context);
+            
             // Check previous validator result
             var checkResult = context.Get<VersionCheckResult>("Game.VersionValidator.Result");
             if (checkResult == null)
@@ -54,7 +59,7 @@ public class GameInstallerCommand : ICommandPlugin
                 {
                     return new CommandResult(false, $"Game provider '{providerName}' not found");
                 }
-                checkResult = await provider.CheckVersionAsync(versionName, installDir, context.CancellationToken);
+                checkResult = await provider.CheckVersionAsync(versionName, installDir, variables, context.CancellationToken);
             }
 
             // Skip if already exists
@@ -76,10 +81,11 @@ public class GameInstallerCommand : ICommandPlugin
             }
             context.Reporter.ReportState($"[GameInstaller] Provider resolved: {providerName}");
 
-            // Install version
+            // Install version with variables per INVARIANT_THEORY.md §3.2 Nomadic
             var installResult = await gameProvider.InstallVersionAsync(
                 versionName, 
-                installDir, 
+                installDir,
+                variables,
                 context.Reporter, 
                 context.CancellationToken
             );
@@ -114,6 +120,36 @@ public class GameInstallerCommand : ICommandPlugin
     {
         var key = $"GameProvider.{providerName}";
         return context.Get<IGameProvider>(key);
+    }
+    
+    /// <summary>
+    /// Extracts variables from context mutations per INVARIANT_THEORY.md §3.2 Nomadic Invariant.
+    /// Variables travel with manifest, not hardcoded in code.
+    /// </summary>
+    private static Dictionary<string, string> ExtractVariables(CommandContext context)
+    {
+        var variables = new Dictionary<string, string>();
+        
+        // Extract string variables from context mutations
+        var mutations = context.GetMutations();
+        foreach (var kvp in mutations)
+        {
+            if (kvp.Value is string strValue)
+            {
+                variables[kvp.Key] = strValue;
+            }
+        }
+        
+        // Per INVARIANT_THEORY.md §3.2 - ensure critical variables have fallbacks
+        // These should normally come from manifest, but we provide defaults for robustness
+        if (!variables.ContainsKey("mcDir"))
+        {
+            variables["mcDir"] = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                ".vantuzlauncher");
+        }
+        
+        return variables;
     }
 
     private static string Interpolate(string text, CommandContext context)

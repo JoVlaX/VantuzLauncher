@@ -3,8 +3,8 @@
 namespace Vantuz.Plugins.Minecraft;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CmlLib.Core;
@@ -21,12 +21,16 @@ public class MinecraftGameProvider : IGameProvider
 {
     public string ProviderName => "Minecraft";
 
-    public async Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
+    public async Task<VersionCheckResult> CheckVersionAsync(
+        string version, 
+        string installDir, 
+        Dictionary<string, string> variables,
+        CancellationToken ct)
     {
         try
         {
-            // Fix variable interpolation per INVARIANT_THEORY.md §498 Explicitness
-            installDir = InterpolatePath(installDir);
+            // Per INVARIANT_THEORY.md §498 Explicitness - interpolate from manifest variables
+            installDir = PathInterpolator.Interpolate(installDir, variables);
             
             var path = new MinecraftPath(installDir);
             var versionJsonPath = path.GetVersionJsonPath(version);
@@ -40,12 +44,17 @@ public class MinecraftGameProvider : IGameProvider
         }
     }
 
-    public async Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct)
+    public async Task<InstallResult> InstallVersionAsync(
+        string version, 
+        string installDir, 
+        Dictionary<string, string> variables,
+        IStatusReporter reporter, 
+        CancellationToken ct)
     {
         try
         {
-            // Fix variable interpolation per INVARIANT_THEORY.md §498 Explicitness
-            installDir = InterpolatePath(installDir);
+            // Per INVARIANT_THEORY.md §498 Explicitness - interpolate from manifest variables
+            installDir = PathInterpolator.Interpolate(installDir, variables);
             reporter.ReportState($"[INSTALL] Resolved installDir: {installDir}");
             
             reporter.ReportState($"[INSTALL] Initializing MinecraftPath for {version}...");
@@ -56,15 +65,16 @@ public class MinecraftGameProvider : IGameProvider
             var launcher = new MinecraftLauncher(path);
             reporter.ReportState($"[INSTALL] MinecraftLauncher created successfully");
             
-            // Detect Forge version format: 1.20.1-forge-47.2.20
-            if (TryParseForgeVersion(version, out var mcVersion, out var forgeVersion))
+            // Per SRP: Use ForgeVersionParser for version detection only
+            var forgeVersion = ForgeVersionParser.Parse(version);
+            if (forgeVersion.IsValid)
             {
-                reporter.ReportState($"[FORGE] Detected Forge version: Minecraft={mcVersion}, Forge={forgeVersion}");
+                reporter.ReportState($"[FORGE] Detected Forge version: Minecraft={forgeVersion.MinecraftVersion}, Forge={forgeVersion.ForgeVersionNumber}");
                 
                 var forgeInstaller = new ForgeInstaller(launcher);
                 reporter.ReportState($"[FORGE] Starting Forge installation...");
                 
-                await forgeInstaller.Install(forgeVersion, mcVersion);
+                await forgeInstaller.Install(forgeVersion.ForgeVersionNumber, forgeVersion.MinecraftVersion);
                 
                 reporter.ReportState($"[FORGE] Forge installation completed successfully");
                 return new InstallResult(true);
@@ -104,11 +114,12 @@ public class MinecraftGameProvider : IGameProvider
     public async Task<LaunchParameters> BuildLaunchParametersAsync(
         string version, 
         string installDir, 
+        Dictionary<string, string> variables,
         LaunchOptions options, 
         CancellationToken ct)
     {
-        // Fix variable interpolation per INVARIANT_THEORY.md §498 Explicitness
-        installDir = InterpolatePath(installDir);
+        // Per INVARIANT_THEORY.md §498 Explicitness - interpolate from manifest variables
+        installDir = PathInterpolator.Interpolate(installDir, variables);
         
         var path = new MinecraftPath(installDir);
         var launcher = new MinecraftLauncher(path);
@@ -157,55 +168,6 @@ public class MinecraftGameProvider : IGameProvider
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-
-    /// <summary>
-    /// Interpolates path variables like {{mcDir}} per INVARIANT_THEORY.md §498
-    /// </summary>
-    private static string InterpolatePath(string path)
-    {
-        if (string.IsNullOrEmpty(path)) return path;
-        
-        // Replace {{mcDir}} with actual Minecraft directory
-        if (path.Contains("{{mcDir}}"))
-        {
-            var mcDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                ".vantuzlauncher");
-            path = path.Replace("{{mcDir}}", mcDir);
-        }
-        
-        // Replace other common variables
-        if (path.Contains("${special:ApplicationData}"))
-        {
-            path = path.Replace("${special:ApplicationData}", 
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-        }
-        
-        return Path.GetFullPath(path);
-    }
-
-    /// <summary>
-    /// Detects and parses Forge version format: 1.20.1-forge-47.2.20
-    /// Returns true if Forge format detected, with mcVersion and forgeVersion out parameters
-    /// </summary>
-    private static bool TryParseForgeVersion(string version, out string mcVersion, out string forgeVersion)
-    {
-        mcVersion = string.Empty;
-        forgeVersion = string.Empty;
-        
-        if (string.IsNullOrEmpty(version)) return false;
-        
-        // Format: 1.20.1-forge-47.2.20
-        var parts = version.Split("-forge-");
-        if (parts.Length == 2)
-        {
-            mcVersion = parts[0];
-            forgeVersion = parts[1];
-            return true;
-        }
-        
-        return false;
-    }
 }
 
 #pragma warning restore ARM007

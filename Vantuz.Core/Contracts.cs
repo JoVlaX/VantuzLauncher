@@ -104,18 +104,35 @@ public interface IGameProvider : IAsyncDisposable
     
     /// <summary>
     /// Check if version exists locally
+    /// Per INVARIANT_THEORY.md §3.2 Nomadic - variables from manifest, not hardcoded
     /// </summary>
-    Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct);
+    Task<VersionCheckResult> CheckVersionAsync(
+        string version, 
+        string installDir, 
+        Dictionary<string, string> variables,
+        CancellationToken ct);
     
     /// <summary>
     /// Install/update the specified version
+    /// Per INVARIANT_THEORY.md §3.2 Nomadic - variables from manifest, not hardcoded
     /// </summary>
-    Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct);
+    Task<InstallResult> InstallVersionAsync(
+        string version, 
+        string installDir, 
+        Dictionary<string, string> variables,
+        IStatusReporter reporter, 
+        CancellationToken ct);
     
     /// <summary>
     /// Build launch parameters for OS.Executor
+    /// Per INVARIANT_THEORY.md §3.2 Nomadic - variables from manifest, not hardcoded
     /// </summary>
-    Task<LaunchParameters> BuildLaunchParametersAsync(string version, string installDir, LaunchOptions options, CancellationToken ct);
+    Task<LaunchParameters> BuildLaunchParametersAsync(
+        string version, 
+        string installDir, 
+        Dictionary<string, string> variables,
+        LaunchOptions options, 
+        CancellationToken ct);
 }
 
 /// <summary>

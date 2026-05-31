@@ -3,6 +3,7 @@ namespace Vantuz.Plugins.Game;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Vantuz.Core;
@@ -54,6 +55,9 @@ public class GameLaunchCommand : ICommandPlugin
             if (ramMb == 0) ramMb = 4096;
             string? javaPath = context.Get<string>("javaPath");
 
+            // Per INVARIANT_THEORY.md §3.2 Nomadic - extract variables for path interpolation
+            var variables = ExtractVariables(context);
+
             // Build extra options from stepConfig
             var extraOptions = new Dictionary<string, object>();
             if (stepConfig.TryGetProperty("authlibPath", out var alp))
@@ -70,7 +74,7 @@ public class GameLaunchCommand : ICommandPlugin
                 return new CommandResult(false, $"Game provider '{providerName}' not found");
             }
 
-            // Build launch parameters using universal interface
+            // Build launch parameters using universal interface with variables
             var launchOptions = new LaunchOptions(
                 PlayerName: playerName,
                 AccessToken: accessToken,
@@ -82,7 +86,8 @@ public class GameLaunchCommand : ICommandPlugin
 
             var launchParams = await provider.BuildLaunchParametersAsync(
                 versionName, 
-                installDir, 
+                installDir,
+                variables,
                 launchOptions, 
                 context.CancellationToken
             );
@@ -121,6 +126,35 @@ public class GameLaunchCommand : ICommandPlugin
             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? "");
         }
         return text;
+    }
+    
+    /// <summary>
+    /// Extracts variables from context mutations per INVARIANT_THEORY.md §3.2 Nomadic Invariant.
+    /// Variables travel with manifest, not hardcoded in code.
+    /// </summary>
+    private static Dictionary<string, string> ExtractVariables(CommandContext context)
+    {
+        var variables = new Dictionary<string, string>();
+        
+        // Extract string variables from context mutations
+        var mutations = context.GetMutations();
+        foreach (var kvp in mutations)
+        {
+            if (kvp.Value is string strValue)
+            {
+                variables[kvp.Key] = strValue;
+            }
+        }
+        
+        // Per INVARIANT_THEORY.md §3.2 - ensure critical variables have fallbacks
+        if (!variables.ContainsKey("mcDir"))
+        {
+            variables["mcDir"] = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                ".vantuzlauncher");
+        }
+        
+        return variables;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

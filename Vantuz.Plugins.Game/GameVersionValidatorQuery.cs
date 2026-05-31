@@ -1,7 +1,9 @@
 namespace Vantuz.Plugins.Game;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +42,9 @@ public class GameVersionValidatorQuery : IQueryPlugin
 
         installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
+        // Per INVARIANT_THEORY.md §3.2 Nomadic - extract variables for path interpolation
+        var variables = ExtractVariables(context);
+
         context.Reporter.ReportState($"Проверка версии {versionName}...");
 
         // Resolve provider from context (registered by provider plugin)
@@ -49,8 +54,8 @@ public class GameVersionValidatorQuery : IQueryPlugin
             throw new InvalidOperationException($"Game provider '{providerName}' not found. Ensure the provider plugin is loaded.");
         }
 
-        // Check version using universal interface
-        var result = await provider.CheckVersionAsync(versionName, installDir, context.CancellationToken);
+        // Check version using universal interface with variables
+        var result = await provider.CheckVersionAsync(versionName, installDir, variables, context.CancellationToken);
 
         if (!result.Exists)
         {
@@ -82,6 +87,34 @@ public class GameVersionValidatorQuery : IQueryPlugin
             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? "");
         }
         return text;
+    }
+    
+    /// <summary>
+    /// Extracts variables from context payload per INVARIANT_THEORY.md §3.2 Nomadic Invariant.
+    /// Variables travel with manifest, not hardcoded in code.
+    /// </summary>
+    private static Dictionary<string, string> ExtractVariables(QueryContext context)
+    {
+        var variables = new Dictionary<string, string>();
+        
+        // Extract string variables from context payload
+        foreach (var kvp in context.Payload)
+        {
+            if (kvp.Value is string strValue)
+            {
+                variables[kvp.Key] = strValue;
+            }
+        }
+        
+        // Per INVARIANT_THEORY.md §3.2 - ensure critical variables have fallbacks
+        if (!variables.ContainsKey("mcDir"))
+        {
+            variables["mcDir"] = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                ".vantuzlauncher");
+        }
+        
+        return variables;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
