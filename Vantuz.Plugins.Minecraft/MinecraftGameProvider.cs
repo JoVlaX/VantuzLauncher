@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
+using CmlLib.Core.Installer.Forge;
 using CmlLib.Core.ProcessBuilder;
 using Vantuz.Core;
 
@@ -24,6 +25,9 @@ public class MinecraftGameProvider : IGameProvider
     {
         try
         {
+            // Fix variable interpolation per INVARIANT_THEORY.md §498 Explicitness
+            installDir = InterpolatePath(installDir);
+            
             var path = new MinecraftPath(installDir);
             var versionJsonPath = path.GetVersionJsonPath(version);
             var versionExists = File.Exists(versionJsonPath);
@@ -40,6 +44,10 @@ public class MinecraftGameProvider : IGameProvider
     {
         try
         {
+            // Fix variable interpolation per INVARIANT_THEORY.md §498 Explicitness
+            installDir = InterpolatePath(installDir);
+            reporter.ReportState($"[INSTALL] Resolved installDir: {installDir}");
+            
             reporter.ReportState($"[INSTALL] Initializing MinecraftPath for {version}...");
             var path = new MinecraftPath(installDir);
             reporter.ReportState($"[INSTALL] MinecraftPath created: {path.BasePath}");
@@ -47,6 +55,20 @@ public class MinecraftGameProvider : IGameProvider
             reporter.ReportState($"[INSTALL] Creating MinecraftLauncher...");
             var launcher = new MinecraftLauncher(path);
             reporter.ReportState($"[INSTALL] MinecraftLauncher created successfully");
+            
+            // Detect Forge version format: 1.20.1-forge-47.2.20
+            if (TryParseForgeVersion(version, out var mcVersion, out var forgeVersion))
+            {
+                reporter.ReportState($"[FORGE] Detected Forge version: Minecraft={mcVersion}, Forge={forgeVersion}");
+                
+                var forgeInstaller = new ForgeInstaller(launcher);
+                reporter.ReportState($"[FORGE] Starting Forge installation...");
+                
+                await forgeInstaller.Install(forgeVersion, mcVersion);
+                
+                reporter.ReportState($"[FORGE] Forge installation completed successfully");
+                return new InstallResult(true);
+            }
 
             // Wire up progress reporting
             launcher.FileProgressChanged += (sender, args) =>
@@ -85,6 +107,9 @@ public class MinecraftGameProvider : IGameProvider
         LaunchOptions options, 
         CancellationToken ct)
     {
+        // Fix variable interpolation per INVARIANT_THEORY.md §498 Explicitness
+        installDir = InterpolatePath(installDir);
+        
         var path = new MinecraftPath(installDir);
         var launcher = new MinecraftLauncher(path);
 
@@ -132,6 +157,55 @@ public class MinecraftGameProvider : IGameProvider
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+
+    /// <summary>
+    /// Interpolates path variables like {{mcDir}} per INVARIANT_THEORY.md §498
+    /// </summary>
+    private static string InterpolatePath(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return path;
+        
+        // Replace {{mcDir}} with actual Minecraft directory
+        if (path.Contains("{{mcDir}}"))
+        {
+            var mcDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                ".vantuzlauncher");
+            path = path.Replace("{{mcDir}}", mcDir);
+        }
+        
+        // Replace other common variables
+        if (path.Contains("${special:ApplicationData}"))
+        {
+            path = path.Replace("${special:ApplicationData}", 
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+        }
+        
+        return Path.GetFullPath(path);
+    }
+
+    /// <summary>
+    /// Detects and parses Forge version format: 1.20.1-forge-47.2.20
+    /// Returns true if Forge format detected, with mcVersion and forgeVersion out parameters
+    /// </summary>
+    private static bool TryParseForgeVersion(string version, out string mcVersion, out string forgeVersion)
+    {
+        mcVersion = string.Empty;
+        forgeVersion = string.Empty;
+        
+        if (string.IsNullOrEmpty(version)) return false;
+        
+        // Format: 1.20.1-forge-47.2.20
+        var parts = version.Split("-forge-");
+        if (parts.Length == 2)
+        {
+            mcVersion = parts[0];
+            forgeVersion = parts[1];
+            return true;
+        }
+        
+        return false;
+    }
 }
 
 #pragma warning restore ARM007
