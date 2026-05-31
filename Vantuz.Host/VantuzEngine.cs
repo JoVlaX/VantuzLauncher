@@ -15,7 +15,7 @@ public record StepConfig(string PluginName, JsonElement Config);
 
 /// <summary>
 /// VantuzEngine с поддержкой QuantizedNode (квантованного выполнения).
-/// Согласно .traerules:96-98 и .traerules:169-174.
+/// Согласно Armatura:96-98 и .traerules:169-174.
 /// </summary>
 public class VantuzEngine
 {
@@ -135,7 +135,7 @@ public class VantuzEngine
     /// <summary>
     /// Интерполирует переменные вида {{key}} используя значения из payload.
     /// Поддерживает ${env:VAR} и ${special:Folder} для Nomadic конфигурации.
-    /// Согласно .traerules:42 (Explicit Input Payloads) и :65 (No hardcoded paths).
+    /// Согласно Armatura:42 (Explicit Input Payloads) и :65 (No hardcoded paths).
     /// </summary>
     private static Dictionary<string, string> InterpolateVariables(
         Dictionary<string, string> variables,

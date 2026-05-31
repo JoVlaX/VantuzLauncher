@@ -8,7 +8,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// ARM005 CQRS Command: Universal game version installer using IGameProvider.
-/// Per .traerules:126 - no external dependencies, works with any game.
+/// Per Armatura:126 - no external dependencies, works with any game.
 /// </summary>
 public class GameInstallerCommand : ICommandPlugin
 {
@@ -18,7 +18,7 @@ public class GameInstallerCommand : ICommandPlugin
     {
         try
         {
-            // Get configuration from stepConfig per .traerules:44-45
+            // Get configuration from stepConfig per Armatura:44-45
             string providerName = stepConfig.TryGetProperty("provider", out var prov)
                 ? Interpolate(prov.GetString() ?? "", context)
                 : throw new InvalidOperationException("provider is missing in stepConfig");

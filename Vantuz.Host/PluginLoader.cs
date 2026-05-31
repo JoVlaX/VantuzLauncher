@@ -22,7 +22,7 @@ namespace Vantuz.Host
 
         /// <summary>
         /// Загружает QuantizedNode из директории плагинов.
-        /// Согласно .traerules:98 - новый паттерн вместо free-form async.
+        /// Согласно Armatura:98 - новый паттерн вместо free-form async.
         /// </summary>
         public IEnumerable<QuantizedNode> LoadQuantizedNodesFromDirectory(string pluginsPath, List<string> allowedDlls)
         {
@@ -74,7 +74,7 @@ namespace Vantuz.Host
         /// <summary>
         /// Загружает CQRS плагины (ICommandPlugin, IQueryPlugin) из директории плагинов.
         /// Оборачивает их в QuantizedNode адаптеры.
-        /// Согласно .traerules:98 - возвращаем QuantizedNode для квантованного выполнения.
+        /// Согласно Armatura:98 - возвращаем QuantizedNode для квантованного выполнения.
         /// </summary>
         public IEnumerable<QuantizedNode> LoadCqrsPluginsFromDirectory(string pluginsPath, List<string> allowedDlls)
         {

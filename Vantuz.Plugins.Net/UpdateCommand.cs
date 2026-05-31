@@ -10,7 +10,7 @@ namespace Vantuz.Plugins.Net
 { 
     /// <summary>
     /// ARM005 CQRS Command: Скачивание и подготовка обновлений лаунчера.
-    /// Per .traerules:76-78 - только запись/модификация состояния.
+    /// Per Armatura:76-78 - только запись/модификация состояния.
     /// </summary>
     public class UpdateCommand : ICommandPlugin 
     { 

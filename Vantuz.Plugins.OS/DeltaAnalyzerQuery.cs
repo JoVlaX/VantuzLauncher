@@ -10,7 +10,7 @@ namespace Vantuz.Plugins.OS;
 
 /// <summary>
 /// ARM005 CQRS Query: Анализ дельты между текущим и целевым состоянием.
-/// Per .traerules:76-78 - только чтение, нет side effects.
+/// Per Armatura:76-78 - только чтение, нет side effects.
 /// </summary>
 public class DeltaAnalyzerQuery : IQueryPlugin
 {

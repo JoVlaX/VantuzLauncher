@@ -9,7 +9,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// ARM005 CQRS Query: Universal version validator using IGameProvider.
-/// Per .traerules:126 - no external dependencies, works with any game.
+/// Per Armatura:126 - no external dependencies, works with any game.
 /// </summary>
 public class GameVersionValidatorQuery : IQueryPlugin
 {
@@ -17,7 +17,7 @@ public class GameVersionValidatorQuery : IQueryPlugin
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
-        // Get provider name from config - explicit declaration per .traerules:44-45
+        // Get provider name from config - explicit declaration per Armatura:44-45
         string providerName = stepConfig.TryGetProperty("provider", out var prov)
             ? Interpolate(prov.GetString() ?? "", context)
             : throw new InvalidOperationException("provider is missing in stepConfig");

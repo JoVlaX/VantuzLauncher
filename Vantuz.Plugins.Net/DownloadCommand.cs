@@ -11,7 +11,7 @@ namespace Vantuz.Plugins.Net;
 
 /// <summary>
 /// ARM005 CQRS Command: Пакетная загрузка файлов с транзакционным коммитом.
-/// Per .traerules:76-78 - только запись/модификация состояния.
+/// Per Armatura:76-78 - только запись/модификация состояния.
 /// </summary>
 public class DownloadCommand : ICommandPlugin
 {

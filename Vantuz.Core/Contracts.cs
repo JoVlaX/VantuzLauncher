@@ -91,8 +91,8 @@ public record CommandResult(bool Success, string? ErrorMessage = null);
 
 // ============================================
 // UNIVERSAL GAME PROVIDER ABSTRACTION
-// Per .traerules:126 - isolate external dependencies
-// Per .traerules:72 - Anticorruption Layer for game-specific APIs
+// Per Armatura:126 - isolate external dependencies
+// Per Armatura:72 - Anticorruption Layer for game-specific APIs
 // ============================================
 
 /// <summary>

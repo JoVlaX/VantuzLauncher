@@ -6,8 +6,8 @@ using Vantuz.Core;
 
 /// <summary>
 /// Plugin entry point that registers MinecraftGameProvider for use by universal game plugins.
-/// Per .traerules:44 - explicit declaration in manifest.
-/// Per .traerules:76-78 - Command plugin for state mutation (provider registration).
+/// Per Armatura:44 - explicit declaration in manifest.
+/// Per Armatura:76-78 - Command plugin for state mutation (provider registration).
 /// </summary>
 public class MinecraftProviderCommand : ICommandPlugin
 {

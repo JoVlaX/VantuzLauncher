@@ -4,11 +4,12 @@
     <Nullable>enable</Nullable> 
     <ImplicitUsings>enable</ImplicitUsings> 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <!-- .traerules:52 - compiler_trace_hiding: FORBIDDEN -->
+    <!-- Armatura:52 - compiler_trace_hiding: FORBIDDEN -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup> 
   <ItemGroup> 
     <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" /> 
+    <Analyzer Include="..\Armatura.Core.Sdk\bin\$(Configuration)\netstandard2.0\Armatura.Core.Sdk.dll" />
   </ItemGroup> 
-  <!-- Per .traerules:126 - no game-specific dependencies here, universal only --> 
+  <!-- Per Armatura:126 - no game-specific dependencies here, universal only --> 
 </Project> 

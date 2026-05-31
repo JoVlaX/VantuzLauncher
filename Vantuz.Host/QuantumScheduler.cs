@@ -12,10 +12,10 @@ using Vantuz.Core;
 /// <summary>
 /// Планировщик квантового выполнения для QuantizedNode.
 /// Реализует:
-/// - Task Bundling (.traerules:174)
-/// - Cooperative yielding (.traerules:172)
-/// - Host-controlled scheduling (.traerules:172)
-/// - Continuous Proportional Backoff (.traerules:223-229)
+/// - Task Bundling (Armatura:174)
+/// - Cooperative yielding (Armatura:172)
+/// - Host-controlled scheduling (Armatura:172)
+/// - Continuous Proportional Backoff (Armatura:223-229)
 /// </summary>
 internal sealed class QuantumScheduler
 {

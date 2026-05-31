@@ -9,7 +9,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// ARM005 CQRS Command: Запуск исполняемых процессов.
-/// Per .traerules:76-78 - только запись/модификация состояния (запуск процесса).
+/// Per Armatura:76-78 - только запись/модификация состояния (запуск процесса).
 /// </summary>
 public class ExecuteCommand : ICommandPlugin
 {

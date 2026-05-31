@@ -12,7 +12,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// Minecraft-specific implementation of IGameProvider using CmlLib.Core.
-/// Per .traerules:126 - CmlLib dependency isolated here only.
+/// Per Armatura:126 - CmlLib dependency isolated here only.
 /// </summary>
 public class MinecraftGameProvider : IGameProvider
 {

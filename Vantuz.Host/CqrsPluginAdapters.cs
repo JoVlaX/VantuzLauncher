@@ -9,7 +9,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// Адаптер для ICommandPlugin - оборачивает Command-операции в QuantizedNode.
-/// Согласно .traerules:98 - наследуется от QuantizedNode, без free-form async.
+/// Согласно Armatura:98 - наследуется от QuantizedNode, без free-form async.
 /// </summary>
 internal sealed class CqrsCommandAdapter : QuantizedNode
 {
@@ -94,8 +94,8 @@ internal sealed class CqrsCommandAdapter : QuantizedNode
 
 /// <summary>
 /// Адаптер для IQueryPlugin - оборачивает Query-операции в QuantizedNode.
-/// Согласно .traerules:98 - наследуется от QuantizedNode.
-/// Query только читает, не модифицирует состояние (traerules:76-79).
+/// Согласно Armatura:98 - наследуется от QuantizedNode.
+/// Query только читает, не модифицирует состояние (Armatura:76-79).
 /// </summary>
 internal sealed class CqrsQueryAdapter : QuantizedNode
 {

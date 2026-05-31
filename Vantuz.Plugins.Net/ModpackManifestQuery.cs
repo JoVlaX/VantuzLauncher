@@ -14,7 +14,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// ARM005 CQRS Query: Загрузка манифеста модпака и конвертация в TargetState.
-/// Per .traerules:126 - no external dependencies in domain types.
+/// Per Armatura:126 - no external dependencies in domain types.
 /// </summary>
 public class ModpackManifestQuery : IQueryPlugin
 {
@@ -30,7 +30,7 @@ public class ModpackManifestQuery : IQueryPlugin
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
-        // Get URL from config per .traerules:44-45
+        // Get URL from config per Armatura:44-45
         string manifestUrl = stepConfig.TryGetProperty("url", out var url)
             ? Interpolate(url.GetString() ?? "", context)
             : throw new InvalidOperationException("url is missing in stepConfig");

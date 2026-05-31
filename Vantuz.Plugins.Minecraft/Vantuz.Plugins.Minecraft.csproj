@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" />
+    <Analyzer Include="..\Armatura.Core.Sdk\bin\$(Configuration)\netstandard2.0\Armatura.Core.Sdk.dll" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CmlLib.Core" Version="4.0.6" />

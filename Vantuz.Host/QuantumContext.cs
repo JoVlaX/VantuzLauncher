@@ -10,7 +10,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// Реализация IQuantumContext для управления квантом выполнения.
-/// Согласно .traerules:169-174 - Host-контролируемое scheduling.
+/// Согласно Armatura:169-174 - Host-контролируемое scheduling.
 /// </summary>
 internal sealed class QuantumContext : IQuantumContext, IDisposable
 {

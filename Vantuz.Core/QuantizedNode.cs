@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// ARM007: QuantizedNode - базовый класс для квантованного выполнения плагинов.
 /// Заменяет free-form async Task методы на строго контролируемые кванты выполнения.
-/// Согласно .traerules:96-98 и .traerules:169-174.
+/// Согласно Armatura:96-98 и Armatura:169-174.
 /// </summary>
 public abstract class QuantizedNode : IAsyncDisposable
 {

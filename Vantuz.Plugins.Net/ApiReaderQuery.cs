@@ -9,7 +9,7 @@ using Vantuz.Core;
 
 /// <summary>
 /// ARM005 CQRS Query: Чтение данных из API.
-/// Per .traerules:76-78 - только чтение, нет side effects.
+/// Per Armatura:76-78 - только чтение, нет side effects.
 /// </summary>
 public class ApiReaderQuery : IQueryPlugin
 {
