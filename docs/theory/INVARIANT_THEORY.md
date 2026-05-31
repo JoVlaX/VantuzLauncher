@@ -93,6 +93,37 @@ This separation ensures the system maintains the **Law of Demeter** at the archi
 
 ---
 
+### 2.3 Component Scope Invariant
+
+**Statement:** Rules apply selectively based on component position in architectural hierarchy.
+
+**Formalization:**
+```
+Let H = {Application, Plugin, ExternalAbstraction, System} be the component hierarchy.
+Let Scope: Rules → P(H) define valid levels for each rule.
+
+For any rule r and component c:
+    Apply(r, c) ⟺ Level(c) ∈ Scope(r)
+
+Example mappings:
+    Scope(ARM008) = {Plugin}                    // Pipeline nodes only
+    Scope(ARM010) = {Plugin}                    // Pipeline resource management
+    Scope(ARM007) = {Plugin, ExternalAbstraction} // Inheritance requirements
+```
+
+**Justification (Pragmatic Scope Restriction):**
+Armatura rules target specific architectural concerns. External abstractions (IGameProvider) implement external API bridges, not pipeline execution. System components (HttpClient) are managed by runtime. Applying pipeline rules to non-pipeline components creates false positives without improving correctness.
+
+**Proof of Non-Interference:**
+```
+∀c: Level(c) = ExternalAbstraction ⟹ c ∉ {IQueryPlugin, ICommandPlugin}
+∴ ARM008(c) is undefined (no free-form async concern)
+
+∴ Scope restriction preserves rule validity.
+```
+
+---
+
 ## 3. Compositional Algebra
 
 ### 3.1 Rule Composition Laws
@@ -171,6 +202,42 @@ MUST rules: Maximum falsifiability (absolute compliance checkable)
 
 **Degenerate Case:**
 A rule like "code should be good" is unfalsifiable—no concrete F_r exists. Such rules are excluded from Armatura by the `measurability` axiom.
+
+---
+
+### 4.3 Resource Classification Theorem
+
+**Statement:** Resource management rules apply by resource lifecycle category.
+
+**Formalization:**
+```
+Let R be the set of all disposable resources.
+Define Category: R → {HostManaged, RuntimeManaged, UserManaged}
+
+Where:
+    HostManaged    = {FileStream, SqlConnection, custom IDisposable}
+    RuntimeManaged = {HttpClient, SemaphoreSlim, CancellationTokenSource}
+    UserManaged    = {UI components, temporary caches}
+
+ARM010 applies to:
+    {r ∈ R | Category(r) = HostManaged}
+
+With falsifier set:
+    F_r = {using FileStream, new FileStream(...), stream.Dispose()}
+    E_r = {Roslyn analyzer detecting FileStream instantiation}
+```
+
+**Justification (Category-Theoretic Classification):**
+Different resources have different ownership semantics. RuntimeManaged resources have deterministic finalization via CLR. HostManaged resources require explicit lifecycle coordination. UserManaged resources fall outside compile-time verification scope.
+
+This classification maintains decidability: we can statically distinguish FileStream (compile-time type) from HttpClient (also compile-time type) by their Category mapping.
+
+**Empirical Basis:**
+```
+Observation: HttpClient disposal timing doesn't affect pipeline determinism.
+Observation: FileStream disposal timing affects file locking and availability.
+∴ Different treatment is empirically justified.
+```
 
 ---
 
@@ -359,6 +426,49 @@ For any architectural decision d in {DI, CQRS, state management, ...}:
 - No specific class names (except examples)
 - No framework versions
 - Abstract constraints applicable to any language/runtime
+
+---
+
+### 9.4 Legacy Compatibility Theorem
+
+**Statement:** Temporary rule exemptions are valid with explicit markers, deadlines, and causal justification.
+
+**Formalization:**
+```
+Define Exemption(e, r, c) as a temporary non-application of rule r to component c.
+
+ValidExemption(e) ⟺
+    ∃ Marker(m): m ∈ {TODO, FIXME, pragma warning disable} ∧ 
+    ∃ Deadline(d): d ∈ ISO8601 ∧ d > Now() ∧
+    ∃ Justification(j): CausalLink(j, r) ∧
+    ∃ Owner(o): o ∈ TeamMembers
+
+Temporal enforcement:
+    Severity(e) = Warning  if Now() < d - 30 days
+    Severity(e) = Error    if Now() ≥ d
+
+Example:
+    // TODO: Refactor to host-managed resource (deadline: 2026-12-01)
+    #pragma warning disable ARM010
+    using FileStream stream = ...
+    #pragma warning restore ARM010
+```
+
+**Justification (Popperian Degeneration Protection):**
+Without explicit markers, exemptions become unfalsifiable (we can't track them). Without deadlines (ISO8601 format per Axiom 1.2), they become permanent (violating Occam's Razor—unnecessary entities). Without causal justification, they become ad-hoc (non-scientific).
+
+This theorem preserves falsifiability: exemptions are observable, time-bounded, and traceable to specific architectural constraints.
+
+**Proof of Consistency:**
+```
+Assume ∃ permanent exemption e with no deadline.
+Then: ¬∃ date when r applies to c
+∴ r is not falsifiable for c
+∴ violates Popperian Criterion (Section 1.2)
+∴ ValidExemption(e) requires finite deadline
+
+∴ Legacy Compatibility preserves scientific status of Armatura.
+```
 
 ---
 

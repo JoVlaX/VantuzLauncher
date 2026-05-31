@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace VantuzLauncher;
@@ -17,6 +20,7 @@ public partial class App : Application
     private static bool _ownsMutex;
 
     public static string WorkspacePath { get; private set; } = string.Empty;
+    private static bool _isHeadless = false;
 
     public static string DetermineWorkspace()
     {
@@ -43,13 +47,28 @@ public partial class App : Application
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
             var ex = (Exception)args.ExceptionObject;
-            // логика логгирования
-            MessageBox.Show($"Критическая ошибка:\n{ex.Message}\n{ex.StackTrace}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (_isHeadless)
+            {
+                Console.Error.WriteLine($"CRITICAL: {ex.Message}\n{ex.StackTrace}");
+                Environment.Exit(2);
+            }
+            else
+            {
+                MessageBox.Show($"Критическая ошибка:\n{ex.Message}\n{ex.StackTrace}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         };
 
         WorkspacePath = DetermineWorkspace();
 
-        // Проверка прав доступа до создания окон
+        // Проверяем headless-режим по аргументам
+        if (TryParseHeadlessArgs(e.Args, out var headlessOptions))
+        {
+            _isHeadless = true;
+            RunHeadlessMode(headlessOptions);
+            return;
+        }
+
+        // Обычный графический режим
         try
         {
             string testFile = Path.Combine(WorkspacePath, ".access_test");
@@ -67,6 +86,77 @@ public partial class App : Application
 
         base.OnStartup(e);
         new MainWindow().Show();
+    }
+
+    private static bool TryParseHeadlessArgs(string[] args, out HeadlessRunner.HeadlessOptions options)
+    {
+        options = new HeadlessRunner.HeadlessOptions();
+
+        var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var arg in args)
+        {
+            if (arg.StartsWith("--"))
+            {
+                var parts = arg.Substring(2).Split('=', 2);
+                if (parts.Length == 2)
+                    dict[parts[0]] = parts[1];
+                else if (parts.Length == 1)
+                    dict[parts[0]] = "true";
+            }
+            else if (arg.StartsWith("-"))
+            {
+                var key = arg.Substring(1);
+                dict[key] = "true";
+            }
+        }
+
+        // Headless режим активируется только при явном флаге --headless
+        if (!dict.ContainsKey("headless"))
+            return false;
+
+        options = new HeadlessRunner.HeadlessOptions
+        {
+            Username = dict.GetValueOrDefault("username", "test"),
+            Password = dict.GetValueOrDefault("password", "test"),
+            RamMb = int.TryParse(dict.GetValueOrDefault("ram", "4096"), out var ram) ? ram : 4096
+        };
+
+        return true;
+    }
+
+    private void RunHeadlessMode(HeadlessRunner.HeadlessOptions options)
+    {
+        // Отключаем создание окон для headless-режима
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                var result = await HeadlessRunner.RunAsync(options, cts.Token);
+
+                // Сохраняем результат
+                string outputPath = Path.Combine(WorkspacePath, "test-result.json");
+                HeadlessRunner.SaveResult(result, outputPath);
+
+                // Выводим в консоль
+                Console.WriteLine($"\n=== TEST RESULT ===");
+                Console.WriteLine($"Status: {result.Status}");
+                Console.WriteLine($"Duration: {result.Duration.TotalSeconds:F2}s");
+                if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    Console.WriteLine($"Error: {result.ErrorMessage}");
+                Console.WriteLine($"Output: {outputPath}");
+
+                // Exit code: 0 = success, 1 = failure
+                Environment.Exit(result.Success ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Headless runner error: {ex.Message}");
+                Environment.Exit(2);
+            }
+        });
     }
 
     private bool InitializeSingleInstanceLock(string targetWorkspace)
