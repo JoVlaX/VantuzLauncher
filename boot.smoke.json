@@ -1,0 +1,48 @@
+{
+  "_description": "Smoke test per INVARIANT_THEORY.md §1.2 Measurability - validates real Forge API without full installation",
+  "_principles": ["SRP", "Explicitness", "Determinism", "Nomadic", "Measurability", "Agentic"],
+  "variables": {
+    "localVersion": "2.0-dev",
+    "gameProvider": "Minecraft",
+    "gameVersion": "1.20.1-forge-47.3.0",
+    "mcDir": "${temp}\\vantuz_smoke_{{$timestamp}}",
+    "installDir": "{{mcDir}}\\.minecraft",
+    "operationTimeout": "00:00:30",
+    "_justification_timeout": "Smoke test uses short timeout per INVARIANT_THEORY.md §1.2 - fast feedback"
+  },
+  "plugins": {
+    "Vantuz.Plugins.Auth.dll": "",
+    "Vantuz.Plugins.Net.dll": "",
+    "Vantuz.Plugins.OS.dll": "",
+    "Vantuz.Plugins.Game.dll": "",
+    "Vantuz.Plugins.Minecraft.dll": ""
+  },
+  "pipeline": [
+    {
+      "pluginName": "Auth.TestAuthCommand",
+      "config": {}
+    },
+    {
+      "pluginName": "Game.MinecraftProvider",
+      "config": {}
+    },
+    {
+      "_description": "Phase 3: REAL version validation per Measurability (§1.2) - no _testMode",
+      "pluginName": "Game.VersionValidatorQuery",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}"
+      }
+    },
+    {
+      "_description": "Phase 4: Health check per Agentic Execution (§11.5)",
+      "pluginName": "OS.ExecuteCommand",
+      "config": {
+        "command": "echo",
+        "arguments": "Smoke test completed successfully per INVARIANT_THEORY.md",
+        "_validateOnly": true
+      }
+    }
+  ]
+}

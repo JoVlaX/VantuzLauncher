@@ -71,10 +71,35 @@ public class MinecraftGameProvider : IGameProvider
             {
                 reporter.ReportState($"[FORGE] Detected Forge version: Minecraft={forgeVersion.MinecraftVersion}, Forge={forgeVersion.ForgeVersionNumber}");
                 
-                var forgeInstaller = new ForgeInstaller(launcher);
-                reporter.ReportState($"[FORGE] Starting Forge installation...");
+                // Per §9.4 Legacy Compatibility - deprecation warning for known bad versions
+                if (forgeVersion.ForgeVersionNumber == "47.2.20")
+                {
+                    reporter.ReportState($"[FORGE WARN] Version 47.2.20 deprecated (deadline: 2026-06-30)");
+                    reporter.ReportState($"[FORGE WARN] Per INVARIANT_THEORY.md §9.4 - migrate to newer version");
+                }
                 
-                await forgeInstaller.Install(forgeVersion.ForgeVersionNumber, forgeVersion.MinecraftVersion);
+                // Per §11.3 Temporal Falsifiability - pre-flight version validation
+                reporter.ReportState($"[FORGE] Querying available versions...");
+                var availableVersions = await ForgeVersionResolver.GetAvailableVersionsAsync(
+                    forgeVersion.MinecraftVersion, reporter, ct);
+                
+                if (availableVersions.Count == 0)
+                {
+                    reporter.ReportState($"[FORGE ERROR] No Forge versions available for MC {forgeVersion.MinecraftVersion}");
+                    return new InstallResult(false, "Forge repository unreachable");
+                }
+                
+                // Per §11.1 Determinism - explicit version selection
+                var selectedForgeVersion = ForgeVersionSelector.SelectVersion(
+                    forgeVersion.ForgeVersionNumber, 
+                    availableVersions, 
+                    reporter);
+                
+                // Per §11.5 Agentic - all inputs validated, proceeding with installation
+                reporter.ReportState($"[FORGE] Installing {selectedForgeVersion} for MC {forgeVersion.MinecraftVersion}");
+                
+                var forgeInstaller = new ForgeInstaller(launcher);
+                await forgeInstaller.Install(selectedForgeVersion, forgeVersion.MinecraftVersion);
                 
                 reporter.ReportState($"[FORGE] Forge installation completed successfully");
                 return new InstallResult(true);

@@ -4,7 +4,7 @@
   "variables": {
     "localVersion": "2.0-dev",
     "gameProvider": "Minecraft",
-    "gameVersion": "1.20.1-forge-47.2.20",
+    "gameVersion": "1.20.1-forge-47.3.0",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
     "installDir": "{{mcDir}}\\.minecraft",
     "operationTimeout": "00:01:00",
@@ -29,23 +29,21 @@
       "config": {}
     },
     {
-      "_comment": "Phase 3: Version validation per Measurability (31)",
+      "_comment": "Phase 3: Version validation per Measurability (31) - uses real ForgeVersionResolver",
       "pluginName": "Game.VersionValidatorQuery",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
-        "installDir": "{{installDir}}",
-        "_testMode": true
+        "installDir": "{{installDir}}"
       }
     },
     {
-      "_comment": "Phase 3: Mock installer - creates minimal test environment",
+      "_comment": "Phase 3: Real installer with SRP version resolution per INVARIANT_THEORY.md §2.2",
       "pluginName": "Game.InstallerCommand",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
-        "installDir": "{{installDir}}",
-        "_testMode": true
+        "installDir": "{{installDir}}"
       }
     },
     {
@@ -87,8 +85,7 @@
         "version": "{{gameVersion}}",
         "installDir": "{{installDir}}",
         "authlibPath": "{{mcDir}}\\authlib-injector.jar",
-        "authlibUrl": "test://yggdrasil/",
-        "_testMode": true
+        "authlibUrl": "test://yggdrasil/"
       }
     },
     {
