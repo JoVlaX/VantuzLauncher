@@ -60,11 +60,13 @@ public partial class App : Application
 
         WorkspacePath = DetermineWorkspace();
 
-        // Проверяем headless-режим по аргументам
+        // Проверяем headless-режим по аргументам (per INVARIANT_THEORY.md §1.2 Measurability)
         if (TryParseHeadlessArgs(e.Args, out var headlessOptions))
         {
             _isHeadless = true;
+            ShutdownMode = ShutdownMode.OnExplicitShutdown; // Prevent automatic shutdown
             RunHeadlessMode(headlessOptions);
+            Shutdown(); // Explicit shutdown after headless completes
             return;
         }
 
@@ -157,7 +159,7 @@ public partial class App : Application
                 Console.Error.WriteLine($"Headless runner error: {ex.Message}");
                 Environment.Exit(2);
             }
-        });
+        }).Wait(); // Wait for headless execution to complete (per INVARIANT_THEORY.md §11.5)
     }
 
     private bool InitializeSingleInstanceLock(string targetWorkspace)
