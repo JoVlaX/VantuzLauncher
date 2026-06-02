@@ -156,6 +156,7 @@ function Invoke-HeadlessTest {
     $arguments = @(
         "--headless"
         "--test-mode"
+        "--boot=boot.test.json"
         "--username=$Username"
         "--password=$Password"
         "--ram=$Ram"

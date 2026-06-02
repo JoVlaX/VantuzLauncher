@@ -1,0 +1,68 @@
+{
+  "_comment": "Production boot for Minecraft Launcher with GUI per INVARIANT_THEORY.md §498",
+  "product": "MinecraftLauncher",
+  "variables": {
+    "localVersion": "2.0-dev",
+    "gameProvider": "Minecraft",
+    "gameVersion": "1.20.1-forge-47.3.0",
+    "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
+    "installDir": "{{mcDir}}\\.minecraft",
+    "operationTimeout": "00:05:00"
+  },
+  "plugins": {
+    "Vantuz.Plugins.Auth.dll": "",
+    "Vantuz.Plugins.Net.dll": "",
+    "Vantuz.Plugins.OS.dll": "",
+    "Vantuz.Plugins.Game.dll": "",
+    "Vantuz.Plugins.Minecraft.dll": "",
+    "Vantuz.Products.MinecraftLauncher.GUI.dll": ""
+  },
+  "pipeline": [
+    {
+      "_comment": "Phase 1: User authentication (production)",
+      "pluginName": "Auth.LoginCommand",
+      "config": {
+        "provider": "Yggdrasil",
+        "authServer": "https://authserver.mojang.com"
+      }
+    },
+    {
+      "_comment": "Phase 2: Game installation",
+      "pluginName": "Game.InstallerCommand",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}"
+      }
+    },
+    {
+      "_comment": "Phase 3: Version validation",
+      "pluginName": "Game.VersionValidatorQuery",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}"
+      }
+    },
+    {
+      "_comment": "Phase 4: Launch preparation",
+      "pluginName": "Game.LaunchCommand",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}",
+        "authlibPath": "{{mcDir}}\\authlib-injector.jar",
+        "authlibUrl": "https://yggdrasil.example.com/"
+      }
+    },
+    {
+      "_comment": "Phase 5: GUI - Per §498, GUI is explicit pipeline step",
+      "pluginName": "GUI.MinecraftLauncher",
+      "config": {
+        "theme": "dark",
+        "showProgress": true,
+        "autoCloseOnLaunch": false
+      }
+    }
+  ]
+}

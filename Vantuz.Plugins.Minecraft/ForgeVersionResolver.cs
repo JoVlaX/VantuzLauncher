@@ -31,6 +31,13 @@ public static class ForgeVersionResolver
         // Per §1.2 Measurability - explicit logging of query
         reporter.ReportState($"[FORGE QUERY] Fetching versions for MC {mcVersion}");
         
+        // Per §11.5 Agentic - explicit validation of inputs
+        if (string.IsNullOrWhiteSpace(mcVersion))
+        {
+            reporter.ReportState("[FORGE QUERY ERROR] mcVersion is null or empty");
+            return new List<string>().AsReadOnly();
+        }
+
         try
         {
             // Per §11.5 Agentic - use ForgeInstaller to query Forge versions
@@ -39,7 +46,9 @@ public static class ForgeVersionResolver
             var launcher = new CmlLib.Core.MinecraftLauncher(path);
             var forgeInstaller = new ForgeInstaller(launcher);
             var forgeVersions = await forgeInstaller.GetForgeVersions(mcVersion);
-            var versionList = forgeVersions?.Select(v => v.ForgeVersionName).ToList() ?? new List<string>();
+            var versionList = forgeVersions?.Where(v => v != null && !string.IsNullOrWhiteSpace(v.ForgeVersionName))
+                                              .Select(v => v.ForgeVersionName)
+                                              .ToList() ?? new List<string>();
             
             // Per §11.3 - observable result
             int count = versionList.Count();
@@ -64,9 +73,12 @@ public static class ForgeVersionResolver
     /// <summary>
     /// Parses semantic version for proper ordering.
     /// Per §11.1 Determinism - Temperature=0, unambiguous sorting.
+    /// Per §11.5 Agentic - explicit null handling.
     /// </summary>
     private static System.Version ParseVersion(string version)
     {
+        if (string.IsNullOrWhiteSpace(version))
+            return new System.Version(0, 0, 0, 0);
         if (System.Version.TryParse(version, out var parsed))
             return parsed;
         return new System.Version(0, 0, 0, 0);

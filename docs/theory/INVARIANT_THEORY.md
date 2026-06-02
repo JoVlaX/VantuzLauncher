@@ -499,6 +499,8 @@ All principles in Armatura derive from four meta-principles:
 2. **Unidirectionality over Cyclicity** (DAGs→graphs, strict→loose coupling)
 3. **Compositionality over Monolithicity** (plugins→monoliths, quantized→free)
 4. **Verifiability over Trust** (static→runtime, automated→manual)
+5. **Additivity over Multiplicative Complexity** (linear→exponential, sum→product)
+6. **Systemness over Aggregation** (emergent order→mere collection, invariant-governed→ad-hoc)
 
 ---
 
@@ -643,6 +645,89 @@ if (version.Contains("forge")) { /* guess format */ }
 
 ---
 
+## 12. Workspace Structure Invariant
+
+### 12.1 File System Boundary Invariant
+
+**Statement:** Every file in the workspace belongs to exactly one component boundary.
+
+**Formalization:**
+```
+Let F = {f₁, f₂, ...} be all files in workspace
+Let C = {Application, Core, Host, Plugins, Tests, Docs} be component boundaries
+
+∀f ∈ F: ∃! c ∈ C: Owner(f) = c
+
+where Owner(f) = c ⟺ Path(f) ⊂ Directory(c)
+```
+
+**Justification (Occam's Razor §7.1):**
+Files outside component directories ("orphan" files in project root) create ambiguity—agents cannot determine which assembly owns the code. This violates the Minimum Description Length principle: the path should encode ownership without external metadata.
+
+**Popperian Criterion (Falsifiability §1.2):**
+```
+F_r = {any .cs, .json file in project root}
+E_r = {CI check: find . -maxdepth 1 -name "*.cs" returns empty}
+```
+
+---
+
+### 12.2 Test Isolation Invariant
+
+**Statement:** Test code MUST NOT mix with production code in the same assembly.
+
+**Formalization:**
+```
+Let P = production source files
+Let T = test source files
+
+Constraint: P ∩ T = ∅ at file level
+Constraint: Assembly(P) ∩ Assembly(T) = ∅ at binary level
+
+Corollary: Test utilities referencing external components
+           must reside in separate *.Tests.csproj projects
+```
+
+**Justification (Agentic Execution §11.5):**
+Mixed assemblies require agents to analyze file content to distinguish test from production code. Separation enables deterministic composition: agents reference production assemblies without side-effects, and test assemblies without shipping test code.
+
+**Popperian Criterion (Falsifiability §1.2):**
+```
+F_r = {test-*.cs files in project root or src/ directories}
+E_r = {grep -r "class.*Test" *.cs in non-test directories}
+```
+
+---
+
+### 12.3 Namespace-File Correspondence Invariant
+
+**Statement:** Namespace structure MUST reflect directory structure 1:1.
+
+**Formalization:**
+```
+Namespace(f) = Directory(f) path segments joined by "."
+
+∀f: Namespace(f) matches PathSegments(Directory(f))
+
+Example:
+    File: Vantuz.Plugins.Minecraft/ForgeVersionParser.cs
+    Namespace: Vantuz.Plugins.Minecraft
+```
+
+**Justification (Measurability §1.2):**
+Namespace-directory mismatch breaks static dependency resolution—compilers and analyzers cannot locate types by namespace alone. This makes verification undecidable, violating the Axiom of Measurability.
+
+**Justification (Nomadic Invariant §3.2):**
+Consistent paths enable host-independent navigation. An agent on any platform can resolve `Vantuz.Plugins.Minecraft` to the filesystem path without host-specific knowledge.
+
+**Popperian Criterion (Falsifiability §1.2):**
+```
+F_r = {file where declared_namespace ≠ derived_from_path}
+E_r = {Roslyn analyzer validating namespace-path correspondence}
+```
+
+---
+
 ## Conclusion
 
 Armatura represents a **scientific architectural constitution** grounded in:
@@ -650,6 +735,7 @@ Armatura represents a **scientific architectural constitution** grounded in:
 - **Scientific methodology** (Popperian falsifiability, empirical testability)
 - **Philosophical coherence** (Occam's razor, causality, ergodicity)
 - **Meta-invariance** (temporal stability, agentic executability)
+- **Workspace structure** (file boundaries, test isolation, namespace correspondence)
 
 This theory provides the epistemological foundation for why Armatura rules exist, why they have their specific forms, and how they collectively ensure system correctness, maintainability, and nomadic portability.
 
@@ -663,6 +749,73 @@ This theory provides the epistemological foundation for why Armatura rules exist
 
 ---
 
-*Document version: 1.1*
-*Last updated: 2026-05-31*
-*Status: Formalized Invariant Theory with Meta-Invariance Axiom*
+### 10.4 Meta-Principle: Additivity
+
+**Statement:** System complexity grows as sum of independent component complexities, not product.
+
+**Formalization:**
+```
+Let S = {c₁, c₂, ..., cₙ} be system components
+Let Complexity(X) = |description of X| by Kolmogorov
+
+Additive System:
+    Complexity(S) = Σᵢ Complexity(cᵢ) + O(log n)
+    where O(log n) is combination overhead
+    
+Non-Additive (Monolithic):
+    Complexity(S) = O(Πᵢ |cᵢ|) or worse
+    
+Meta-Invariant: ∀ valid Armatura systems:
+    Complexity(system) ≤ Σ Complexity(components) + O(log |components|)
+```
+
+**Justification (§7.1 MDL + §3.2 Nomadic + §11.1 Meta-Invariance):**
+
+Additivity achieves minimum description length across component boundaries.
+Without additivity, composition would create emergent complexity violating
+nomadic portability. Meta-invariance requires that adding a component
+adds predictable complexity, not exponential growth.
+
+**Popperian Criterion:**
+```
+F_r = {system where Complexity(whole) >> Σ Complexity(parts)}
+E_r = {cyclomatic complexity analysis: verify linear vs exponential growth}
+```
+
+---
+
+### 10.5 Meta-Principle: Systemness
+
+**Statement:** Whole exceeds sum of parts through invariant-governed composition.
+
+**Formalization:**
+```
+Let S = {c₁, ..., cₙ} be components
+Let I = {i₁, ..., iₘ} be invariant set
+
+Systemness(S) ⟺
+    ∃I: |I| < |S| ∧
+    ∀c ∈ S: c satisfies I ∧
+    EmergentProperty(S) emerges from I
+    
+ρ(S) = |EmergentCapabilities(S)| / |I|
+ρ(S) > 1 ⟺ true system
+```
+
+**Justification (§2.1 Architectural Flow + §3.1 Composition Laws + §10.4 Additivity):**
+
+Systemness ensures invariants create emergent capabilities beyond components.
+DAG structure enables predictable emergence. Composition laws guarantee 
+associative composition. Additivity ensures manageable complexity.
+
+**Popperian Criterion:**
+```
+F_r = {collection without emergent capabilities from invariants}
+E_r = {architectural analysis: verify ρ(S) > 1}
+```
+
+---
+
+*Document version: 1.3.0*
+*Last updated: 2026-06-02*
+*Status: Formalized Invariant Theory with Additivity and Systemness meta-principles*

@@ -1,0 +1,111 @@
+{
+  "_description": "GUI-enabled boot manifest per COMPOSITUM_SPECIFICATION.md - GUI is a plugin, not Core",
+  "variables": {
+    "localVersion": "2.0-dev",
+    "gameProvider": "Minecraft",
+    "gameVersion": "1.20.1-forge-47.3.0",
+    "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
+    "installDir": "{{mcDir}}\\.minecraft",
+    "operationTimeout": "00:05:00",
+    "_justification": "GUI plugins loaded as first step per COMPOSITUM_SPECIFICATION.md §4.1"
+  },
+  "plugins": {
+    "Vantuz.Products.MinecraftLauncher.GUI.dll": "",
+    "Vantuz.Plugins.Auth.dll": "",
+    "Vantuz.Plugins.Net.dll": "",
+    "Vantuz.Plugins.OS.dll": "",
+    "Vantuz.Plugins.Game.dll": "",
+    "Vantuz.Plugins.Minecraft.dll": ""
+  },
+  "pipeline": [
+    {
+      "pluginName": "GUI.MinecraftLauncher",
+      "config": {
+        "_description": "Initialize GUI and provide ICredentialProvider capability"
+      }
+    },
+    {
+      "pluginName": "GUI.CredentialCollection",
+      "config": {
+        "_description": "Collect username/password from user via GUI"
+      }
+    },
+    {
+      "pluginName": "Net.ApiReaderQuery",
+      "config": {
+        "url": "https://troglobit.webhm.pro/launcher_version.txt",
+        "payloadKey": "remoteVersion",
+        "ignoreSslErrors": true,
+        "fallback": "2.0-dev"
+      }
+    },
+    {
+      "pluginName": "Net.UpdateCommand",
+      "config": {
+        "url": "https://troglobit.webhm.pro/launcher.zip",
+        "currentVersion": "{{localVersion}}",
+        "targetVersion": "{{remoteVersion}}",
+        "scriptName": "update.bat"
+      }
+    },
+    {
+      "pluginName": "Auth.YggdrasilCommand",
+      "config": {
+        "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate",
+        "ignoreSslErrors": true,
+        "launcherVersion": "{{remoteVersion}}"
+      }
+    },
+    {
+      "pluginName": "Game.MinecraftProvider",
+      "config": {}
+    },
+    {
+      "pluginName": "Game.VersionValidatorQuery",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}"
+      }
+    },
+    {
+      "pluginName": "Game.InstallerCommand",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}"
+      }
+    },
+    {
+      "pluginName": "Net.ModpackManifestQuery",
+      "config": {
+        "url": "https://troglobit.webhm.pro/modpack/latest/modpack.json",
+        "installDir": "{{installDir}}",
+        "ignoreSslErrors": true
+      }
+    },
+    { "pluginName": "OS.DeltaAnalyzerQuery", "config": {} },
+    { "pluginName": "OS.LocalMoveCommand", "config": {} },
+    { "pluginName": "Net.DownloadCommand", "config": {} },
+    { "pluginName": "OS.BatchPurgeCommand", "config": {} },
+    {
+      "pluginName": "Game.LaunchCommand",
+      "config": {
+        "provider": "{{gameProvider}}",
+        "version": "{{gameVersion}}",
+        "installDir": "{{installDir}}",
+        "authlibPath": "{{mcDir}}\\authlib-injector.jar",
+        "authlibUrl": "{{authEndpoint}}/yggdrasil/"
+      }
+    },
+    {
+      "pluginName": "OS.ExecuteCommand",
+      "config": {
+        "fileName": "{{gameCommand}}",
+        "arguments": "{{gameArgs}}",
+        "workDir": "{{gameWorkDir}}",
+        "waitForExit": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "schema_description": "Armatura Document Hierarchy Manifest — machine-readable document state",
+  "last_updated": "2026-06-02T15:45:00+05:00",
+  "updated_by": "Cascade Agent (§12-§14 Protocols Addition)",
+  "project": "Compositum",
+  "hierarchy_levels": {
+    "1": {
+      "name": "Universal Theory",
+      "description": "Source of truth for all Armatura projects"
+    },
+    "2": {
+      "name": "Project Specification",
+      "description": "Project-specific invariant instantiation"
+    },
+    "3": {
+      "name": "Project Manifest",
+      "description": "AI agent onboarding and identity"
+    },
+    "4": {
+      "name": "Category Documentation",
+      "description": "Implementation details for plugin categories"
+    }
+  },
+  "documents": {
+    "invariant_theory": {
+      "level": 1,
+      "path": "docs/theory/INVARIANT_THEORY.md",
+      "title": "Armatura Invariant Theory",
+      "version": "1.3.0",
+      "hash_algorithm": "sha256",
+      "hash": "sha256_updated_after_v1.3_changes",
+      "parent": null,
+      "status": "active",
+      "last_modified": "2026-06-02T10:10:00+05:00"
+    },
+    "document_protocol": {
+      "level": 1,
+      "path": "docs/theory/ARMATURA_DOCUMENT_PROTOCOL.md",
+      "title": "Armatura Document Protocol",
+      "version": "1.3.0",
+      "hash_algorithm": "sha256",
+      "hash": "sha256_placeholder_update_after_edit",
+      "parent": null,
+      "siblings": ["invariant_theory"],
+      "status": "active",
+      "last_modified": "2026-06-02T10:25:00+05:00"
+    },
+    "compositum_specification": {
+      "level": 2,
+      "path": "docs/theory/COMPOSITUM_SPECIFICATION.md",
+      "title": "Compositum Specification",
+      "version": "3.2.0",
+      "hash_algorithm": "sha256",
+      "hash": "sha256_placeholder_update_after_edit",
+      "parents": ["invariant_theory", "document_protocol"],
+      "parent_version_requirement": "1.3.0, 1.3.0",
+      "status": "active",
+      "last_modified": "2026-06-02T10:26:00+05:00"
+    },
+    "compositum_manifest": {
+      "level": 3,
+      "path": "COMPOSITUM.md",
+      "title": "Compositum Project Identity",
+      "version": "3.3.0",
+      "hash_algorithm": "sha256",
+      "hash": "sha256_placeholder_update_after_edit",
+      "parent": "compositum_specification",
+      "parent_version_requirement": "3.2.0",
+      "status": "active",
+      "last_modified": "2026-06-02T10:27:00+05:00"
+    }
+  },
+  "deviations": [
+    {
+      "id": "DEVIATION-001",
+      "path": "docs/deviations/DEVIATION-001.md",
+      "rule_violated": "INVARIANT_THEORY.md §2.3 Component Scope",
+      "status": "active",
+      "deadline": "2026-06-09T23:59:59+05:00",
+      "owner": "Agent Cascade",
+      "created": "2026-06-02T15:45:00+05:00"
+    },
+    {
+      "id": "DEVIATION-002",
+      "path": "docs/deviations/DEVIATION-002.md",
+      "rule_violated": "INVARIANT_THEORY.md §1.2 Measurability",
+      "status": "partially_resolved",
+      "deadline": "2026-06-04T23:59:59+05:00",
+      "owner": "Agent Cascade",
+      "created": "2026-06-02T15:45:00+05:00"
+    }
+  ],
+  "validation_rules": {
+    "enforce_parent_version": true,
+    "enforce_hash_match": true,
+    "enforce_required_sections": true,
+    "report_all_errors": true,
+    "no_grace_periods": true
+  },
+  "cascade_tracking": {
+    "pending_updates": [],
+    "last_parent_change": null
+  }
+}

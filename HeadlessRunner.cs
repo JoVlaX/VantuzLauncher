@@ -23,6 +23,7 @@ public static class HeadlessRunner
         public int RamMb { get; init; } = 4096;
         public string? TestCredentialsPath { get; init; }
         public bool TestMode { get; init; } = false;  // Phase 2: Mock auth for Nomadic testing
+        public string? BootPath { get; init; }  // Per INVARIANT_THEORY.md §498 - explicit boot file
     }
 
     public record PhaseResult

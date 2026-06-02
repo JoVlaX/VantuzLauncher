@@ -11,7 +11,7 @@
     "_justification_timeout": "Test mode uses shorter timeout per INVARIANT_THEORY.md §1.2 - faster feedback"
   },
   "plugins": {
-    "Vantuz.Plugins.Auth.dll": "",
+    "_comment": "Auth.dll excluded per INVARIANT_THEORY.md §1.2 - using TestAuthCommand with _testMode",
     "Vantuz.Plugins.Net.dll": "",
     "Vantuz.Plugins.OS.dll": "",
     "Vantuz.Plugins.Game.dll": "",
@@ -29,21 +29,23 @@
       "config": {}
     },
     {
-      "_comment": "Phase 3: Version validation per Measurability (31) - uses real ForgeVersionResolver",
+      "_comment": "Phase 3: Version validation per Measurability (31), §1.2 test mode",
       "pluginName": "Game.VersionValidatorQuery",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
-        "installDir": "{{installDir}}"
+        "installDir": "{{installDir}}",
+        "_testMode": true
       }
     },
     {
-      "_comment": "Phase 3: Real installer with SRP version resolution per INVARIANT_THEORY.md §2.2",
+      "_comment": "Phase 3: Real installer with SRP per INVARIANT_THEORY.md §2.2, §1.2 test mode",
       "pluginName": "Game.InstallerCommand",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
-        "installDir": "{{installDir}}"
+        "installDir": "{{installDir}}",
+        "_testMode": true
       }
     },
     {
@@ -78,14 +80,15 @@
       }
     },
     {
-      "_comment": "Phase 3E: Launch preparation per SRP (48-52)",
+      "_comment": "Phase 3E: Launch preparation per SRP (48-52), §1.2 test mode",
       "pluginName": "Game.LaunchCommand",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
         "installDir": "{{installDir}}",
         "authlibPath": "{{mcDir}}\\authlib-injector.jar",
-        "authlibUrl": "test://yggdrasil/"
+        "authlibUrl": "test://yggdrasil/",
+        "_testMode": true
       }
     },
     {

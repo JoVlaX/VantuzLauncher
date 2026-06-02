@@ -1,18 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
+using Vantuz.Core;
+using Vantuz.Host;
 
 namespace VantuzLauncher;
 
 /// <summary>
-/// Interaction logic for App.xaml
+/// Minimal application bootstrap.
+/// Per COMPOSITUM_SPECIFICATION.md §2.2: Core is NOT Application.
+/// GUI is loaded as plugin through VantuzEngine pipeline.
 /// </summary>
 public partial class App : Application
 {
@@ -64,13 +63,13 @@ public partial class App : Application
         if (TryParseHeadlessArgs(e.Args, out var headlessOptions))
         {
             _isHeadless = true;
-            ShutdownMode = ShutdownMode.OnExplicitShutdown; // Prevent automatic shutdown
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
             RunHeadlessMode(headlessOptions);
-            Shutdown(); // Explicit shutdown after headless completes
+            Shutdown();
             return;
         }
 
-        // Обычный графический режим
+        // GUI Mode: Launch through VantuzEngine (GUI is a plugin, not Core)
         try
         {
             string testFile = Path.Combine(WorkspacePath, ".access_test");
@@ -87,7 +86,61 @@ public partial class App : Application
         if (!InitializeSingleInstanceLock(WorkspacePath)) { Shutdown(); return; }
 
         base.OnStartup(e);
-        new MainWindow().Show();
+        RunGuiMode();
+    }
+
+    /// <summary>
+    /// GUI mode: Execute through VantuzEngine with GUI plugin pipeline.
+    /// Per COMPOSITUM_SPECIFICATION.md §4.1: GUI is a plugin category capability.
+    /// </summary>
+    private async void RunGuiMode()
+    {
+        string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.gui.json");
+        string pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins");
+        string crashLogPath = Path.Combine(WorkspacePath, "crash.log");
+
+        // Fallback to standard boot.json if GUI-specific doesn't exist
+        if (!File.Exists(bootJsonPath))
+        {
+            bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json");
+        }
+
+        if (!File.Exists(bootJsonPath))
+        {
+            MessageBox.Show("Configuration file not found (boot.json or boot.gui.json).", "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown();
+            return;
+        }
+
+        // Minimal console reporter for bootstrap phase
+        var reporter = new SimpleConsoleReporter();
+        var engine = new VantuzEngine(pluginsDir, reporter, crashLogPath);
+
+        try
+        {
+            using var cts = new CancellationTokenSource();
+            var initialPayload = new Dictionary<string, object>
+            {
+                ["workspace_path"] = WorkspacePath,
+                ["host_executable"] = System.Diagnostics.Process.GetCurrentProcess().ProcessName
+            };
+
+            var result = await engine.RunAsync(bootJsonPath, cts.Token, initialPayload);
+
+            if (!result.Success)
+            {
+                MessageBox.Show($"Pipeline execution failed:\n{result.ErrorMessage}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Critical error:\n{ex.Message}\n\nDetails in crash.log", "Fatal Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            File.AppendAllText(crashLogPath, $"[{DateTime.Now}] GUI Mode Error: {ex}\n");
+        }
+        finally
+        {
+            Shutdown();
+        }
     }
 
     private static bool TryParseHeadlessArgs(string[] args, out HeadlessRunner.HeadlessOptions options)
@@ -121,7 +174,8 @@ public partial class App : Application
             Username = dict.GetValueOrDefault("username", "test"),
             Password = dict.GetValueOrDefault("password", "test"),
             RamMb = int.TryParse(dict.GetValueOrDefault("ram", "4096"), out var ram) ? ram : 4096,
-            TestMode = dict.ContainsKey("test-mode") || dict.ContainsKey("test")  // Phase 2: Nomadic testing
+            TestMode = dict.ContainsKey("test-mode") || dict.ContainsKey("test"),  // Phase 2: Nomadic testing
+            BootPath = dict.GetValueOrDefault("boot", null)  // Per INVARIANT_THEORY.md §498 - explicit boot file
         };
 
         return true;
@@ -175,14 +229,6 @@ public partial class App : Application
         return true;
     }
 
-    private static string CalculateStringMD5(string input)
-    {
-        using var sha256 = SHA256.Create();
-        byte[] inputBytes = Encoding.UTF8.GetBytes(input);
-        byte[] hashBytes = sha256.ComputeHash(inputBytes);
-        return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
-    }
-
     protected override void OnExit(ExitEventArgs e)
     {
         if (_ownsMutex && _instanceMutex != null)
@@ -191,5 +237,22 @@ public partial class App : Application
         }
         _instanceMutex?.Dispose();
         base.OnExit(e);
+    }
+}
+
+/// <summary>
+/// Minimal console reporter for bootstrap phase.
+/// Per INVARIANT_THEORY.md §1.2 Measurability: simple deterministic output.
+/// </summary>
+internal sealed class SimpleConsoleReporter : IStatusReporter
+{
+    public void ReportState(string message)
+    {
+        Console.WriteLine($"[BOOT] {message}");
+    }
+
+    public void ReportProgress(string operationId, double percent)
+    {
+        Console.WriteLine($"[BOOT] [{operationId}] {percent:F1}%");
     }
 }

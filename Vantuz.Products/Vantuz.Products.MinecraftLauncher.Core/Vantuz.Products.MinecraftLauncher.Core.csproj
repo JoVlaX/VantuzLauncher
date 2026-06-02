@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Vantuz.Products.MinecraftLauncher.Core</AssemblyName>
+    <RootNamespace>Vantuz.Products.MinecraftLauncher.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Vantuz.Core\Vantuz.Core.csproj" />
+    <ProjectReference Include="..\..\Vantuz.Host\Vantuz.Host.csproj" />
+  </ItemGroup>
+
+</Project>
