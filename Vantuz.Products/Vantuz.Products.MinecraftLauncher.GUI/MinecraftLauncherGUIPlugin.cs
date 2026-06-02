@@ -47,7 +47,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
                 // Set capabilities in context for downstream plugins
                 context.Set("gui_reporter", _reporter);
                 context.Set("gui_window", _mainWindow);
-                context.Set("gui_credential_provider", (ICredentialProvider)_mainWindow);
+                context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);  // Sync with CredentialCollectionStep.cs:27
                 context.Set("workspace_path", workspacePath);
 
                 // Subscribe to context updates

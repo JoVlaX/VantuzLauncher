@@ -31,6 +31,15 @@
       }
     },
     {
+      "pluginName": "Auth.YggdrasilCommand",
+      "config": {
+        "_description": "Authenticate immediately after credentials collected (before Update check)",
+        "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate",
+        "ignoreSslErrors": true,
+        "launcherVersion": "{{remoteVersion}}"
+      }
+    },
+    {
       "pluginName": "Net.ApiReaderQuery",
       "config": {
         "url": "https://troglobit.webhm.pro/launcher_version.txt",
@@ -42,18 +51,11 @@
     {
       "pluginName": "Net.UpdateCommand",
       "config": {
+        "_description": "Update check after auth (404 won't block credentials flow)",
         "url": "https://troglobit.webhm.pro/launcher.zip",
         "currentVersion": "{{localVersion}}",
         "targetVersion": "{{remoteVersion}}",
         "scriptName": "update.bat"
-      }
-    },
-    {
-      "pluginName": "Auth.YggdrasilCommand",
-      "config": {
-        "url": "https://troglobit.webhm.pro/yggdrasil/authserver/authenticate",
-        "ignoreSslErrors": true,
-        "launcherVersion": "{{remoteVersion}}"
       }
     },
     {

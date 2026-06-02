@@ -115,6 +115,10 @@
     <!-- DEVIATION-001: Copy GUI plugin from Products pending migration to Vantuz.Plugins.GUI -->
     <Copy SourceFiles="@(PluginGUIFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
 
+    <!-- Copy GUI manifest per INVARIANT_THEORY.md Explicitness - GUI mode configuration -->
+    <Copy SourceFiles="$(ProjectDir)boot.gui.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Message Text="[Vantuz Assembler] GUI manifest copied: boot.gui.json" Importance="high" />
+
     <!-- Copy test manifest per INVARIANT_THEORY.md Explicitness - separate test configuration -->
     <Copy SourceFiles="$(ProjectDir)boot.test.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Message Text="[Vantuz Assembler] Test manifest copied: boot.test.json" Importance="high" />
