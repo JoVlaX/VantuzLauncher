@@ -27,15 +27,52 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
         Directory.CreateDirectory(workspacePath);
 
         // Phase 1: Initialize WPF Application (UI thread)
+        // Per DEVIATION-003: Use existing Application if host is WPF app
         var tcs = new TaskCompletionSource<bool>();
 
-        var thread = new Thread(() =>
+        // Check if we're running in an existing WPF Application context
+        if (Application.Current != null)
         {
+            // Running inside existing WPF app - use current dispatcher
             try
             {
-                // Per §11.5 Agentic: explicit initialization
-                _app = new Application();
-                _app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                _app = Application.Current;
+                
+                // Create reporter that uses current UI thread
+                _reporter = new GUIProgressReporter();
+
+                // Create main window on current UI thread
+                await _app.Dispatcher.InvokeAsync(() =>
+                {
+                    _mainWindow = new MainWindow(_reporter, workspacePath);
+                    _mainWindow.Show();
+                });
+
+                // Set capabilities in context for downstream plugins
+                context.Set("gui_reporter", _reporter);
+                context.Set("gui_window", _mainWindow);
+                context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);
+                context.Set("workspace_path", workspacePath);
+
+                context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (hosted mode)");
+                
+                tcs.SetResult(true);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+            }
+        }
+        else
+        {
+            // Standalone mode - create new STA thread with Application
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    // Per §11.5 Agentic: explicit initialization
+                    _app = new Application();
+                    _app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
                 // Create reporter that marshals to UI thread
                 _reporter = new GUIProgressReporter();
@@ -51,7 +88,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
                 context.Set("workspace_path", workspacePath);
 
                 // Subscribe to context updates
-                context.Reporter.ReportState("[GUI] Minecraft Launcher initialized");
+                context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (standalone mode)");
 
                 tcs.SetResult(true);
 
@@ -66,8 +103,9 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
 
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
+        }
 
-        // Wait for initialization
+        // Wait for initialization (both modes)
         await tcs.Task;
         
         // Phase 2: Wait for pipeline completion signal

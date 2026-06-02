@@ -93,6 +93,35 @@
     <PluginGUIFiles Include="$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\**\*.*" />
   </ItemGroup> 
  
+  <!-- Armatura Full Automation: Pre-Build Verification -->
+  <!-- Per INVARIANT_THEORY.md §1.2 Measurability: All states must be verifiable at build time -->
+  <Target Name="ArmaturaPreBuildVerification" BeforeTargets="BeforeBuild">
+    <Message Text="[Armatura] Starting pre-build verification..." Importance="high" />
+    
+    <!-- ARM-BUILD-001: Critical configuration files must exist -->
+    <Error Condition="!Exists('$(ProjectDir)boot.gui.json')" 
+           Text="ARM-BUILD-001: Critical file 'boot.gui.json' not found. GUI mode will be unavailable. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+    
+    <Error Condition="!Exists('$(ProjectDir)boot.test.json')" 
+           Text="ARM-BUILD-002: Critical file 'boot.test.json' not found. Test mode will be unavailable. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+    
+    <Error Condition="!Exists('$(ProjectDir)boot.template.json')" 
+           Text="ARM-BUILD-003: Critical file 'boot.template.json' not found. Manifest generation will fail. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+    
+    <!-- ARM-BUILD-004: Deviation protocols must be documented -->
+    <Warning Condition="!Exists('$(ProjectDir)docs/deviations/DEVIATION-001.md')" 
+             Text="ARM-BUILD-004-WARN: DEVIATION-001 protocol not found. Active violations may be undocumented." />
+    
+    <Warning Condition="!Exists('$(ProjectDir)docs/deviations/DEVIATION-002.md')" 
+             Text="ARM-BUILD-005-WARN: DEVIATION-002 protocol not found. Build-time verification status unknown." />
+    
+    <!-- ARM-BUILD-006: Verification checklist must exist -->
+    <Error Condition="!Exists('$(ProjectDir)docs/verification-checklist.md')" 
+           Text="ARM-BUILD-006: Verification checklist not found. Pre-commit protocol undefined. Per INVARIANT_THEORY.md §3.4 (Falsifiability)." />
+    
+    <Message Text="[Armatura] Pre-build verification passed. Proceeding with build." Importance="high" />
+  </Target>
+
   <!-- DEVIATION-002: Pre-build verification per INVARIANT_THEORY.md §1.2 Measurability -->
   <Target Name="VerifyGUIPluginSourceExists" BeforeTargets="AssembleVantuz">
     <PropertyGroup>
@@ -137,6 +166,48 @@
            Text="DEVIATION-002 ACTIVE: GUI Plugin DLL not copied to plugins directory. Check AssembleVantuz target. See docs/deviations/DEVIATION-002.md" />
 
     <Message Text="[Vantuz Assembler] DEVIATION-002: GUI Plugin copy verified in output/plugins." Importance="high" />
-  </Target> 
+  </Target>
+
+  <!-- Armatura Full Automation: Post-Build Verification -->
+  <!-- Per INVARIANT_THEORY.md §1.2: Output integrity must be measurable -->
+  <Target Name="ArmaturaPostBuildVerification" AfterTargets="VerifyGUIPluginCopied">
+    <Message Text="[Armatura] Starting post-build verification..." Importance="high" />
+    
+    <!-- ARM-BUILD-007: Output manifests must exist -->
+    <Error Condition="!Exists('$(TargetDir)boot.json')" 
+           Text="ARM-BUILD-007: Generated 'boot.json' not found. Manifest generation failed." />
+    
+    <Error Condition="!Exists('$(TargetDir)boot.gui.json')" 
+           Text="ARM-BUILD-008: 'boot.gui.json' not copied to output. GUI mode will fail." />
+    
+    <Error Condition="!Exists('$(TargetDir)boot.test.json')" 
+           Text="ARM-BUILD-009: 'boot.test.json' not copied to output. Test mode will fail." />
+    
+    <!-- ARM-BUILD-010: Required plugins must be present -->
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Auth.dll')" 
+           Text="ARM-BUILD-010: Auth plugin not found in output/plugins." />
+    
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Net.dll')" 
+           Text="ARM-BUILD-011: Net plugin not found in output/plugins." />
+    
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.OS.dll')" 
+           Text="ARM-BUILD-012: OS plugin not found in output/plugins." />
+    
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Game.dll')" 
+           Text="ARM-BUILD-013: Game plugin not found in output/plugins." />
+    
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Minecraft.dll')" 
+           Text="ARM-BUILD-014: Minecraft plugin not found in output/plugins." />
+    
+    <!-- ARM-BUILD-015: GUI plugin (DEVIATION-001) must be present -->
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')" 
+           Text="ARM-BUILD-015: GUI plugin not found in output/plugins. DEVIATION-001 may not be correctly handled." />
+    
+    <!-- ARM-BUILD-016: Dev marker copied (Debug only) -->
+    <Message Condition="'$(Configuration)' == 'Debug' And Exists('$(TargetDir).dev')" 
+             Text="[Armatura] Dev marker confirmed in output (Debug mode)." Importance="high" />
+    
+    <Message Text="[Armatura] Post-build verification passed. Build complete." Importance="high" />
+  </Target>
 
 </Project>

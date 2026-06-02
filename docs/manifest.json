@@ -89,6 +89,15 @@
       "deadline": "2026-06-04T23:59:59+05:00",
       "owner": "Agent Cascade",
       "created": "2026-06-02T15:45:00+05:00"
+    },
+    {
+      "id": "DEVIATION-003",
+      "path": "docs/deviations/DEVIATION-003.md",
+      "rule_violated": "INVARIANT_THEORY.md §2.2 CQRS Separation (Runtime Resource Resolution)",
+      "status": "active",
+      "deadline": "2026-07-02T23:59:59+05:00",
+      "owner": "Agent Cascade",
+      "created": "2026-06-02T18:10:00+05:00"
     }
   ],
   "validation_rules": {
