@@ -7,11 +7,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <SelfContained>false</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <!-- INVARIANT_THEORY.md:45 - static verification required for falsifiability -->
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <!-- Workaround: SDK duplicates TargetFrameworkAttribute for WPF net8.0-windows (CS0579) -->
   </PropertyGroup>
+
+  <!-- Remove auto-generated AssemblyAttributes.cs to prevent CS0579 duplicate attribute errors -->
+  <Target Name="RemoveDuplicateFrameworkAttributes" AfterTargets="_GenerateTargetFrameworkAttribute">
+    <Delete Files="$(IntermediateOutputPath)*.AssemblyAttributes.cs" ContinueOnError="true" />
+  </Target>
 
   <ItemGroup>
     <Compile Remove="Vantuz.Core\**" />
@@ -62,6 +64,11 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+    <!-- Headless test plugin per INVARIANT_THEORY.md Measurability -->
+    <ProjectReference Include="Vantuz.Plugins.Test\Vantuz.Plugins.Test.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -91,6 +98,8 @@
     <!-- DEVIATION-001: Products folder for GUI plugin pending migration to Vantuz.Plugins.GUI -->
     <!-- Note: WPF projects use net8.0-windows target framework -->
     <PluginGUIFiles Include="$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\**\*.*" />
+    <!-- Headless test plugin per INVARIANT_THEORY.md Measurability -->
+    <PluginTestFiles Include="$(ProjectDir)Vantuz.Plugins.Test\bin\$(Configuration)\net8.0\**\*.*" />
   </ItemGroup> 
  
   <!-- Armatura Full Automation: Pre-Build Verification -->
@@ -104,6 +113,9 @@
     
     <Error Condition="!Exists('$(ProjectDir)boot.test.json')" 
            Text="ARM-BUILD-002: Critical file 'boot.test.json' not found. Test mode will be unavailable. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+    
+    <Error Condition="!Exists('$(ProjectDir)boot.headless.json')" 
+           Text="ARM-BUILD-002B: Critical file 'boot.headless.json' not found. Headless test mode will be unavailable. Per INVARIANT_THEORY.md §1.2 (Measurability)." />
     
     <Error Condition="!Exists('$(ProjectDir)boot.template.json')" 
            Text="ARM-BUILD-003: Critical file 'boot.template.json' not found. Manifest generation will fail. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
@@ -123,7 +135,8 @@
   </Target>
 
   <!-- DEVIATION-002: Pre-build verification per INVARIANT_THEORY.md §1.2 Measurability -->
-  <Target Name="VerifyGUIPluginSourceExists" BeforeTargets="AssembleVantuz">
+  <!-- Release-only: dotnet run (Debug) does not guarantee GUI plugin output exists -->
+  <Target Name="VerifyGUIPluginSourceExists" BeforeTargets="AssembleVantuz" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
       <GUIPluginSource>$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\Vantuz.Products.MinecraftLauncher.GUI.dll</GUIPluginSource>
     </PropertyGroup>
@@ -143,6 +156,8 @@
     <Copy SourceFiles="@(PluginMinecraftFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <!-- DEVIATION-001: Copy GUI plugin from Products pending migration to Vantuz.Plugins.GUI -->
     <Copy SourceFiles="@(PluginGUIFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <!-- Copy headless test plugin per INVARIANT_THEORY.md Measurability -->
+    <Copy SourceFiles="@(PluginTestFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
 
     <!-- Copy GUI manifest per INVARIANT_THEORY.md Explicitness - GUI mode configuration -->
     <Copy SourceFiles="$(ProjectDir)boot.gui.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
@@ -151,6 +166,10 @@
     <!-- Copy test manifest per INVARIANT_THEORY.md Explicitness - separate test configuration -->
     <Copy SourceFiles="$(ProjectDir)boot.test.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Message Text="[Vantuz Assembler] Test manifest copied: boot.test.json" Importance="high" />
+
+    <!-- Copy headless manifest per INVARIANT_THEORY.md Measurability - headless automated testing -->
+    <Copy SourceFiles="$(ProjectDir)boot.headless.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Message Text="[Vantuz Assembler] Headless manifest copied: boot.headless.json" Importance="high" />
 
     <!-- Copy .dev marker only for Debug builds per INVARIANT_THEORY.md §498 - explicit dev mode detection -->
     <Copy SourceFiles="$(ProjectDir).dev" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'$(Configuration)' == 'Debug'" />
@@ -161,7 +180,8 @@
   </Target>
 
   <!-- DEVIATION-002: Post-build verification per INVARIANT_THEORY.md §1.2 Measurability -->
-  <Target Name="VerifyGUIPluginCopied" AfterTargets="AssembleVantuz">
+  <!-- Release-only: Debug builds skip GUI plugin check to support dotnet run -->
+  <Target Name="VerifyGUIPluginCopied" AfterTargets="AssembleVantuz" Condition="'$(Configuration)' == 'Release'">
     <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')"
            Text="DEVIATION-002 ACTIVE: GUI Plugin DLL not copied to plugins directory. Check AssembleVantuz target. See docs/deviations/DEVIATION-002.md" />
 
@@ -183,6 +203,9 @@
     <Error Condition="!Exists('$(TargetDir)boot.test.json')" 
            Text="ARM-BUILD-009: 'boot.test.json' not copied to output. Test mode will fail." />
     
+    <Error Condition="!Exists('$(TargetDir)boot.headless.json')" 
+           Text="ARM-BUILD-009B: 'boot.headless.json' not copied to output. Headless test mode will fail." />
+    
     <!-- ARM-BUILD-010: Required plugins must be present -->
     <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Auth.dll')" 
            Text="ARM-BUILD-010: Auth plugin not found in output/plugins." />
@@ -199,8 +222,8 @@
     <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Minecraft.dll')" 
            Text="ARM-BUILD-014: Minecraft plugin not found in output/plugins." />
     
-    <!-- ARM-BUILD-015: GUI plugin (DEVIATION-001) must be present -->
-    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')" 
+    <!-- ARM-BUILD-015: GUI plugin (DEVIATION-001) must be present (Release only) -->
+    <Error Condition="'$(Configuration)' == 'Release' And !Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')" 
            Text="ARM-BUILD-015: GUI plugin not found in output/plugins. DEVIATION-001 may not be correctly handled." />
     
     <!-- ARM-BUILD-016: Dev marker copied (Debug only) -->

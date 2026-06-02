@@ -1,6 +1,12 @@
 ﻿{
+    "FixesApplied":  0,
+    "RunId":  "3dc08f60-dfc1-452f-aff9-b9957df15d11",
+    "Iterations":  0,
+    "LastError":  "",
     "TestResult":  null,
-    "FixesApplied":  null,
+    "Phase":  "none",
     "Success":  true,
-    "Iterations":  null
+    "Reason":  "",
+    "Status":  "success",
+    "Timestamp":  "2026-06-02T17:52:21.7757219Z"
 }

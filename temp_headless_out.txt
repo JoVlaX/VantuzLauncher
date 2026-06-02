@@ -1,0 +1,13 @@
+[17:16:43] Initializing VantuzEngine...
+[17:16:44] [MOCK] Credentials auto-submitted for user: test_user
+[17:16:44] [TEST] Authentication successful (mock)
+[17:16:44] Auth.TestAuthCommand: 100,0%
+[17:16:44] Провайдер Minecraft зарегистрирован.
+[17:16:44] [DRY RUN] Installation of 1.20.1-forge-47.3.0 would occur here. No state changes.
+[17:16:44] Проверка версии 1.20.1-forge-47.3.0...
+[17:16:44] Версия 1.20.1-forge-47.3.0 не найдена. Требуется установка.
+
+=== TEST RESULT ===
+Status: success
+Duration: 1,36s
+Output: C:\Users\1\AppData\Roaming\.vantuzlauncher\test-result.json

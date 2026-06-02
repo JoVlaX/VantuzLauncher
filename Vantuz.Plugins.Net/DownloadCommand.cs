@@ -17,7 +17,7 @@ namespace Vantuz.Plugins.Net;
 /// </summary>
 public class DownloadCommand : ICommandPlugin
 {
-    public string Name => "Net.DownloadCommand";
+    public string Name => "Net.Download";
     private readonly HttpClient _httpClient;
     private readonly SemaphoreSlim _semaphore = new(4);
 
@@ -33,19 +33,6 @@ public class DownloadCommand : ICommandPlugin
 
         if (downloadQueue == null || downloadQueue.Count == 0)
         {
-            return new CommandResult(true);
-        }
-
-        // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
-        bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
-        bool skipActualDownload = stepConfig.TryGetProperty("_skipActualDownload", out var skipProp) && skipProp.GetBoolean();
-
-        if (isTestMode || skipActualDownload)
-        {
-            context.Reporter.ReportState($"[TEST MODE] DownloadCommand - simulating {downloadQueue.Count} downloads");
-            context.Set("DownloadSuccess", true);
-            context.Set("DownloadedCount", downloadQueue.Count);
-            context.Set("DownloadTestMode", true);
             return new CommandResult(true);
         }
 

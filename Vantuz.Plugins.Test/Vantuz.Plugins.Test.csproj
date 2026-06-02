@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" />
+    <ProjectReference Include="..\Vantuz.Host\Vantuz.Host.csproj" />
+  </ItemGroup>
+</Project>

@@ -18,7 +18,7 @@ using Vantuz.Core;
 /// </summary>
 public class ModpackManifestQuery : IQueryPlugin
 {
-    public string Name => "Net.ModpackManifestQuery";
+    public string Name => "Net.ModpackManifest";
     private readonly HttpClient _httpClient;
 
     public ModpackManifestQuery()

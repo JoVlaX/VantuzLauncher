@@ -1,0 +1,49 @@
+{
+  "success": true,
+  "status": "success",
+  "errorMessage": null,
+  "startTime": "2026-06-02T17:52:03.6164964Z",
+  "endTime": "2026-06-02T17:52:04.6555461Z",
+  "duration": "00:00:01.0390497",
+  "logs": [
+    "[17:52:03] Initializing VantuzEngine...",
+    "[17:52:04] [MOCK] Credentials auto-submitted for user: test_user",
+    "[17:52:04] [TEST] Authentication successful (mock)",
+    "[17:52:04] Auth.TestAuthCommand: 100,0%",
+    "[17:52:04] \u041F\u0440\u043E\u0432\u0430\u0439\u0434\u0435\u0440 Minecraft \u0437\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043E\u0432\u0430\u043D.",
+    "[17:52:04] [DRY RUN] Installation of 1.20.1-forge-47.3.0 would occur here. No state changes.",
+    "[17:52:04] \u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u0432\u0435\u0440\u0441\u0438\u0438 1.20.1-forge-47.3.0...",
+    "[17:52:04] \u0412\u0435\u0440\u0441\u0438\u044F 1.20.1-forge-47.3.0 \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u0430. \u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u0443\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0430."
+  ],
+  "finalPayload": {
+    "username": "test_user",
+    "password": "test_pass",
+    "ramMb": "4096",
+    "localVersion": "2.0-test",
+    "testUser": "test_user",
+    "testPass": "test_password",
+    "installDir": "C:\\Users\\1\\AppData\\Roaming/.vantuzlauncher/instances/1.20.1-forge",
+    "hostExecutable": "VantuzLauncher.exe",
+    "gui.credential_provider": {},
+    "auth.credentials": {
+      "username": "test_user",
+      "password": "test_pass",
+      "rememberMe": false,
+      "ramMb": 4096
+    },
+    "auth_token": "TEST_TOKEN_VANTUZ_2026",
+    "auth_uuid": "00000000-0000-0000-0000-000000000001",
+    "auth_username": "test_user",
+    "auth_success": true,
+    "auth_timestamp": "2026-06-02T17:52:04.5572088Z",
+    "GameProvider.Minecraft": {
+      "providerName": "Minecraft"
+    },
+    "InstallSuccess": true,
+    "InstallDryRun": true,
+    "Game.VersionValidator.Result": {
+      "exists": false,
+      "errorMessage": null
+    }
+  }
+}

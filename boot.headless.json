@@ -1,0 +1,60 @@
+{
+  "_description": "Headless test manifest for agentic self-verification per runtime-verification-limitations.md",
+  "variables": {
+    "localVersion": "2.0-test",
+    "testUser": "test_user",
+    "testPass": "test_password",
+    "ramMb": "4096",
+    "installDir": "{{workspace}}/.vantuzlauncher/instances/1.20.1-forge"
+  },
+  "plugins": {
+    "Vantuz.Plugins.Test.dll": "",
+    "Vantuz.Plugins.Auth.dll": "",
+    "Vantuz.Plugins.Net.dll": "",
+    "Vantuz.Plugins.OS.dll": "",
+    "Vantuz.Plugins.Game.dll": "",
+    "Vantuz.Plugins.Minecraft.dll": ""
+  },
+  "pipeline": [
+    {
+      "_comment": "Phase 1: Mock credentials - no GUI required",
+      "pluginName": "Test.MockCredentialProvider",
+      "config": {
+        "username": "{{testUser}}",
+        "password": "{{testPass}}",
+        "rememberMe": false,
+        "ramMb": 4096
+      }
+    },
+    {
+      "_comment": "Phase 2: Authentication with deterministic test plugin (no network per INVARIANT_THEORY.md §1.2)",
+      "pluginName": "Auth.TestAuthCommand",
+      "config": {
+        "launcherVersion": "2.0-test"
+      }
+    },
+    {
+      "_comment": "Phase 3: Register Minecraft game provider for universal game plugins",
+      "pluginName": "Game.MinecraftProvider"
+    },
+    {
+      "_comment": "Phase 4: Game installation (dry-run in test mode)",
+      "pluginName": "Game.Installer",
+      "config": {
+        "provider": "Minecraft",
+        "version": "1.20.1-forge-47.3.0",
+        "installDir": "{{installDir}}",
+        "dryRun": true
+      }
+    },
+    {
+      "_comment": "Phase 5: Version validation",
+      "pluginName": "Game.VersionValidator",
+      "config": {
+        "provider": "Minecraft",
+        "version": "1.20.1-forge-47.3.0",
+        "installDir": "{{installDir}}"
+      }
+    }
+  ]
+}

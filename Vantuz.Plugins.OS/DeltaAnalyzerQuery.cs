@@ -14,30 +14,12 @@ namespace Vantuz.Plugins.OS;
 /// </summary>
 public class DeltaAnalyzerQuery : IQueryPlugin
 {
-    public string Name => "OS.DeltaAnalyzerQuery";
+    public string Name => "OS.DeltaAnalyzer";
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
         // ПАТТЕРН GRACEFUL SKIP
         var targetState = context.Get<List<FileState>>("TargetState");
-
-        // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
-        bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
-        if (isTestMode)
-        {
-            context.Reporter.ReportState("[TEST MODE] DeltaAnalyzerQuery using deterministic mock state");
-            // Use mock target state from config if provided, otherwise empty
-            if (stepConfig.TryGetProperty("_mockTargetState", out var mockStateElement))
-            {
-                targetState = new List<FileState>();
-            }
-            else
-            {
-                targetState = new List<FileState>();
-            }
-            // Return deterministic empty result for test mode
-            return new DeltaAnalyzerResult(new List<FileState>(), new List<string>(), new List<MoveOperation>());
-        }
 
         // Check for modpack manifest result from Net.ModpackManifest
         var manifestResult = context.Get<ModpackManifestResult>("Net.ModpackManifest.Result");

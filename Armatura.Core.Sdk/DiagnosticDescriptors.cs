@@ -63,11 +63,10 @@ public static class DiagnosticDescriptors
     );
 
     // ARM011: Component Scope Invariant Violation
-    // Per INVARIANT_THEORY.md §2.3: Level N may only depend on Level N-1
     public static readonly DiagnosticDescriptor ComponentScopeViolation = new(
         id: "ARM011",
         title: "Component Scope Invariant Violation",
-        messageFormat: "ARM011: Level {0} component '{1}' implements Level {2} interface '{3}'. Per INVARIANT_THEORY.md §2.3, migrate to appropriate namespace.",
+        messageFormat: "ARM011: Level {0} component '{1}' implements Level {2} interface '{3}'. Components may only implement interfaces from their own level or one level above per INVARIANT_THEORY.md §2.3.",
         category: "Architecture",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -75,26 +74,24 @@ public static class DiagnosticDescriptors
     );
 
     // ARM012: Unmatched Context Key
-    // Per INVARIANT_THEORY.md §2.1: All contracts must be explicit and verifiable
     public static readonly DiagnosticDescriptor UnmatchedContextKey = new(
         id: "ARM012",
         title: "Unmatched Context Key",
-        messageFormat: "ARM012: Context key '{0}' has no matching {1}. Ensure all context.Set calls have corresponding context.Get.",
-        category: "Contracts",
+        messageFormat: "ARM012: Context key '{0}' is used without a matching Set/Get pair. All context keys must have corresponding producers and consumers.",
+        category: "Architecture",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Context key contract violation: All context.Set calls must have corresponding context.Get within the same pipeline scope."
+        description: "Context key contract violation: context.Set/Get pairs must be matched across the compilation."
     );
 
     // ARM013: Similar Context Keys Detected
-    // Detects potential key mismatches like gui_credential_provider vs gui.credential_provider
     public static readonly DiagnosticDescriptor SimilarContextKeys = new(
         id: "ARM013",
         title: "Similar Context Keys Detected",
-        messageFormat: "ARM013: Context keys '{0}' and '{1}' are similar but differ in separator (underscore vs dot). This may indicate a typo.",
-        category: "Contracts",
+        messageFormat: "ARM013: Context keys '{0}' and '{1}' are similar but use different separators. Normalize to a single separator convention.",
+        category: "Architecture",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Potential key mismatch: Similar keys with different separators detected. Use consistent naming convention."
+        description: "Context key inconsistency: similar keys with different separators detected (e.g., gui_credential_provider vs gui.credential_provider)."
     );
 }

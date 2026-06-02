@@ -13,23 +13,11 @@ namespace Vantuz.Plugins.OS;
 /// </summary>
 public class LocalMoveCommand : ICommandPlugin
 {
-    public string Name => "OS.LocalMoveCommand";
+    public string Name => "OS.LocalMove";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         var localMoveQueue = context.Get<List<MoveOperation>>("LocalMoveQueue");
-
-        // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
-        bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
-        if (isTestMode)
-        {
-            context.Reporter.ReportState("[TEST MODE] LocalMoveCommand - simulating file moves");
-            int count = localMoveQueue?.Count ?? 0;
-            context.Set("LocalMoveSuccessCount", count);
-            context.Set("LocalMoveTestMode", true);
-            return new CommandResult(true);
-        }
-
         if (localMoveQueue == null || localMoveQueue.Count == 0)
         {
             return new CommandResult(true);

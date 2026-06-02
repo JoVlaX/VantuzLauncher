@@ -3,7 +3,6 @@ namespace Vantuz.Plugins.Game;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Vantuz.Core;
@@ -14,24 +13,12 @@ using Vantuz.Core;
 /// </summary>
 public class GameLaunchCommand : ICommandPlugin
 {
-    public string Name => "Game.LaunchCommand";
+    public string Name => "Game.Launch";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         try
         {
-            // TEST MODE: Deterministic behavior per INVARIANT_THEORY.md §1.1
-            bool isTestMode = stepConfig.TryGetProperty("_testMode", out var testModeProp) && testModeProp.GetBoolean();
-            if (isTestMode)
-            {
-                context.Reporter.ReportState("[TEST MODE] GameLaunchCommand - simulating launch preparation");
-                context.Set("gameCommand", "java");
-                context.Set("gameArgs", "-cp test.jar TestMain");
-                context.Set("gameWorkDir", System.AppContext.BaseDirectory);
-                context.Set("LaunchTestMode", true);
-                return new CommandResult(true);
-            }
-
             // Get configuration from stepConfig per Armatura:44-45
             string providerName = stepConfig.TryGetProperty("provider", out var prov)
                 ? Interpolate(prov.GetString() ?? "", context)
@@ -55,9 +42,6 @@ public class GameLaunchCommand : ICommandPlugin
             if (ramMb == 0) ramMb = 4096;
             string? javaPath = context.Get<string>("javaPath");
 
-            // Per INVARIANT_THEORY.md §3.2 Nomadic - extract variables for path interpolation
-            var variables = ExtractVariables(context);
-
             // Build extra options from stepConfig
             var extraOptions = new Dictionary<string, object>();
             if (stepConfig.TryGetProperty("authlibPath", out var alp))
@@ -74,7 +58,7 @@ public class GameLaunchCommand : ICommandPlugin
                 return new CommandResult(false, $"Game provider '{providerName}' not found");
             }
 
-            // Build launch parameters using universal interface with variables
+            // Build launch parameters using universal interface
             var launchOptions = new LaunchOptions(
                 PlayerName: playerName,
                 AccessToken: accessToken,
@@ -86,8 +70,7 @@ public class GameLaunchCommand : ICommandPlugin
 
             var launchParams = await provider.BuildLaunchParametersAsync(
                 versionName, 
-                installDir,
-                variables,
+                installDir, 
                 launchOptions, 
                 context.CancellationToken
             );
@@ -126,35 +109,6 @@ public class GameLaunchCommand : ICommandPlugin
             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? "");
         }
         return text;
-    }
-    
-    /// <summary>
-    /// Extracts variables from context mutations per INVARIANT_THEORY.md §3.2 Nomadic Invariant.
-    /// Variables travel with manifest, not hardcoded in code.
-    /// </summary>
-    private static Dictionary<string, string> ExtractVariables(CommandContext context)
-    {
-        var variables = new Dictionary<string, string>();
-        
-        // Extract string variables from context mutations
-        var mutations = context.GetMutations();
-        foreach (var kvp in mutations)
-        {
-            if (kvp.Value is string strValue)
-            {
-                variables[kvp.Key] = strValue;
-            }
-        }
-        
-        // Per INVARIANT_THEORY.md §3.2 - ensure critical variables have fallbacks
-        if (!variables.ContainsKey("mcDir"))
-        {
-            variables["mcDir"] = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                ".vantuzlauncher");
-        }
-        
-        return variables;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

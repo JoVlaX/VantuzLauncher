@@ -33,7 +33,7 @@ param(
 # ============================================
 # CONFIGURATION (Nomadic: относительные пути)
 # ============================================
-$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
+$scriptDir = $PSScriptRoot
 $slnPath = Join-Path $scriptDir "VantuzLauncher.sln"
 $testScript = Join-Path $scriptDir "test-and-run.ps1"
 $stateFile = Join-Path $scriptDir "auto-fix-state.json"
@@ -52,7 +52,7 @@ $colors = @{
 # ============================================
 
 function Get-CodeHash {
-    $files = Get-ChildItem -Path $scriptDir -Recurse -Filter "*.cs" | Sort-Object { $_.FullName.Substring($scriptDir.Length).ToLowerInvariant() }
+    $files = Get-ChildItem -Path $scriptDir -Recurse -Filter "*.cs" | Sort-Object FullName
     $sha = [System.Security.Cryptography.SHA256]::Create()
     foreach ($file in $files) {
         $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
@@ -70,10 +70,10 @@ function Initialize-State {
     $state = @{
         runId = [Guid]::NewGuid().ToString()
         startTime = [DateTime]::UtcNow.ToString("o")
-        iterations = [int]0
+        iterations = 0
         errorsSeen = @()
         lastError = $null
-        fixesApplied = [int]0
+        fixesApplied = 0
         status = "initialized"
         lastCodeHash = $null
     }
@@ -249,8 +249,6 @@ function Invoke-FixPhase {
     $State.lastCodeHash = $hashBefore
     Save-State $State
     
-    # DEVIATION-004 ACTIVE: Auto-Fix Placeholder — see docs/deviations/DEVIATION-004.md
-    # Resolution deadline: 2026-06-09
     # Note: Actual fix implementation requires code analysis and modification
     # This orchestrator manages the loop; fixes are applied by code analysis tools
     
@@ -282,6 +280,7 @@ function Start-AutoFixCycle {
     Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor $colors.Iteration
     
     $state = Initialize-State
+    "[DIAG-A] After Init: iterations=$($state.iterations), fixes=$($state.fixesApplied)" | Out-File "$scriptDir\diag.log" -Encoding UTF8
     $autoFixFlag = if ($AutoFix) { "Enabled" } else { "Disabled" }
     Add-History -Message "Orchestrator started. AutoFix flag is $autoFixFlag."
     
@@ -413,6 +412,7 @@ function Start-AutoFixCycle {
         Write-Host "║     Duration: $duration" -ForegroundColor $colors.Success
         Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor $colors.Success
         
+        Write-Host "[DIAG] Returning with Iterations=$($state.iterations), FixesApplied=$($state.fixesApplied)" -ForegroundColor Yellow
         return @{
             Success = $true
             Iterations = $state.iterations

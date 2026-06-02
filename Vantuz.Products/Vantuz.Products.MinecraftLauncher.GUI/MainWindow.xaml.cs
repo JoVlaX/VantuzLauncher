@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Vantuz.Core;
 
 namespace Vantuz.Products.MinecraftLauncher.GUI;
 
@@ -20,7 +19,7 @@ public partial class MainWindow : Window, ICredentialProvider
     private readonly TaskCompletionSource<Credentials> _credentialsTcs = new();
     private readonly string _configPath;
 
-    public event EventHandler<Vantuz.Core.CredentialsSubmittedEventArgs>? CredentialsSubmitted;
+    public event EventHandler<CredentialsSubmittedEventArgs>? CredentialsSubmitted;
     public event EventHandler? CredentialsCancelled;
 
     public MainWindow(GUIProgressReporter reporter, string workspacePath)

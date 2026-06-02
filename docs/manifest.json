@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "schema_description": "Armatura Document Hierarchy Manifest — machine-readable document state",
-  "last_updated": "2026-06-02T15:45:00+05:00",
-  "updated_by": "Cascade Agent (§12-§14 Protocols Addition)",
+  "last_updated": "2026-06-02T23:15:00+05:00",
+  "updated_by": "Cascade Agent (CI/Test/Orchestrator Modernization Audit)",
   "project": "Compositum",
   "hierarchy_levels": {
     "1": {
@@ -29,7 +29,7 @@
       "title": "Armatura Invariant Theory",
       "version": "1.3.0",
       "hash_algorithm": "sha256",
-      "hash": "sha256_updated_after_v1.3_changes",
+      "hash": "E12F25E1702741E375B833AF9DBADF138A398E1A6285D2F012F81D897721B6B4",
       "parent": null,
       "status": "active",
       "last_modified": "2026-06-02T10:10:00+05:00"
@@ -40,7 +40,7 @@
       "title": "Armatura Document Protocol",
       "version": "1.3.0",
       "hash_algorithm": "sha256",
-      "hash": "sha256_placeholder_update_after_edit",
+      "hash": "25EC31DFDC8B085311D1EF9D5AF769B2902B87C7F0B8736D32CBE89E89E77183",
       "parent": null,
       "siblings": ["invariant_theory"],
       "status": "active",
@@ -52,7 +52,7 @@
       "title": "Compositum Specification",
       "version": "3.2.0",
       "hash_algorithm": "sha256",
-      "hash": "sha256_placeholder_update_after_edit",
+      "hash": "9B1F3E37A6E6D7F1DEC2BB86FB83C199C97C6F033B766EDAB61AC780F73EDBE5",
       "parents": ["invariant_theory", "document_protocol"],
       "parent_version_requirement": "1.3.0, 1.3.0",
       "status": "active",
@@ -64,7 +64,7 @@
       "title": "Compositum Project Identity",
       "version": "3.3.0",
       "hash_algorithm": "sha256",
-      "hash": "sha256_placeholder_update_after_edit",
+      "hash": "5FBC42C2CE977336F5926BA82B7C149B28E532B51A20E43A2F02F19802383FD2",
       "parent": "compositum_specification",
       "parent_version_requirement": "3.2.0",
       "status": "active",
@@ -93,11 +93,20 @@
     {
       "id": "DEVIATION-003",
       "path": "docs/deviations/DEVIATION-003.md",
-      "rule_violated": "INVARIANT_THEORY.md §2.2 CQRS Separation (Runtime Resource Resolution)",
+      "rule_violated": "INVARIANT_THEORY.md §2.2 CQRS Separation",
       "status": "active",
       "deadline": "2026-07-02T23:59:59+05:00",
       "owner": "Agent Cascade",
-      "created": "2026-06-02T18:10:00+05:00"
+      "created": "2026-06-02T15:45:00+05:00"
+    },
+    {
+      "id": "DEVIATION-004",
+      "path": "docs/deviations/DEVIATION-004.md",
+      "rule_violated": "INVARIANT_THEORY.md §1.2 Measurability",
+      "status": "active",
+      "deadline": "2026-06-09T23:59:59+05:00",
+      "owner": "Agent Cascade",
+      "created": "2026-06-02T23:15:00+05:00"
     }
   ],
   "validation_rules": {

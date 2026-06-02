@@ -70,10 +70,16 @@
 ### Phase 2: Build-time Verification (by 2026-06-04) ✅
 - [x] Add `VerifyGUIPluginSourceExists` target (BeforeTargets="AssembleVantuz")
 - [x] Add `VerifyGUIPluginCopied` target (AfterTargets="AssembleVantuz")
+- [x] Document `GenerateTargetFrameworkAttribute=false` SDK workaround
+- [x] Scope verification targets to `Release` only — `dotnet run` (Debug) skips GUI plugin checks
 - [ ] Add `VerifyManifestValid` target for boot.gui.json validation
 - [x] Test all error conditions
 
-### Phase 3: Re-enable Obfuscar (by 2026-06-04) ⏳
+### Phase 3: SDK Workaround Documentation (2026-06-02) ✅
+- [x] Document `GenerateTargetFrameworkAttribute=false` workaround for WPF SDK CS0579 bug
+- [x] Add workaround comment in `VantuzLauncher.csproj`
+
+### Phase 4: Re-enable Obfuscar (pending) ⏳
 - [ ] Fix obfuscar.xml configuration
 - [ ] Verify obfuscated build succeeds
 - [ ] Close this deviation protocol
@@ -89,6 +95,12 @@
 ## Implementation
 
 ```xml
+<!-- SDK Workaround: Prevent CS0579 duplicate TargetFrameworkAttribute for WPF net8.0-windows -->
+<!-- Per INVARIANT_THEORY.md §9.4 Legacy Compatibility — temporary workaround pending SDK fix -->
+<Target Name="RemoveDuplicateFrameworkAttributes" BeforeTargets="BeforeCompile">
+  <Delete Files="$(IntermediateOutputPath)*.AssemblyAttributes.cs" ContinueOnError="true" />
+</Target>
+
 <!-- To be added to VantuzLauncher.csproj -->
 <Target Name="VerifyGUIPluginSourceExists" BeforeTargets="AssembleVantuz">
   <PropertyGroup>

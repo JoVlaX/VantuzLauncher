@@ -1,16 +1,10 @@
 ﻿{
-  "_description": "Production manifest per INVARIANT_THEORY.md - explicit host-independent configuration",
   "variables": {
     "localVersion": "2.0-dev",
     "gameProvider": "Minecraft",
-    "gameVersion": "1.20.1-forge-47.3.0",
-    "_previousVersion": "1.20.1-forge-47.2.20",
-    "_deprecationDeadline": "2026-06-30",
-    "_justification_version": "Per INVARIANT_THEORY.md §9.4 - 47.2.20 deprecated, 47.3.0 is current stable",
+    "gameVersion": "1.20.1-forge-47.2.20",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
-    "installDir": "{{mcDir}}\\.minecraft",
-    "operationTimeout": "00:05:00",
-    "_justification_timeout": "Per INVARIANT_THEORY.md §3.2 Nomadic Invariant - configurable per environment, travels with manifest"
+    "installDir": "{{mcDir}}\\.minecraft"
   },
   "plugins": {
     "Vantuz.Plugins.Auth.dll": "",

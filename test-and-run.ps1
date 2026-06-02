@@ -46,11 +46,10 @@ param(
 # ============================================
 # CONFIGURATION (Nomadic: все пути относительные)
 # ============================================
-$scriptDir = $PSScriptRoot
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $slnPath = Join-Path $scriptDir "VantuzLauncher.sln"
-$projectPath = Join-Path $scriptDir "VantuzLauncher.csproj"
-$exePath = Join-Path $scriptDir "bin\Debug\net8.0-windows\win-x64\VantuzLauncher.exe"
-$fallbackExePath = Join-Path $scriptDir "bin\Release\net8.0-windows\win-x64\VantuzLauncher.exe"
+$exePath = Join-Path $scriptDir "bin\Release\net8.0-windows\win-x64\VantuzLauncher.exe"
+$fallbackExePath = Join-Path $scriptDir "bin\Debug\net8.0-windows\VantuzLauncher.exe"
 $reportPath = Join-Path $scriptDir "test-report.log"
 $resultPath = Join-Path $scriptDir "test-result.json"
 
@@ -99,9 +98,9 @@ function Invoke-Build {
     Write-Host "Cleaning previous builds..."
     & dotnet clean $SolutionPath --verbosity quiet 2>&1 | Out-Null
 
-    # Сборка в Debug (headless поддержка)
+    # Сборка в Release
     Write-Host "Building solution..."
-    $buildOutput = & dotnet build $SolutionPath -c Debug --verbosity minimal 2>&1
+    $buildOutput = & dotnet build $SolutionPath -c Release --verbosity minimal 2>&1
     $exitCode = $LASTEXITCODE
 
     if ($exitCode -ne 0) {
@@ -155,11 +154,11 @@ function Invoke-HeadlessTest {
 
     $arguments = @(
         "--headless"
-        "--test-mode"
-        "--boot=boot.test.json"
         "--username=$Username"
         "--password=$Password"
         "--ram=$Ram"
+        "--workspace=$scriptDir"
+        "--boot=boot.headless.json"
     )
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
@@ -175,10 +174,10 @@ function Invoke-HeadlessTest {
     $process.StartInfo = $psi
 
     $output = New-Object System.Text.StringBuilder
-    $error = New-Object System.Text.StringBuilder
+    $errBuilder = New-Object System.Text.StringBuilder
 
     $outputEvent = { $output.AppendLine($EventArgs.Data) }
-    $errorEvent = { $error.AppendLine($EventArgs.Data) }
+    $errorEvent = { $errBuilder.AppendLine($EventArgs.Data) }
 
     Register-ObjectEvent -InputObject $process -EventName OutputDataReceived -Action $outputEvent | Out-Null
     Register-ObjectEvent -InputObject $process -EventName ErrorDataReceived -Action $errorEvent | Out-Null
@@ -194,14 +193,14 @@ function Invoke-HeadlessTest {
     if (-not $completed) {
         Write-Result "FAIL" "Process timed out after $TimeoutSeconds seconds"
         $process.Kill()
-        return @{ Success = $false; ExitCode = 3; Output = $output.ToString(); Error = $error.ToString() }
+        return @{ Success = $false; ExitCode = 3; Output = $output.ToString(); Error = $errBuilder.ToString() }
     }
 
     $process.WaitForExit()  # Дожидаемся завершения обработки вывода
 
     $exitCode = $process.ExitCode
     $outputStr = $output.ToString()
-    $errorStr = $error.ToString()
+    $errorStr = $errBuilder.ToString()
 
     # Вывод консоли
     if ($outputStr) {
@@ -231,7 +230,7 @@ function Get-TestResult {
 
     try {
         $content = Get-Content $ResultPath -Raw
-        return $content | ConvertFrom-Json -Depth 10
+        return $content | ConvertFrom-Json
     }
     catch {
         Write-Result "WARN" "Failed to parse test-result.json: $_"

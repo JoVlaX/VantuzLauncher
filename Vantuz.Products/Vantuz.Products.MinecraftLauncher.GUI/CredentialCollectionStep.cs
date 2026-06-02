@@ -24,8 +24,7 @@ public class CredentialCollectionStep : ICommandPlugin
         try
         {
             // Get credential provider from GUI plugin
-            // Per INVARIANT_THEORY.md §1.2: Must use shared type from Vantuz.Core for cross-plugin compatibility
-            var credentialProvider = context.Get<Vantuz.Core.ICredentialProvider>("gui.credential_provider");
+            var credentialProvider = context.Get<ICredentialProvider>("gui.credential_provider");
             if (credentialProvider == null)
             {
                 return new CommandResult(false, "Credential provider not available. Ensure GUI.MinecraftLauncher step executed first.");

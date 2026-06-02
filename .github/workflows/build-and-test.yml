@@ -1,0 +1,68 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore VantuzLauncher.sln
+
+      - name: Build solution (Release)
+        run: dotnet build VantuzLauncher.sln -c Release --no-restore --verbosity minimal
+
+      - name: Run headless tests
+        shell: pwsh
+        run: |
+          $result = & .\test-and-run.ps1 -NoBuild -Timeout 120
+          Write-Host $result
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-artifacts
+          path: |
+            test-result.json
+            test-report.log
+            crash.log
+          if-no-files-found: ignore
+
+      - name: Verify test result
+        shell: pwsh
+        run: |
+          if (Test-Path test-result.json) {
+            $json = Get-Content test-result.json | ConvertFrom-Json
+            if ($json.status -eq 'success') {
+              Write-Host 'Tests passed successfully'
+            } else {
+              Write-Error "Test status: $($json.status). Error: $($json.errorMessage)"
+              exit 1
+            }
+          } else {
+            Write-Error 'test-result.json not found'
+            exit 1
+          }
