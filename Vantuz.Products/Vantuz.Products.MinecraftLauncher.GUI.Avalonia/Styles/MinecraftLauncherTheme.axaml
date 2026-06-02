@@ -1,0 +1,76 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <Color x:Key="MinecraftGreen">#55FF55</Color>
+    <Color x:Key="MinecraftDarkGreen">#00AA00</Color>
+    <Color x:Key="MinecraftBrown">#8B7355</Color>
+    <Color x:Key="MinecraftStone">#808080</Color>
+    <Color x:Key="MinecraftDirt">#8B4513</Color>
+    
+    <LinearGradientBrush x:Key="LauncherBackground" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#1a1a2e" Offset="0.0" />
+        <GradientStop Color="#16213e" Offset="0.5" />
+        <GradientStop Color="#0f3460" Offset="1.0" />
+    </LinearGradientBrush>
+    
+    <Style Selector="TextBlock.H1">
+        <Setter Property="FontSize" Value="48" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource MinecraftGreen}" />
+    </Style>
+    
+    <Style Selector="TextBlock.H2">
+        <Setter Property="FontSize" Value="24" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+    
+    <Style Selector="TextBlock.Subtitle">
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Foreground" Value="#AAAAAA" />
+    </Style>
+    
+    <Style Selector="TextBlock.StatusText">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{StaticResource MinecraftGreen}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+    
+    <Style Selector="Border.Card">
+        <Setter Property="Background" Value="#20FFFFFF" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="30" />
+        <Setter Property="BoxShadow" Value="0 8 32 0 #40000000" />
+    </Style>
+    
+    <Style Selector="Button.mc-button">
+        <Setter Property="Height" Value="50" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Background" Value="{StaticResource MinecraftGreen}" />
+        <Setter Property="Foreground" Value="Black" />
+    </Style>
+    
+    <Style Selector="Button.mc-button:pointerover">
+        <Setter Property="Background" Value="{StaticResource MinecraftDarkGreen}" />
+    </Style>
+    
+    <Style Selector="TextBox.mc-input">
+        <Setter Property="Height" Value="45" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Background" Value="#30FFFFFF" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderBrush" Value="{StaticResource MinecraftGreen}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Padding" Value="10,0" />
+    </Style>
+    
+    <Style Selector="ProgressBar.mc-progress">
+        <Setter Property="Height" Value="8" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Foreground" Value="{StaticResource MinecraftGreen}" />
+        <Setter Property="Background" Value="#30FFFFFF" />
+    </Style>
+</ResourceDictionary>

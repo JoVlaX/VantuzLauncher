@@ -51,7 +51,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
                 // Set capabilities in context for downstream plugins
                 context.Set("gui_reporter", _reporter);
                 context.Set("gui_window", _mainWindow);
-                context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);
+                context.Set("gui.credential_provider", (Vantuz.Core.ICredentialProvider)_mainWindow);
                 context.Set("workspace_path", workspacePath);
 
                 context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (hosted mode)");
@@ -84,7 +84,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
                 // Set capabilities in context for downstream plugins
                 context.Set("gui_reporter", _reporter);
                 context.Set("gui_window", _mainWindow);
-                context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);  // Sync with CredentialCollectionStep.cs:27
+                context.Set("gui.credential_provider", (Vantuz.Core.ICredentialProvider)_mainWindow);  // Sync with CredentialCollectionStep.cs:27
                 context.Set("workspace_path", workspacePath);
 
                 // Subscribe to context updates

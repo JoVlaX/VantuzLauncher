@@ -1,5 +1,5 @@
 {
-  "_comment": "Production boot for Minecraft Launcher with GUI per INVARIANT_THEORY.md §498",
+  "_comment": "Production boot for Minecraft Launcher with GUI per INVARIANT_THEORY.md §2.2 CQRS, §498 Explicit UI",
   "product": "MinecraftLauncher",
   "variables": {
     "localVersion": "2.0-dev",
@@ -7,27 +7,47 @@
     "gameVersion": "1.20.1-forge-47.3.0",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
     "installDir": "{{mcDir}}\\.minecraft",
-    "operationTimeout": "00:05:00"
+    "operationTimeout": "00:05:00",
+    "authEndpoint": "https://troglobit.webhm.pro/yggdrasil",
+    "authUrl": "{{authEndpoint}}/authserver/authenticate",
+    "launcherVersion": "2.0-dev"
   },
   "plugins": {
+    "Vantuz.Products.MinecraftLauncher.GUI.dll": "",
     "Vantuz.Plugins.Auth.dll": "",
     "Vantuz.Plugins.Net.dll": "",
     "Vantuz.Plugins.OS.dll": "",
     "Vantuz.Plugins.Game.dll": "",
-    "Vantuz.Plugins.Minecraft.dll": "",
-    "Vantuz.Products.MinecraftLauncher.GUI.dll": ""
+    "Vantuz.Plugins.Minecraft.dll": ""
   },
   "pipeline": [
     {
-      "_comment": "Phase 1: User authentication (production)",
-      "pluginName": "Auth.LoginCommand",
+      "_comment": "Phase 1: GUI Initialization - Per COMPOSITUM_SPECIFICATION.md §4.1, GUI must be first to register capabilities",
+      "pluginName": "GUI.MinecraftLauncher",
       "config": {
-        "provider": "Yggdrasil",
-        "authServer": "https://authserver.mojang.com"
+        "theme": "dark",
+        "showProgress": true,
+        "autoCloseOnLaunch": false
       }
     },
     {
-      "_comment": "Phase 2: Game installation",
+      "_comment": "Phase 2: Credential Collection - Per INVARIANT_THEORY.md §2.2, UI Command before auth Query",
+      "pluginName": "GUI.CredentialCollection",
+      "config": {
+        "_description": "Collect username/password from user via registered ICredentialProvider"
+      }
+    },
+    {
+      "_comment": "Phase 3: Authentication - Executes after credentials collected",
+      "pluginName": "Auth.YggdrasilCommand",
+      "config": {
+        "url": "{{authUrl}}",
+        "ignoreSslErrors": true,
+        "launcherVersion": "{{launcherVersion}}"
+      }
+    },
+    {
+      "_comment": "Phase 4: Game installation",
       "pluginName": "Game.InstallerCommand",
       "config": {
         "provider": "{{gameProvider}}",
@@ -36,7 +56,7 @@
       }
     },
     {
-      "_comment": "Phase 3: Version validation",
+      "_comment": "Phase 5: Version validation",
       "pluginName": "Game.VersionValidatorQuery",
       "config": {
         "provider": "{{gameProvider}}",
@@ -45,23 +65,14 @@
       }
     },
     {
-      "_comment": "Phase 4: Launch preparation",
+      "_comment": "Phase 6: Launch preparation",
       "pluginName": "Game.LaunchCommand",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
         "installDir": "{{installDir}}",
         "authlibPath": "{{mcDir}}\\authlib-injector.jar",
-        "authlibUrl": "https://yggdrasil.example.com/"
-      }
-    },
-    {
-      "_comment": "Phase 5: GUI - Per §498, GUI is explicit pipeline step",
-      "pluginName": "GUI.MinecraftLauncher",
-      "config": {
-        "theme": "dark",
-        "showProgress": true,
-        "autoCloseOnLaunch": false
+        "authlibUrl": "{{authEndpoint}}/"
       }
     }
   ]
