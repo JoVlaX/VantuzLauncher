@@ -160,6 +160,14 @@ public static class PluginNameVerifier
             exitCode = 1;
         }
 
+        var nomadicViolations = VerifyNomadic(pluginsDir);
+        if (nomadicViolations.Count > 0)
+        {
+            Console.Error.WriteLine("[VERIFY] ARM-BUILD-026: Nomadic/Transdomain primitive violations detected.");
+            foreach (var v in nomadicViolations) Console.Error.WriteLine($"  {v}");
+            exitCode = 1;
+        }
+
         return exitCode;
     }
 
@@ -279,6 +287,78 @@ public static class PluginNameVerifier
                                     !refAssembly.Equals(pluginAssemblyName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references external assembly {refAssembly}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { /* Skip unreadable assemblies */ }
+        }
+        return violations;
+    }
+
+    private static readonly string[] ForbiddenHostSpecificTypes = new[]
+    {
+        "System.Windows.Forms",
+        "Microsoft.AspNetCore",
+        "System.Web",
+        "System.ServiceModel",
+        "System.Drawing",
+        "System.Web.UI",
+        "Microsoft.Win32"
+    };
+
+    private static List<string> VerifyNomadic(string pluginsDir)
+    {
+        var violations = new List<string>();
+        foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
+        {
+            try
+            {
+                using var asm = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters { ReadWrite = false });
+                foreach (var type in asm.MainModule.Types)
+                {
+                    if (type.IsInterface || type.IsAbstract || type.IsValueType) continue;
+
+                    // Detect P/Invoke
+                    foreach (var method in type.Methods)
+                    {
+                        if (method.IsPInvokeImpl)
+                        {
+                            violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: uses P/Invoke (platform-specific)");
+                        }
+                    }
+
+                    // Detect custom attributes with host-specific names
+                    foreach (var attr in type.CustomAttributes)
+                    {
+                        var attrName = attr.AttributeType.FullName;
+                        if (attrName.Contains("HostSpecific") || attrName.Contains("Platform") || attrName.Contains("WindowsOnly"))
+                        {
+                            violations.Add($"{type.FullName} in {Path.GetFileName(dllPath)}: has host-specific attribute {attrName}");
+                        }
+                    }
+
+                    // Detect forbidden host-specific references in method bodies
+                    foreach (var method in type.Methods.Where(m => m.HasBody))
+                    {
+                        foreach (var instr in method.Body.Instructions)
+                        {
+                            if (instr.Operand is MethodReference mr)
+                            {
+                                var declType = mr.DeclaringType.FullName;
+                                if (ForbiddenHostSpecificTypes.Any(f => declType.StartsWith(f)))
+                                {
+                                    violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references host-specific type {declType}");
+                                }
+                            }
+                            if (instr.Operand is TypeReference tr)
+                            {
+                                var typeName = tr.FullName;
+                                if (ForbiddenHostSpecificTypes.Any(f => typeName.StartsWith(f)))
+                                {
+                                    violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references host-specific type {typeName}");
                                 }
                             }
                         }

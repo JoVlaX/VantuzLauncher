@@ -1,8 +1,9 @@
 # Deviation Protocol 005: Partial Loader Implementation
 
-**Status:** Active — Phases 1–3 Resolved; Phase 4 (integration) Pending
+**Status:** Resolved 2026-06-03
 **Created:** 2026-06-03T15:30:00+05:00
 **Deadline:** 2026-06-30T23:59:59+05:00
+**Closed:** 2026-06-03T17:40:00+05:00
 **Owner:** Agent Cascade
 
 ---
@@ -76,10 +77,10 @@ Full invariant verification requires:
 - [x] Validate `I_scope(p)` per `COMPOSITUM_SPEC §4.1` with allowed assembly whitelist
 - [x] Add `ARM-BUILD-024` error code for scope violation
 
-### Phase 4: Unified Loader Integration (by 2026-06-30)
-- [ ] Integrate `VerifyCQRS`, `VerifyResources`, `VerifyScope` into unified `Loader: Assembly → (I: Valid/Invalid)` interface
-- [ ] Generate single exit code from `PluginNameVerifier` aggregating all invariant checks
-- [ ] Close this deviation protocol when `V_completeness_report.json` shows zero missing verifiers
+### Phase 4: Unified Loader Integration ✅ Resolved 2026-06-03
+- [x] Integrate `VerifyCQRS`, `VerifyResources`, `VerifyScope`, `VerifyNomadic` into unified `VerifyPluginInvariants` returning single exit code
+- [x] Generate single exit code from `PluginNameVerifier` aggregating all invariant checks
+- [x] Close this deviation protocol — `V_completeness_report.json` shows zero missing verifiers
 
 ## Risk Assessment
 

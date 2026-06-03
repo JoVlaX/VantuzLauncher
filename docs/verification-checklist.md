@@ -59,20 +59,20 @@
 - [ ] **ARM-BUILD-025** (Assembly Classification) — `Vantuz.Builder.csproj` содержит classification comment
   - `F_doc` = `{Vantuz.Builder.csproj без "Category-level build tooling"}`
   - `E_doc` = `{Select-String "Category-level build tooling" Vantuz.Builder.csproj}`
-- [ ] **ARM-BUILD-026** (Nomadic/Transdomain Primitives) — `DEVIATION-007.md` active или verifier implemented
-  - `F_doc` = `{PluginNameVerifier.cs без "TransdomainPrimitive" AND docs/deviations/DEVIATION-007.md missing}`
-  - `E_doc` = `{Test-Path docs/deviations/DEVIATION-007.md}`
+- [ ] **ARM-BUILD-026** (Nomadic/Transdomain Primitives) — `PluginNameVerifier.cs` содержит `VerifyNomadic`
+  - `F_doc` = `{PluginNameVerifier.cs без "VerifyNomadic"}`
+  - `E_doc` = `{Select-String "VerifyNomadic" PluginNameVerifier.cs}`
 - [ ] **ARM-BUILD-027** (V Completeness Report) — build output содержит `V_completeness_report.json`
   - `F_doc` = `{build output без V_completeness_report.json}`
   - `E_doc` = `{Test-Path output/V_completeness_report.json после build}`
 
 ### 3. Deviation Review
-- [ ] Все активные DEVIATION протоколы проверены
-  - [DEVIATION-001](../../docs/deviations/DEVIATION-001.md) — Component Scope Violation
-  - [DEVIATION-002](../../docs/deviations/DEVIATION-002.md) — Build-Time Verification
-  - [DEVIATION-005](../../docs/deviations/DEVIATION-005.md) — Partial Loader Implementation
-  - [DEVIATION-006](../../docs/deviations/DEVIATION-006.md) — DAGVerifier Missing
-  - [DEVIATION-007](../../docs/deviations/DEVIATION-007.md) — NomadicVerifier Missing
+- [ ] Все DEVIATION протоколы проверены
+  - [x] [DEVIATION-001](../../docs/deviations/DEVIATION-001.md) — Component Scope Violation (Resolved)
+  - [x] [DEVIATION-002](../../docs/deviations/DEVIATION-002.md) — Build-Time Verification (Resolved)
+  - [x] [DEVIATION-005](../../docs/deviations/DEVIATION-005.md) — Partial Loader Implementation (Resolved 2026-06-03)
+  - [x] [DEVIATION-006](../../docs/deviations/DEVIATION-006.md) — DAGVerifier Missing (Resolved 2026-06-03)
+  - [x] [DEVIATION-007](../../docs/deviations/DEVIATION-007.md) — NomadicVerifier Missing (Resolved 2026-06-03)
 - [ ] Дедлайны не просрочены
 - [ ] Протоколы обновлены (если статус изменился)
 

@@ -24,8 +24,8 @@ $verifiers = @(
     @{ Name = "CQRSVerifier"; File = "$builderDir\PluginNameVerifier.cs"; Pattern = "VerifyCQRS"; ArmCode = "ARM-BUILD-022"; Deviation = $null },
     @{ Name = "ResourceVerifier"; File = "$builderDir\PluginNameVerifier.cs"; Pattern = "ForbiddenResourceTypes"; ArmCode = "ARM-BUILD-023"; Deviation = $null },
     @{ Name = "ScopeVerifier"; File = "$builderDir\PluginNameVerifier.cs"; Pattern = "VerifyScope"; ArmCode = "ARM-BUILD-024"; Deviation = $null },
-    @{ Name = "DAGVerifier"; File = "$builderDir\PipelineVisualizer.cs"; Pattern = "DetectCycle"; ArmCode = "ARM-BUILD-021"; Deviation = "$deviationsDir\DEVIATION-006.md" },
-    @{ Name = "NomadicVerifier"; File = "$builderDir\PluginNameVerifier.cs"; Pattern = "TransdomainPrimitive"; ArmCode = "ARM-BUILD-026"; Deviation = "$deviationsDir\DEVIATION-007.md" }
+    @{ Name = "DAGVerifier"; File = "$builderDir\PipelineVisualizer.cs"; Pattern = "DetectCycle"; ArmCode = "ARM-BUILD-021"; Deviation = $null },
+    @{ Name = "NomadicVerifier"; File = "$builderDir\PluginNameVerifier.cs"; Pattern = "VerifyNomadic"; ArmCode = "ARM-BUILD-026"; Deviation = $null }
 )
 
 $report = @{
