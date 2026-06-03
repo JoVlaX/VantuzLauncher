@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Classification: Category-level build tooling, not Core (per COMPOSITUM_SPEC §4.2) -->
     <!-- .traerules:52 - compiler_trace_hiding: FORBIDDEN -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>

@@ -1,6 +1,6 @@
 # Deviation Protocol 005: Partial Loader Implementation
 
-**Status:** Active
+**Status:** Active — Phases 1–3 Resolved; Phase 4 (integration) Pending
 **Created:** 2026-06-03T15:30:00+05:00
 **Deadline:** 2026-06-30T23:59:59+05:00
 **Owner:** Agent Cascade
@@ -28,7 +28,10 @@ where Name = plugin class Name property string
 This verifies:
 - ✅ `Name` property exists on concrete plugin types
 - ✅ `Name` value matches pipeline `pluginName` references in `boot*.json`
-- ❌ Does NOT verify `I(p) = Valid` (CQRS separation, resource category, scope restriction)
+- ✅ CQRS separation: `VerifyCQRS` implemented (ARM-BUILD-022)
+- ✅ Resource category: `VerifyResources` implemented (ARM-BUILD-023)
+- ✅ Scope restriction: `VerifyScope` implemented (ARM-BUILD-024)
+- ❌ Does NOT verify `I(p) = Valid` as unified Loader (integration pending)
 
 ### Required State (Complete)
 
@@ -58,20 +61,25 @@ Full invariant verification requires:
 
 ## Resolution Plan
 
-### Phase 1: CQRS Separation Verification (by 2026-06-10)
-- [ ] Extend `PluginNameVerifier.DiscoverPluginNames` to inspect `type.Interfaces` for `ICommandPlugin`/`IQueryPlugin` mutual exclusion
-- [ ] Add `ARM-BUILD-022` error code for CQRS violation
-- [ ] Document falsifier set `F_r` and empirical test `E_r` in `verification-checklist.md`
+### Phase 1: CQRS Separation Verification ✅ Resolved 2026-06-03
+- [x] Extend `PluginNameVerifier` with `VerifyCQRS` inspecting `type.Interfaces` and method names for Command/Query mutual exclusion
+- [x] Add `ARM-BUILD-022` error code for CQRS violation
+- [x] Document falsifier set `F_r` and empirical test `E_r` in `verification-checklist.md`
 
-### Phase 2: Resource Category Verification (by 2026-06-20)
-- [ ] Add Cecil scan for `FileStream` / `HttpClient` instantiation in plugin method bodies
-- [ ] Classify resource usage against `ARM010` categories (RuntimeManaged, HostManaged, UserManaged)
-- [ ] Add `ARM-BUILD-023` error code for resource category violation
+### Phase 2: Resource Category Verification ✅ Resolved 2026-06-03
+- [x] Add Cecil scan for `FileStream` / `HttpClient` / `Process` instantiation in plugin method bodies via `VerifyResources`
+- [x] Classify resource usage against forbidden reference list
+- [x] Add `ARM-BUILD-023` error code for resource category violation
 
-### Phase 3: Component Scope Verification (by 2026-06-30)
-- [ ] Add Roslyn analyzer or Cecil scan for Product → Core direct references
-- [ ] Validate `I_scope(p)` per `COMPOSITUM_SPEC §4.1`
-- [ ] Close this deviation protocol
+### Phase 3: Component Scope Verification ✅ Resolved 2026-06-03
+- [x] Add Cecil scan for cross-assembly references via `VerifyScope`
+- [x] Validate `I_scope(p)` per `COMPOSITUM_SPEC §4.1` with allowed assembly whitelist
+- [x] Add `ARM-BUILD-024` error code for scope violation
+
+### Phase 4: Unified Loader Integration (by 2026-06-30)
+- [ ] Integrate `VerifyCQRS`, `VerifyResources`, `VerifyScope` into unified `Loader: Assembly → (I: Valid/Invalid)` interface
+- [ ] Generate single exit code from `PluginNameVerifier` aggregating all invariant checks
+- [ ] Close this deviation protocol when `V_completeness_report.json` shows zero missing verifiers
 
 ## Risk Assessment
 

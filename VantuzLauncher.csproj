@@ -266,4 +266,10 @@
     <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- verify-dir &quot;$(_TargetDirTrimmed)&quot; &quot;$(TargetDir)plugins&quot;" />
   </Target>
 
+  <!-- ARM-BUILD-027: V Completeness Report per COMPOSITUM_SPECIFICATION.md §7.1a -->
+  <Target Name="VCompletenessReport" AfterTargets="VerifyPluginNames">
+    <Message Text="[Armatura] ARM-BUILD-027: Generating V completeness report..." Importance="high" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)scripts\generate-v-completeness-report.ps1&quot; -OutputDir &quot;$(TargetDir)&quot;" />
+  </Target>
+
 </Project>

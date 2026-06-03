@@ -158,6 +158,80 @@ public static class PipelineVisualizer
 
         Console.WriteLine();
         Console.WriteLine("══════════════════════════════════════════════════════════════════");
+
+        // DAG verification per INVARIANT_THEORY §2.1
+        var cycle = DetectCycle(dependencies);
+        if (cycle != null)
+        {
+            Console.Error.WriteLine("[ARM-BUILD-021] DAG VIOLATION: Cycle detected in pipeline dependency graph.");
+            Console.Error.WriteLine($"  Cycle: {string.Join(" → ", cycle)} → {cycle[0]}");
+            throw new InvalidOperationException("Pipeline is not a DAG — cycle detected.");
+        }
+        else
+        {
+            Console.WriteLine("[VERIFY] DAG check passed: |C| = 0 (no cycles)");
+        }
+    }
+
+    private static List<string>? DetectCycle(Dictionary<string, List<string>> dependencies)
+    {
+        var inDegree = new Dictionary<string, int>();
+        var allNodes = new HashSet<string>(dependencies.Keys);
+        foreach (var deps in dependencies.Values)
+            foreach (var d in deps)
+                allNodes.Add(d);
+
+        foreach (var n in allNodes)
+            inDegree[n] = 0;
+
+        foreach (var kvp in dependencies)
+            foreach (var dep in kvp.Value)
+                if (inDegree.ContainsKey(dep))
+                    inDegree[dep]++;
+
+        var queue = new Queue<string>(allNodes.Where(n => inDegree[n] == 0));
+        var visited = 0;
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            visited++;
+            if (dependencies.TryGetValue(current, out var deps))
+            {
+                foreach (var neighbor in deps)
+                {
+                    if (inDegree.ContainsKey(neighbor))
+                    {
+                        inDegree[neighbor]--;
+                        if (inDegree[neighbor] == 0)
+                            queue.Enqueue(neighbor);
+                    }
+                }
+            }
+        }
+
+        if (visited == allNodes.Count)
+            return null; // No cycle
+
+        // Find a node that is part of a cycle
+        var cycleNode = allNodes.First(n => inDegree.ContainsKey(n) && inDegree[n] > 0);
+        var cycle = new List<string>();
+        var currentInCycle = cycleNode;
+        var visitedInCycle = new HashSet<string>();
+
+        do
+        {
+            cycle.Add(currentInCycle);
+            visitedInCycle.Add(currentInCycle);
+            var next = dependencies[currentInCycle].FirstOrDefault(d => inDegree.ContainsKey(d) && inDegree[d] > 0 && !visitedInCycle.Contains(d));
+            if (string.IsNullOrEmpty(next))
+                next = dependencies[currentInCycle].FirstOrDefault(d => inDegree.ContainsKey(d) && inDegree[d] > 0);
+            if (string.IsNullOrEmpty(next))
+                break;
+            currentInCycle = next;
+        } while (currentInCycle != cycleNode && !visitedInCycle.Contains(currentInCycle));
+
+        return cycle.Count > 0 ? cycle : new List<string> { cycleNode };
     }
 
     private static List<string> GetProduces(PipelineStep step, int index)

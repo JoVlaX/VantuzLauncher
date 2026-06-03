@@ -88,7 +88,29 @@ F_r = {Level 2 document with outdated parent reference after Level 1 update}
 E_r = {agent pre-write check: parent_version matches manifest}
 ```
 
-### §0.3 Document Responsibilities
+### §0.3 Plan Verification Protocol
+
+**Statement:** All agent-generated plans MUST pass structural validation before execution.
+
+**Formalization:**
+```
+Plan(p) valid ⟺
+    ∀section ∈ p.analysis:
+        section.claims ⊂ VerifiableClaims(F_doc, E_doc) ∧
+    ∀action ∈ p.actions:
+        ∃Deadline(a): a ∈ ISO8601 ∧
+    ∃SelfAudit(p): V_self(p) = Valid
+```
+
+**Checklist:**
+- [ ] Does the plan analyze artifacts against INVARIANT_THEORY? If yes, does it include `## Meta-Compliance`?
+- [ ] Does every proposed action have an ISO8601 deadline?
+- [ ] Are all claims file-system verifiable or marked [HYPOTHESIS]?
+- [ ] Does the plan include a `## Self-Audit` section?
+
+**Justification (§1.2a Reflexive Measurability INVARIANT_THEORY):** Plans asserting compliance with Armatura must themselves be demonstrably compliant.
+
+### §0.4 Document Responsibilities
 
 **Statement:** Each document in the hierarchy serves a distinct epistemological function with measurable compliance criteria.
 
@@ -459,6 +481,27 @@ E_r = {CI pipeline enforcing all three criteria}
     where V = conjunction of all verifiers from INVARIANT_THEORY
 ```
 
+#### §7.1a V Completeness Dashboard
+
+**Statement:** `V = ∧V_i` must be operationally checkable at build time.
+
+**Formalization:**
+```
+V_complete ⟺ |V_implemented| = |V_required| ∧ ∀v ∈ V_required: v ∈ V_implemented
+
+V_required = {
+    NameVerifier, CQRSVerifier, ResourceVerifier,
+    ScopeVerifier, DAGVerifier, NomadicVerifier
+}
+```
+
+**Build requirement:** Every build MUST output `V_completeness_report.json` listing:
+- Implemented verifiers with ARM codes
+- Required but unimplemented verifiers
+- Deviation protocol status for any missing verifier
+
+A missing verifier without active deviation protocol is a **build error**.
+
 ### §7.2 Zero-Tolerance Policy
 
 **Statement:** No deviation from INVARIANT_THEORY is permitted without explicit deviation protocol.
@@ -534,8 +577,8 @@ The system is falsifiable: any component violating INVARIANT_THEORY is automatic
 ## Version
 
 *Document: COMPOSITUM_SPECIFICATION.md*  
-*Version: 3.2.0*  
+*Version: 3.3.0*  
 *Status: Formalized Project Specification*  
-*Parent: INVARIANT_THEORY.md v1.3, ARMATURA_DOCUMENT_PROTOCOL.md v1.3*  
+*Parent: INVARIANT_THEORY.md v1.1, ARMATURA_DOCUMENT_PROTOCOL.md v1.3*  
 *Sibling: COMPOSITUM.md (root AI manifest)*  
-*Changes: Parent updated to INVARIANT_THEORY v1.3/DOCUMENT_PROTOCOL v1.3; Added §12-§14 protocols (AI-only editing, rollback, cross-project)*
+*Changes: Added §0.3 Plan Verification Protocol, §7.1a V Completeness Dashboard; Renumbered §0.3→§0.4 Document Responsibilities; Parent updated to INVARIANT_THEORY v1.1 (Reflexive Measurability, Document Falsifiability, Symmetric Deadlines)*

@@ -44,6 +44,22 @@ where Complexity(i) = |i| + λ·Entropy(i)
 
 **Popperian Criterion:** A rule without static verification is unfalsifiable and therefore unscientific. The `human_factor_reliance: FORBIDDEN` clause enforces objectivity.
 
+### 1.2a Corollary: Reflexive Measurability
+
+**Statement:** Any document, plan, or artifact asserting compliance with Armatura MUST itself be statically verifiable against the same criteria.
+
+**Formalization:**
+```
+∀Artifact a ∈ Assertions:
+    AssertsCompliance(a, Armatura) →
+    ∃V_a: Artifact → {Valid, Invalid}:
+        V_a(a) = Valid ⟹ a satisfies Armatura
+```
+
+**Scope:** Includes plans, audits, retrospectives, deviation protocols, and agent-generated analysis.
+
+**Consequence:** A retrospective claiming "§1.2 requires build-time verification" must itself contain a verifiable checklist or automated test. A plan proposing preventive mechanisms must include ISO8601 deadlines (per §9.4 applied symmetrically).
+
 ---
 
 ## 2. Invariant Theory
@@ -191,6 +207,21 @@ Examples:
     F_r = {code using ServiceCollection.BuildServiceProvider()}
     E_r = {Roslyn analyzer detecting ServiceProvider usage}
 ```
+
+### 4.1a Corollary: Document Falsifiability
+
+**Statement:** Every claim in an Armatura-compliant document must have concrete falsifier set `F_doc` and empirical test `E_doc`.
+
+**Formalization:**
+```
+For each claim c in document d:
+    F_doc(c) = {file system states that would falsify c}
+    E_doc(c) = {automated check or manual inspection detecting falsification}
+
+    ValidClaim(c) ⟺ |F_doc(c)| > 0 ∧ |E_doc(c)| > 0
+```
+
+**Agent-state claims:** Claims depending on the generator's internal state ("would have", "could have", "should have") MUST be marked [HYPOTHESIS] and excluded from `ValidClaim` unless accompanied by an observable proxy (e.g., session scope document, commit history).
 
 ### 4.2 The Verifiability Spectrum
 
@@ -470,6 +501,20 @@ Then: ¬∃ date when r applies to c
 ∴ Legacy Compatibility preserves scientific status of Armatura.
 ```
 
+### 9.4a Corollary: Symmetric Deadlines
+
+**Statement:** Any time-bounded action — whether exemption (negative) or improvement (positive) — MUST have an ISO8601 deadline.
+
+**Formalization:**
+```
+Define Action(a, type, deadline):
+    type ∈ {Exemption, Improvement, Remediation, Prevention}
+
+ValidAction(a) ⟺ ∃Deadline(d): d ∈ ISO8601 ∧ d > Now()
+```
+
+**Consequence:** Retrospective preventive mechanisms, roadmap items, and self-correction protocols require deadlines with the same rigor as deviation protocols.
+
 ---
 
 ## 10. Philosophical Synthesis
@@ -544,6 +589,6 @@ This theory provides the epistemological foundation for why Armatura rules exist
 
 ---
 
-*Document version: 1.0*
+*Document version: 1.1*
 *Last updated: 2026-05-30*
 *Status: Formalized Invariant Theory*

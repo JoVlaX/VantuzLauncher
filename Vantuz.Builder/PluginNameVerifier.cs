@@ -51,6 +51,11 @@ public static class PluginNameVerifier
         }
 
         Console.WriteLine($"[VERIFY] PASS: All {expectedNames.Count} pipeline names verified against {discoveredNames.Count} discovered plugin classes.");
+
+        // Extended invariant checks per DEVIATION-005
+        int invariantResult = VerifyPluginInvariants(pluginsDir);
+        if (invariantResult != 0) return invariantResult;
+
         return 0;
     }
 
@@ -125,6 +130,164 @@ public static class PluginNameVerifier
         }
 
         return (discoveredNames, discoveredMap);
+    }
+
+    private static int VerifyPluginInvariants(string pluginsDir)
+    {
+        int exitCode = 0;
+
+        var cqrsViolations = VerifyCQRS(pluginsDir);
+        if (cqrsViolations.Count > 0)
+        {
+            Console.Error.WriteLine("[VERIFY] ARM-BUILD-022: CQRS separation violations detected.");
+            foreach (var v in cqrsViolations) Console.Error.WriteLine($"  {v}");
+            exitCode = 1;
+        }
+
+        var resourceViolations = VerifyResources(pluginsDir);
+        if (resourceViolations.Count > 0)
+        {
+            Console.Error.WriteLine("[VERIFY] ARM-BUILD-023: Resource category violations detected.");
+            foreach (var v in resourceViolations) Console.Error.WriteLine($"  {v}");
+            exitCode = 1;
+        }
+
+        var scopeViolations = VerifyScope(pluginsDir);
+        if (scopeViolations.Count > 0)
+        {
+            Console.Error.WriteLine("[VERIFY] ARM-BUILD-024: Scope violations detected.");
+            foreach (var v in scopeViolations) Console.Error.WriteLine($"  {v}");
+            exitCode = 1;
+        }
+
+        return exitCode;
+    }
+
+    private static List<string> VerifyCQRS(string pluginsDir)
+    {
+        var violations = new List<string>();
+        foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
+        {
+            try
+            {
+                using var asm = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters { ReadWrite = false });
+                foreach (var type in asm.MainModule.Types)
+                {
+                    if (type.IsInterface || type.IsAbstract || type.IsValueType) continue;
+
+                    bool hasCommand = type.Interfaces.Any(i =>
+                        i.InterfaceType.Name.Contains("Command") ||
+                        type.Methods.Any(m => m.Name.Contains("Command") || m.Name.Contains("Execute")));
+                    bool hasQuery = type.Interfaces.Any(i =>
+                        i.InterfaceType.Name.Contains("Query") ||
+                        type.Methods.Any(m => m.Name.Contains("Query") || m.Name.Contains("Get")));
+
+                    if (hasCommand && hasQuery)
+                    {
+                        violations.Add($"{type.FullName} in {Path.GetFileName(dllPath)}: mixes Command and Query characteristics");
+                    }
+                }
+            }
+            catch { /* Skip unreadable assemblies */ }
+        }
+        return violations;
+    }
+
+    private static readonly string[] ForbiddenResourceTypes = new[]
+    {
+        "System.IO.FileStream",
+        "System.Net.Http.HttpClient",
+        "System.Net.HttpWebRequest",
+        "System.Diagnostics.Process"
+    };
+
+    private static List<string> VerifyResources(string pluginsDir)
+    {
+        var violations = new List<string>();
+        foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
+        {
+            try
+            {
+                using var asm = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters { ReadWrite = false });
+                foreach (var type in asm.MainModule.Types)
+                {
+                    if (type.IsInterface || type.IsAbstract || type.IsValueType) continue;
+
+                    foreach (var method in type.Methods.Where(m => m.HasBody))
+                    {
+                        foreach (var instr in method.Body.Instructions)
+                        {
+                            if (instr.Operand is MethodReference mr)
+                            {
+                                var declType = mr.DeclaringType.FullName;
+                                if (ForbiddenResourceTypes.Any(f => declType.StartsWith(f)))
+                                {
+                                    violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references {declType}");
+                                }
+                            }
+                            if (instr.Operand is TypeReference tr)
+                            {
+                                var typeName = tr.FullName;
+                                if (ForbiddenResourceTypes.Any(f => typeName.StartsWith(f)))
+                                {
+                                    violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references type {typeName}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { /* Skip unreadable assemblies */ }
+        }
+        return violations;
+    }
+
+    private static List<string> VerifyScope(string pluginsDir)
+    {
+        var violations = new List<string>();
+        var allowedAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "mscorlib", "System", "System.Core", "netstandard", "System.Runtime",
+            "System.Collections", "System.Linq", "System.Text.Json", "Mono.Cecil"
+        };
+
+        foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
+        {
+            try
+            {
+                using var asm = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters { ReadWrite = false });
+                var pluginAssemblyName = asm.Name.Name;
+                var pluginDir = Path.GetDirectoryName(dllPath)!;
+                var pluginDllNames = new HashSet<string>(
+                    Directory.GetFiles(pluginDir, "*.dll")
+                             .Select(f => Path.GetFileNameWithoutExtension(f)),
+                    StringComparer.OrdinalIgnoreCase);
+
+                foreach (var type in asm.MainModule.Types)
+                {
+                    if (type.IsInterface || type.IsAbstract || type.IsValueType) continue;
+
+                    foreach (var method in type.Methods.Where(m => m.HasBody))
+                    {
+                        foreach (var instr in method.Body.Instructions)
+                        {
+                            if (instr.Operand is MemberReference mr)
+                            {
+                                var refAssembly = mr.DeclaringType.Scope.Name;
+                                if (!allowedAssemblies.Contains(refAssembly) &&
+                                    !pluginDllNames.Contains(refAssembly) &&
+                                    !refAssembly.Equals(pluginAssemblyName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references external assembly {refAssembly}");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { /* Skip unreadable assemblies */ }
+        }
+        return violations;
     }
 
     private class BootManifest
