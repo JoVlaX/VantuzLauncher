@@ -32,7 +32,7 @@ public static class PipelineVisualizer
                 Environment.Exit(1);
                 return;
             }
-            Environment.Exit(PluginNameVerifier.Verify(args[1], args[2]));
+            Environment.Exit(PluginNameVerifier.VerifyManifest(args[1], args[2]));
             return;
         }
 

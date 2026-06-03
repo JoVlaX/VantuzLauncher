@@ -3,11 +3,13 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Vantuz.Builder;
 
 if (args.Length < 1)
 {
     Console.Error.WriteLine("Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>");
     Console.Error.WriteLine("       Vantuz.Builder verify <boot.json> <plugins-dir>");
+    Console.Error.WriteLine("       Vantuz.Builder verify-dir <directory> <plugins-dir>");
     Console.Error.WriteLine("       Vantuz.Builder visualize <boot.json>");
     return 1;
 }
@@ -19,7 +21,17 @@ if (args.Length >= 1 && args[0].Equals("verify", StringComparison.OrdinalIgnoreC
         Console.Error.WriteLine("Usage: Vantuz.Builder verify <boot.json> <plugins-dir>");
         return 1;
     }
-    return PluginNameVerifier.Verify(args[1], args[2]);
+    return PluginNameVerifier.VerifyManifest(args[1], args[2]);
+}
+
+if (args.Length >= 1 && args[0].Equals("verify-dir", StringComparison.OrdinalIgnoreCase))
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Usage: Vantuz.Builder verify-dir <directory> <plugins-dir>");
+        return 1;
+    }
+    return PluginNameVerifier.VerifyDirectory(args[1], args[2]);
 }
 
 if (args.Length >= 1 && args[0].Equals("visualize", StringComparison.OrdinalIgnoreCase))

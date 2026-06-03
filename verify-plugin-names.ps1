@@ -46,7 +46,13 @@ $discoveredMap = @{}  # name -> dll
 foreach ($dll in $dlls) {
     try {
         $asm = [System.Reflection.Assembly]::LoadFrom($dll)
-        foreach ($type in $asm.GetTypes()) {
+        $types = $null
+        try {
+            $types = $asm.GetTypes()
+        } catch [System.Reflection.ReflectionTypeLoadException] {
+            $types = $_.Exception.Types
+        }
+        foreach ($type in $types) {
             # Must implement ICommandPlugin or IQueryPlugin
             $iface = $type.GetInterfaces() | Where-Object {
                 $_.Name -eq "ICommandPlugin" -or $_.Name -eq "IQueryPlugin"

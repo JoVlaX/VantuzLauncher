@@ -20,7 +20,7 @@
   "pipeline": [
     {
       "_comment": "Phase 1: User authentication (production)",
-      "pluginName": "Auth.LoginCommand",
+      "pluginName": "Auth.YggdrasilCommand",
       "config": {
         "provider": "Yggdrasil",
         "authServer": "https://authserver.mojang.com"

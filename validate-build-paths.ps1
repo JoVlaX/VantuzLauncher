@@ -39,7 +39,8 @@ param(
     [switch]$AssertDotNetRun,
     [switch]$AssertTestResult,
     [switch]$AssertPluginsCopied,
-    [switch]$AssertBootJsonIntegrity
+    [switch]$AssertBootJsonIntegrity,
+    [switch]$AssertPipelineNames
 )
 
 # ============================================
@@ -74,7 +75,7 @@ $colors = @{
 }
 
 # Default to AssertAll if no specific flag given
-if (-not ($AssertCleanBuild -or $AssertDotNetRun -or $AssertTestResult -or $AssertPluginsCopied -or $AssertBootJsonIntegrity)) {
+if (-not ($AssertCleanBuild -or $AssertDotNetRun -or $AssertTestResult -or $AssertPluginsCopied -or $AssertBootJsonIntegrity -or $AssertPipelineNames)) {
     $AssertAll = $true
 }
 
@@ -205,6 +206,29 @@ function Invoke-PluginsCopiedCheck {
     return @{ Passed = $true; Message = "All $($expectedPlugins.Count) plugin DLLs present" }
 }
 
+function Invoke-PipelineNamesCheck {
+    Write-Host "`n[Assert-PipelineNames] Checking pipeline pluginNames against discovered plugin classes..." -ForegroundColor $colors.Info
+
+    if (-not (Test-Path $outputDir)) {
+        return @{ Passed = $false; Message = "output directory not found: $outputDir" }
+    }
+    if (-not (Test-Path $pluginsDir)) {
+        return @{ Passed = $false; Message = "plugins directory not found: $pluginsDir" }
+    }
+
+    $builderProj = Join-Path $scriptDir "Vantuz.Builder\Vantuz.Builder.csproj"
+    if (-not (Test-Path $builderProj)) {
+        return @{ Passed = $false; Message = "Vantuz.Builder.csproj not found at $builderProj" }
+    }
+
+    & dotnet run --project $builderProj -- verify-dir $outputDir $pluginsDir 2>&1 | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+    if ($LASTEXITCODE -ne 0) {
+        return @{ Passed = $false; Message = "Plugin name mismatch detected in one or more manifests (see errors above)" }
+    }
+
+    return @{ Passed = $true; Message = "All pipeline pluginNames verified in all manifests against plugin DLLs" }
+}
+
 function Invoke-BootJsonIntegrityCheck {
     Write-Host "`n[Assert-BootJsonIntegrity] Checking boot.json hashes..." -ForegroundColor $colors.Info
 
@@ -279,6 +303,12 @@ if ($AssertPluginsCopied -or $AssertAll) {
 if ($AssertBootJsonIntegrity -or $AssertAll) {
     $r = Invoke-BootJsonIntegrityCheck
     $results += [PSCustomObject]@{ Assertion = "BootJsonIntegrity"; Passed = $r.Passed; Message = $r.Message }
+    if (-not $r.Passed) { $allPassed = $false }
+}
+
+if ($AssertPipelineNames -or $AssertAll) {
+    $r = Invoke-PipelineNamesCheck
+    $results += [PSCustomObject]@{ Assertion = "PipelineNames"; Passed = $r.Passed; Message = $r.Message }
     if (-not $r.Passed) { $allPassed = $false }
 }
 

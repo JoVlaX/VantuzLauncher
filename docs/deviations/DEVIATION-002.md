@@ -1,6 +1,6 @@
 # Deviation Protocol 002: Measurability Violation
 
-**Status:** Active  
+**Status:** Active — Phases 1–3, 5–7 Resolved; Phase 4 Obfuscar re-enable Active (deadline: 2026-06-30T23:59:59+05:00)  
 **Created:** 2026-06-02T15:45:00+05:00  
 **Deadline:** 2026-06-04T23:59:59+05:00  
 **Owner:** Agent Cascade  
@@ -72,17 +72,33 @@
 - [x] Add `VerifyGUIPluginCopied` target (AfterTargets="AssembleVantuz")
 - [x] Document `GenerateTargetFrameworkAttribute=false` SDK workaround
 - [x] Scope verification targets to `Release` only — `dotnet run` (Debug) skips GUI plugin checks
-- [ ] Add `VerifyManifestValid` target for boot.gui.json validation
+- [x] Add `VerifyManifestValid` target for boot.gui.json validation (superseded by ARM-BUILD-020 VerifyPluginNames target)
 - [x] Test all error conditions
 
 ### Phase 3: SDK Workaround Documentation (2026-06-02) ✅
 - [x] Document `GenerateTargetFrameworkAttribute=false` workaround for WPF SDK CS0579 bug
 - [x] Add workaround comment in `VantuzLauncher.csproj`
 
-### Phase 4: Re-enable Obfuscar (pending) ⏳
+### Phase 4: Re-enable Obfuscar (Active) ⏳ — Deadline: 2026-06-30T23:59:59+05:00
 - [ ] Fix obfuscar.xml configuration
 - [ ] Verify obfuscated build succeeds
 - [ ] Close this deviation protocol
+
+### Phase 7: Complete Boot Manifest Verification (2026-06-03) ✅
+- [x] Copy `boot.minecraft.production.json` into build output during `AssembleVantuz`
+- [x] Add `ARM-BUILD-009C` existence check for production manifest in output
+- [x] Extend MSBuild `VerifyPluginNames` target to verify **all** `boot*.json` manifests via `verify-dir`
+- [x] Rewrite `PluginNameVerifier` with **Mono.Cecil static IL analysis** — eliminates `ReflectionTypeLoadException` from WPF dependencies
+- [x] GUI plugins (`GUI.MinecraftLauncher`, `GUI.CredentialCollection`) now discoverable at build-time without `PresentationFramework`
+- [x] Update `validate-build-paths.ps1` `Assert-PipelineNames` to use `verify-dir`
+- [x] Per-manifest reporting: each manifest verified independently with name count
+
+### Phase 6: Plugin Name Verification (2026-06-03) ✅
+- [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
+- [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)
+- [x] Integrate into `validate-build-paths.ps1` as `Assert-PipelineNames`
+- [x] Fix `boot.headless.json` drift (`Game.Installer`→`Game.InstallerCommand`, `Game.VersionValidator`→`Game.VersionValidatorQuery`)
+- [x] Fix `boot.minecraft.production.json` drift (`Auth.LoginCommand`→`Auth.YggdrasilCommand`)
 
 ### Phase 5: Dual-Path Validation Pipeline (2026-06-03) ✅
 - [x] Create `validate-build-paths.ps1` with atomic assertions per INVARIANT_THEORY.md §1.2

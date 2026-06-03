@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk"> 
-  <PropertyGroup> 
-    <OutputType>Exe</OutputType> 
-    <TargetFramework>net8.0</TargetFramework> 
-    <ImplicitUsings>enable</ImplicitUsings> 
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- .traerules:52 - compiler_trace_hiding: FORBIDDEN -->
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-  </PropertyGroup> 
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Mono.Cecil" Version="0.11.5" />
+  </ItemGroup>
 </Project> 

@@ -188,6 +188,10 @@
     <Copy SourceFiles="$(ProjectDir)boot.headless.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Message Text="[Vantuz Assembler] Headless manifest copied: boot.headless.json" Importance="high" />
 
+    <!-- Copy production manifest per INVARIANT_THEORY.md Measurability - production pipeline must be verifiable -->
+    <Copy SourceFiles="$(ProjectDir)boot.minecraft.production.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Message Text="[Vantuz Assembler] Production manifest copied: boot.minecraft.production.json" Importance="high" />
+
     <!-- Copy .dev marker only for Debug builds per INVARIANT_THEORY.md В§498 - explicit dev mode detection -->
     <Copy SourceFiles="$(ProjectDir).dev" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'$(Configuration)' == 'Debug'" />
     <Message Text="[Vantuz Assembler] Dev marker copied: .dev (Debug only)" Importance="high" Condition="'$(Configuration)' == 'Debug'" />
@@ -223,6 +227,9 @@
     <Error Condition="!Exists('$(TargetDir)boot.headless.json')" 
            Text="ARM-BUILD-009B: 'boot.headless.json' not copied to output. Headless test mode will fail." />
     
+    <Error Condition="!Exists('$(TargetDir)boot.minecraft.production.json')" 
+           Text="ARM-BUILD-009C: 'boot.minecraft.production.json' not copied to output. Production mode will fail." />
+    
     <!-- ARM-BUILD-010: Required plugins must be present -->
     <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Auth.dll')" 
            Text="ARM-BUILD-010: Auth plugin not found in output/plugins." />
@@ -248,6 +255,15 @@
              Text="[Armatura] Dev marker confirmed in output (Debug mode)." Importance="high" />
     
     <Message Text="[Armatura] Post-build verification passed. Build complete." Importance="high" />
+  </Target>
+
+  <!-- ARM-BUILD-020: Plugin name verification per INVARIANT_THEORY.md §1.2 Measurability -->
+  <Target Name="VerifyPluginNames" AfterTargets="ArmaturaPostBuildVerification">
+    <PropertyGroup>
+      <_TargetDirTrimmed>$(TargetDir.TrimEnd('\'))</_TargetDirTrimmed>
+    </PropertyGroup>
+    <Message Text="[Armatura] ARM-BUILD-020: Verifying pipeline pluginNames against discovered plugin classes..." Importance="high" />
+    <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- verify-dir &quot;$(_TargetDirTrimmed)&quot; &quot;$(TargetDir)plugins&quot;" />
   </Target>
 
 </Project>
