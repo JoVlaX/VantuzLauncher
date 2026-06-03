@@ -13,7 +13,7 @@ using Vantuz.Core;
 /// </summary>
 public class GameLaunchCommand : ICommandPlugin
 {
-    public string Name => "Game.Launch";
+    public string Name => "Game.LaunchCommand";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {

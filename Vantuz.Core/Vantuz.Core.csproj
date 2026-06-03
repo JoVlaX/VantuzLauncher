@@ -7,6 +7,11 @@
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Build dependency: ensure analyzer DLL is built before Vantuz.Core per INVARIANT_THEORY.md §1.2 -->
+    <ProjectReference Include="..\Armatura.Core.Sdk\Armatura.Core.Sdk.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
     <Analyzer Include="..\Armatura.Core.Sdk\bin\$(Configuration)\netstandard2.0\Armatura.Core.Sdk.dll" />
   </ItemGroup>
 </Project>

@@ -84,6 +84,19 @@
 - [ ] Verify obfuscated build succeeds
 - [ ] Close this deviation protocol
 
+### Phase 5: Dual-Path Validation Pipeline (2026-06-03) ✅
+- [x] Create `validate-build-paths.ps1` with atomic assertions per INVARIANT_THEORY.md §1.2
+  - `Assert-CleanBuild` — deterministic clean + solution build
+  - `Assert-DotNetRun` — `dotnet run --project` headless path
+  - `Assert-PluginsCopied` — verify all plugin DLLs in output/plugins
+  - `Assert-BootJsonIntegrity` — hash pinning verification
+- [x] Integrate into `test-and-run.ps1` post-build
+- [x] Integrate into `auto-fix-orchestrator.ps1` build phase
+- [x] Add CI step in `.github/workflows/build-and-test.yml`
+- [x] Document in `docs/verification-checklist.md`
+
+**Rationale:** The original bug (CS0579 + plugin copy order) only manifested on `dotnet run --project`, not `dotnet build`. Manual validation of `dotnet build` alone was insufficient per §1.2 Measurability. The pipeline ensures both paths are tested atomically and automatically.
+
 ## Risk Assessment
 
 | Risk | Probability | Impact | Mitigation |

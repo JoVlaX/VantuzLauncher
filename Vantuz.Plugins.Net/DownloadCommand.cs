@@ -17,7 +17,7 @@ namespace Vantuz.Plugins.Net;
 /// </summary>
 public class DownloadCommand : ICommandPlugin
 {
-    public string Name => "Net.Download";
+    public string Name => "Net.DownloadCommand";
     private readonly HttpClient _httpClient;
     private readonly SemaphoreSlim _semaphore = new(4);
 

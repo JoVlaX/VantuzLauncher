@@ -13,7 +13,7 @@ namespace Vantuz.Plugins.OS;
 /// </summary>
 public class LocalMoveCommand : ICommandPlugin
 {
-    public string Name => "OS.LocalMove";
+    public string Name => "OS.LocalMoveCommand";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {

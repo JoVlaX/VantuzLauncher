@@ -16,34 +16,61 @@ public static class PipelineVisualizer
     {
         if (args.Length < 1)
         {
-            Console.WriteLine("Usage: dotnet run --project Vantuz.Builder -- visualize <boot.json>");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  dotnet run --project Vantuz.Builder -- verify <boot.json> <plugins-dir>");
+            Console.WriteLine("  dotnet run --project Vantuz.Builder -- visualize <boot.json>");
             return;
         }
 
-        var manifestPath = args[0];
-        if (!File.Exists(manifestPath))
-        {
-            Console.Error.WriteLine($"Error: Manifest not found: {manifestPath}");
-            return;
-        }
+        var command = args[0].ToLowerInvariant();
 
-        try
+        if (command == "verify")
         {
-            var json = File.ReadAllText(manifestPath);
-            var manifest = JsonSerializer.Deserialize<BootManifest>(json);
-            
-            if (manifest?.Pipeline == null)
+            if (args.Length < 3)
             {
-                Console.Error.WriteLine("Error: Invalid manifest format");
+                Console.Error.WriteLine("Usage: dotnet run --project Vantuz.Builder -- verify <boot.json> <plugins-dir>");
+                Environment.Exit(1);
+                return;
+            }
+            Environment.Exit(PluginNameVerifier.Verify(args[1], args[2]));
+            return;
+        }
+
+        if (command == "visualize")
+        {
+            if (args.Length < 2)
+            {
+                Console.Error.WriteLine("Usage: dotnet run --project Vantuz.Builder -- visualize <boot.json>");
+                return;
+            }
+            var manifestPath = args[1];
+            if (!File.Exists(manifestPath))
+            {
+                Console.Error.WriteLine($"Error: Manifest not found: {manifestPath}");
                 return;
             }
 
-            VisualizePipeline(manifest.Pipeline);
+            try
+            {
+                var json = File.ReadAllText(manifestPath);
+                var manifest = JsonSerializer.Deserialize<BootManifest>(json);
+
+                if (manifest?.Pipeline == null)
+                {
+                    Console.Error.WriteLine("Error: Invalid manifest format");
+                    return;
+                }
+
+                VisualizePipeline(manifest.Pipeline);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error: {ex.Message}");
+            }
+            return;
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
-        }
+
+        Console.Error.WriteLine($"Unknown command: {command}. Use 'verify' or 'visualize'.");
     }
 
     private static void VisualizePipeline(List<PipelineStep> steps)

@@ -14,7 +14,7 @@ namespace Vantuz.Plugins.OS;
 /// </summary>
 public class BatchPurgeCommand : ICommandPlugin
 {
-    public string Name => "OS.BatchPurge";
+    public string Name => "OS.BatchPurgeCommand";
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {

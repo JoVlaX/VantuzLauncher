@@ -13,7 +13,7 @@ using Vantuz.Core;
 /// </summary>
 public class ExecuteCommand : ICommandPlugin
 {
-    public string Name => "OS.Execute"; 
+    public string Name => "OS.ExecuteCommand"; 
  
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {

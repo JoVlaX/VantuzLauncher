@@ -36,6 +36,7 @@ param(
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { (Get-Location).Path }
 $slnPath = Join-Path $scriptDir "VantuzLauncher.sln"
 $testScript = Join-Path $scriptDir "test-and-run.ps1"
+$validationScript = Join-Path $scriptDir "validate-build-paths.ps1"
 $stateFile = Join-Path $scriptDir "auto-fix-state.json"
 $historyFile = Join-Path $scriptDir "auto-fix-history.log"
 
@@ -106,24 +107,37 @@ function Add-History {
 
 function Invoke-BuildPhase {
     Write-Host "`n[BUILD] Starting..." -ForegroundColor $colors.Iteration
-    
+
     & dotnet build $slnPath -c Release --verbosity minimal 2>&1 | ForEach-Object {
         Write-Host "  $_" -ForegroundColor Gray
     }
-    
+
     $exitCode = $LASTEXITCODE
-    
-    if ($exitCode -eq 0) {
-        Add-History "Build: SUCCESS"
-        return @{ Success = $true; Error = $null }
+
+    if ($exitCode -ne 0) {
+        $errors = & dotnet build $slnPath -c Release 2>&1 | Where-Object { $_ -match "error (CS|MSB)\d+:" }
+        $errorSummary = if ($errors) { $errors[0] } else { "Build failed" }
+        Add-History "Build: FAILED - $errorSummary"
+        return @{ Success = $false; Error = $errorSummary; Type = "build" }
     }
-    
-    # Capture build errors
-    $errors = & dotnet build $slnPath -c Release 2>&1 | Where-Object { $_ -match "error (CS|MSB)\d+:" }
-    $errorSummary = if ($errors) { $errors[0] } else { "Build failed" }
-    
-    Add-History "Build: FAILED - $errorSummary"
-    return @{ Success = $false; Error = $errorSummary; Type = "build" }
+
+    # --- Dual-path validation: dotnet run --project per INVARIANT_THEORY.md §1.2 ---
+    if (Test-Path $validationScript) {
+        Write-Host "`n[BUILD] Validating dotnet run --project path..." -ForegroundColor $colors.Iteration
+        & $validationScript -AssertDotNetRun -AssertPluginsCopied -AssertBootJsonIntegrity 2>&1 | ForEach-Object {
+            if ($_ -match "FAIL") { Write-Host "  $_" -ForegroundColor $colors.Error }
+            elseif ($_ -match "PASS") { Write-Host "  $_" -ForegroundColor $colors.Success }
+            else { Write-Host "  $_" -ForegroundColor Gray }
+        }
+        if ($LASTEXITCODE -ne 0) {
+            $errorSummary = "dotnet run --project validation failed (plugin copy order or integrity). See output above."
+            Add-History "Build: FAILED - $errorSummary"
+            return @{ Success = $false; Error = $errorSummary; Type = "build" }
+        }
+    }
+
+    Add-History "Build: SUCCESS"
+    return @{ Success = $true; Error = $null }
 }
 
 # ============================================

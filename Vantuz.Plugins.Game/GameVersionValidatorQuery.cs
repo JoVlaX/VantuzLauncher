@@ -13,7 +13,7 @@ using Vantuz.Core;
 /// </summary>
 public class GameVersionValidatorQuery : IQueryPlugin
 {
-    public string Name => "Game.VersionValidator";
+    public string Name => "Game.VersionValidatorQuery";
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -8,12 +8,8 @@
     <UseWPF>true</UseWPF>
     <SelfContained>false</SelfContained>
     <!-- Workaround: SDK duplicates TargetFrameworkAttribute for WPF net8.0-windows (CS0579) -->
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
-
-  <!-- Remove auto-generated AssemblyAttributes.cs to prevent CS0579 duplicate attribute errors -->
-  <Target Name="RemoveDuplicateFrameworkAttributes" AfterTargets="_GenerateTargetFrameworkAttribute">
-    <Delete Files="$(IntermediateOutputPath)*.AssemblyAttributes.cs" ContinueOnError="true" />
-  </Target>
 
   <ItemGroup>
     <Compile Remove="Vantuz.Core\**" />
@@ -27,6 +23,7 @@
     <Compile Remove="Armatura.Core.Sdk\**" />
     <!-- DEVIATION-001: GUI plugin in Products folder - Compile Remove per INVARIANT_THEORY.md Category Isolation -->
     <Compile Remove="Vantuz.Products\**" />
+    <Compile Remove="Vantuz.Plugins.Test\**" />
     <EmbeddedResource Remove="Vantuz.Core\**" />
     <EmbeddedResource Remove="Vantuz.Host\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.Auth\**" />
@@ -69,6 +66,26 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="Vantuz.Plugins.Auth\Vantuz.Plugins.Auth.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="Vantuz.Plugins.Net\Vantuz.Plugins.Net.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="Vantuz.Plugins.OS\Vantuz.Plugins.OS.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="Vantuz.Plugins.Game\Vantuz.Plugins.Game.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+    <ProjectReference Include="Vantuz.Plugins.Minecraft\Vantuz.Plugins.Minecraft.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -89,36 +106,24 @@
   </Target>
   -->
 
-  <ItemGroup>
-    <PluginNetFiles Include="$(ProjectDir)Vantuz.Plugins.Net\bin\$(Configuration)\net8.0\**\*.*" />
-    <PluginAuthFiles Include="$(ProjectDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" />
-    <PluginOSFiles Include="$(ProjectDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" />
-    <PluginGameFiles Include="$(ProjectDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" />
-    <PluginMinecraftFiles Include="$(ProjectDir)Vantuz.Plugins.Minecraft\bin\$(Configuration)\net8.0\**\*.*" />
-    <!-- DEVIATION-001: Products folder for GUI plugin pending migration to Vantuz.Plugins.GUI -->
-    <!-- Note: WPF projects use net8.0-windows target framework -->
-    <PluginGUIFiles Include="$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\**\*.*" />
-    <!-- Headless test plugin per INVARIANT_THEORY.md Measurability -->
-    <PluginTestFiles Include="$(ProjectDir)Vantuz.Plugins.Test\bin\$(Configuration)\net8.0\**\*.*" />
-  </ItemGroup> 
  
   <!-- Armatura Full Automation: Pre-Build Verification -->
-  <!-- Per INVARIANT_THEORY.md §1.2 Measurability: All states must be verifiable at build time -->
+  <!-- Per INVARIANT_THEORY.md В§1.2 Measurability: All states must be verifiable at build time -->
   <Target Name="ArmaturaPreBuildVerification" BeforeTargets="BeforeBuild">
     <Message Text="[Armatura] Starting pre-build verification..." Importance="high" />
     
     <!-- ARM-BUILD-001: Critical configuration files must exist -->
     <Error Condition="!Exists('$(ProjectDir)boot.gui.json')" 
-           Text="ARM-BUILD-001: Critical file 'boot.gui.json' not found. GUI mode will be unavailable. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+           Text="ARM-BUILD-001: Critical file 'boot.gui.json' not found. GUI mode will be unavailable. Per INVARIANT_THEORY.md В§2.1 (Explicitness)." />
     
     <Error Condition="!Exists('$(ProjectDir)boot.test.json')" 
-           Text="ARM-BUILD-002: Critical file 'boot.test.json' not found. Test mode will be unavailable. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+           Text="ARM-BUILD-002: Critical file 'boot.test.json' not found. Test mode will be unavailable. Per INVARIANT_THEORY.md В§2.1 (Explicitness)." />
     
     <Error Condition="!Exists('$(ProjectDir)boot.headless.json')" 
-           Text="ARM-BUILD-002B: Critical file 'boot.headless.json' not found. Headless test mode will be unavailable. Per INVARIANT_THEORY.md §1.2 (Measurability)." />
+           Text="ARM-BUILD-002B: Critical file 'boot.headless.json' not found. Headless test mode will be unavailable. Per INVARIANT_THEORY.md В§1.2 (Measurability)." />
     
     <Error Condition="!Exists('$(ProjectDir)boot.template.json')" 
-           Text="ARM-BUILD-003: Critical file 'boot.template.json' not found. Manifest generation will fail. Per INVARIANT_THEORY.md §2.1 (Explicitness)." />
+           Text="ARM-BUILD-003: Critical file 'boot.template.json' not found. Manifest generation will fail. Per INVARIANT_THEORY.md В§2.1 (Explicitness)." />
     
     <!-- ARM-BUILD-004: Deviation protocols must be documented -->
     <Warning Condition="!Exists('$(ProjectDir)docs/deviations/DEVIATION-001.md')" 
@@ -129,12 +134,12 @@
     
     <!-- ARM-BUILD-006: Verification checklist must exist -->
     <Error Condition="!Exists('$(ProjectDir)docs/verification-checklist.md')" 
-           Text="ARM-BUILD-006: Verification checklist not found. Pre-commit protocol undefined. Per INVARIANT_THEORY.md §3.4 (Falsifiability)." />
+           Text="ARM-BUILD-006: Verification checklist not found. Pre-commit protocol undefined. Per INVARIANT_THEORY.md В§3.4 (Falsifiability)." />
     
     <Message Text="[Armatura] Pre-build verification passed. Proceeding with build." Importance="high" />
   </Target>
 
-  <!-- DEVIATION-002: Pre-build verification per INVARIANT_THEORY.md §1.2 Measurability -->
+  <!-- DEVIATION-002: Pre-build verification per INVARIANT_THEORY.md В§1.2 Measurability -->
   <!-- Release-only: dotnet run (Debug) does not guarantee GUI plugin output exists -->
   <Target Name="VerifyGUIPluginSourceExists" BeforeTargets="AssembleVantuz" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
@@ -149,6 +154,18 @@
 
   <Target Name="AssembleVantuz" AfterTargets="Build">
     <Message Text="[Vantuz Assembler] Copying plugins to target directory..." Importance="high" />
+    <ItemGroup>
+      <PluginNetFiles Include="$(ProjectDir)Vantuz.Plugins.Net\bin\$(Configuration)\net8.0\**\*.*" />
+      <PluginAuthFiles Include="$(ProjectDir)Vantuz.Plugins.Auth\bin\$(Configuration)\net8.0\**\*.*" />
+      <PluginOSFiles Include="$(ProjectDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" />
+      <PluginGameFiles Include="$(ProjectDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" />
+      <PluginMinecraftFiles Include="$(ProjectDir)Vantuz.Plugins.Minecraft\bin\$(Configuration)\net8.0\**\*.*" />
+      <!-- DEVIATION-001: Products folder for GUI plugin pending migration to Vantuz.Plugins.GUI -->
+      <!-- Note: WPF projects use net8.0-windows target framework -->
+      <PluginGUIFiles Include="$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\**\*.*" />
+      <!-- Headless test plugin per INVARIANT_THEORY.md Measurability -->
+      <PluginTestFiles Include="$(ProjectDir)Vantuz.Plugins.Test\bin\$(Configuration)\net8.0\**\*.*" />
+    </ItemGroup>
     <Copy SourceFiles="@(PluginNetFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PluginAuthFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PluginOSFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
@@ -171,7 +188,7 @@
     <Copy SourceFiles="$(ProjectDir)boot.headless.json" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Message Text="[Vantuz Assembler] Headless manifest copied: boot.headless.json" Importance="high" />
 
-    <!-- Copy .dev marker only for Debug builds per INVARIANT_THEORY.md §498 - explicit dev mode detection -->
+    <!-- Copy .dev marker only for Debug builds per INVARIANT_THEORY.md В§498 - explicit dev mode detection -->
     <Copy SourceFiles="$(ProjectDir).dev" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" Condition="'$(Configuration)' == 'Debug'" />
     <Message Text="[Vantuz Assembler] Dev marker copied: .dev (Debug only)" Importance="high" Condition="'$(Configuration)' == 'Debug'" />
 
@@ -179,7 +196,7 @@
     <Exec Command="dotnet run --project &quot;$(ProjectDir)Vantuz.Builder\Vantuz.Builder.csproj&quot; -- &quot;$(ProjectDir)boot.template.json&quot; &quot;$(TargetDir)plugins&quot; &quot;$(TargetDir)boot.json&quot;" />
   </Target>
 
-  <!-- DEVIATION-002: Post-build verification per INVARIANT_THEORY.md §1.2 Measurability -->
+  <!-- DEVIATION-002: Post-build verification per INVARIANT_THEORY.md В§1.2 Measurability -->
   <!-- Release-only: Debug builds skip GUI plugin check to support dotnet run -->
   <Target Name="VerifyGUIPluginCopied" AfterTargets="AssembleVantuz" Condition="'$(Configuration)' == 'Release'">
     <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')"
@@ -189,7 +206,7 @@
   </Target>
 
   <!-- Armatura Full Automation: Post-Build Verification -->
-  <!-- Per INVARIANT_THEORY.md §1.2: Output integrity must be measurable -->
+  <!-- Per INVARIANT_THEORY.md В§1.2: Output integrity must be measurable -->
   <Target Name="ArmaturaPostBuildVerification" AfterTargets="VerifyGUIPluginCopied">
     <Message Text="[Armatura] Starting post-build verification..." Importance="high" />
     

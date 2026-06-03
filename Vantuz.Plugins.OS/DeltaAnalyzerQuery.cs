@@ -14,7 +14,7 @@ namespace Vantuz.Plugins.OS;
 /// </summary>
 public class DeltaAnalyzerQuery : IQueryPlugin
 {
-    public string Name => "OS.DeltaAnalyzer";
+    public string Name => "OS.DeltaAnalyzerQuery";
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {

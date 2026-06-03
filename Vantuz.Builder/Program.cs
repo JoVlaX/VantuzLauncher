@@ -1,54 +1,83 @@
-using System; 
-using System.IO; 
-using System.Security.Cryptography; 
-using System.Text.Json; 
-using System.Text.Json.Nodes; 
- 
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+
+if (args.Length < 1)
+{
+    Console.Error.WriteLine("Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>");
+    Console.Error.WriteLine("       Vantuz.Builder verify <boot.json> <plugins-dir>");
+    Console.Error.WriteLine("       Vantuz.Builder visualize <boot.json>");
+    return 1;
+}
+
+if (args.Length >= 1 && args[0].Equals("verify", StringComparison.OrdinalIgnoreCase))
+{
+    if (args.Length < 3)
+    {
+        Console.Error.WriteLine("Usage: Vantuz.Builder verify <boot.json> <plugins-dir>");
+        return 1;
+    }
+    return PluginNameVerifier.Verify(args[1], args[2]);
+}
+
+if (args.Length >= 1 && args[0].Equals("visualize", StringComparison.OrdinalIgnoreCase))
+{
+    if (args.Length < 2)
+    {
+        Console.Error.WriteLine("Usage: Vantuz.Builder visualize <boot.json>");
+        return 1;
+    }
+    PipelineVisualizer.Main(args[1..]);
+    return 0;
+}
+
 if (args.Length < 3)
 {
     Console.Error.WriteLine("Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>");
     return 1;
-} 
- 
-string templatePath = args[0]; 
-string pluginsDir = args[1]; 
-string outputPath = args[2]; 
- 
+}
+
+string templatePath = args[0];
+string pluginsDir = args[1];
+string outputPath = args[2];
+
 if (!File.Exists(templatePath))
 {
     Console.Error.WriteLine($"Template not found: {templatePath}");
     return 1;
-} 
- 
+}
+
 try
 {
     var jsonString = File.ReadAllText(templatePath);
-    var node = JsonNode.Parse(jsonString); 
- 
-if (node?["plugins"] is JsonObject pluginsNode) 
-{ 
-    foreach (var plugin in pluginsNode.ToDictionary(k => k.Key, v => v.Value)) 
-    { 
-        string dllPath = Path.Combine(pluginsDir, plugin.Key); 
-        if (File.Exists(dllPath)) 
-        { 
-            using var sha = SHA256.Create(); 
-            using var fs = File.OpenRead(dllPath); 
-            var hashBytes = sha.ComputeHash(fs); 
-            var hashStr = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant(); 
-             
-            // Обновляем хэш в JSON 
-            pluginsNode[plugin.Key] = hashStr; 
-            Console.WriteLine($"[Hash Pinning] {plugin.Key} -> {hashStr}"); 
-        } 
-        else 
-        { 
-            Console.WriteLine($"[WARNING] Plugin DLL not found: {dllPath}"); 
-        } 
-    } 
-} 
- 
-File.WriteAllText(outputPath, node!.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+    var node = JsonNode.Parse(jsonString);
+
+    if (node?["plugins"] is JsonObject pluginsNode)
+    {
+        foreach (var plugin in pluginsNode.ToDictionary(k => k.Key, v => v.Value))
+        {
+            string dllPath = Path.Combine(pluginsDir, plugin.Key);
+            if (File.Exists(dllPath))
+            {
+                using var sha = SHA256.Create();
+                using var fs = File.OpenRead(dllPath);
+                var hashBytes = sha.ComputeHash(fs);
+                var hashStr = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+
+                // Обновляем хэш в JSON
+                pluginsNode[plugin.Key] = hashStr;
+                Console.WriteLine($"[Hash Pinning] {plugin.Key} -> {hashStr}");
+            }
+            else
+            {
+                Console.WriteLine($"[WARNING] Plugin DLL not found: {dllPath}");
+            }
+        }
+    }
+
+    File.WriteAllText(outputPath, node!.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
     Console.WriteLine($"Manifest generated: {outputPath}");
     return 0;
 }
@@ -56,4 +85,4 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"[ERROR] {ex.Message}");
     return 1;
-} 
+}

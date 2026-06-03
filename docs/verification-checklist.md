@@ -18,6 +18,17 @@
 - [ ] Все проекты компилируются
 - [ ] Нет linker errors
 
+### 1a. Dual-Path Build Validation (INVARIANT_THEORY.md §1.2)
+```powershell
+.\validate-build-paths.ps1 -AssertAll
+```
+- [ ] `dotnet build VantuzLauncher.sln -c Release` — проходит
+- [ ] `dotnet run --project VantuzLauncher.csproj` — проходит
+- [ ] Все plugin DLLs скопированы в `output/plugins`
+- [ ] `boot.json` хеши совпадают с актуальными DLL
+
+**Критично:** Регрессия CS0579 / plugin-copy-order возможна только при `dotnet run`, но не при `dotnet build`. Обе проверки обязательны.
+
 ### 2. Architectural Analyzers
 ```powershell
 .\scripts\verify.ps1 -Phase Analyzers

@@ -33,6 +33,12 @@ jobs:
       - name: Build solution (Release)
         run: dotnet build VantuzLauncher.sln -c Release --no-restore --verbosity minimal
 
+      - name: Validate dotnet run --project
+        shell: pwsh
+        run: |
+          $result = & .\validate-build-paths.ps1 -AssertDotNetRun -AssertPluginsCopied -AssertBootJsonIntegrity
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Run headless tests
         shell: pwsh
         run: |

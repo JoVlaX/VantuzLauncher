@@ -314,6 +314,26 @@ if (-not $buildSuccess) {
     exit 1
 }
 
+# --- DUAL-PATH VALIDATION (Measurability per INVARIANT_THEORY.md §1.2) ---
+Write-Step "DUAL-PATH VALIDATION"
+$validationScript = Join-Path $scriptDir "validate-build-paths.ps1"
+if (Test-Path $validationScript) {
+    Write-Host "Running validate-build-paths.ps1 (DotNetRun + PluginsCopied + BootJsonIntegrity)..."
+    & $validationScript -AssertDotNetRun -AssertPluginsCopied -AssertBootJsonIntegrity 2>&1 | ForEach-Object {
+        if ($_ -match "FAIL") { Write-Host "  $_" -ForegroundColor $colors.Error }
+        elseif ($_ -match "PASS") { Write-Host "  $_" -ForegroundColor $colors.Success }
+        else { Write-Host "  $_" -ForegroundColor Gray }
+    }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Result "FAIL" "Dual-path validation failed (dotnet run --project or plugin integrity). See output above."
+        exit 1
+    }
+    Write-Result "PASS" "Dual-path validation passed"
+}
+else {
+    Write-Result "WARN" "validate-build-paths.ps1 not found. Skipping dual-path validation."
+}
+
 # --- FIND EXECUTABLE ---
 $exe = Find-Executable -Primary $exePath -Fallback $fallbackExePath
 if (-not $exe) {
