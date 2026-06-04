@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<TestSequence>
+  <Test Name="Vantuz.Plugins.GUI.MinecraftLauncher.Tests.HostedModePluginTests.ExecuteAsync_HostedMode_DoesNotThrowApplicationInstanceError" DisplayName="Vantuz.Plugins.GUI.MinecraftLauncher.Tests.HostedModePluginTests.ExecuteAsync_HostedMode_DoesNotThrowApplicationInstanceError" Source="C:\000\projects\compositum\Vantuz.Plugins.GUI.Tests\bin\Release\net8.0-windows\Vantuz.Plugins.GUI.Tests.dll" Completed="False" />
+</TestSequence>

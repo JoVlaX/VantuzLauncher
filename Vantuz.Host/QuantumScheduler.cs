@@ -64,6 +64,7 @@ internal sealed class QuantumScheduler
                         }
                     }
                     stateSnapshots.Remove(node);
+                    _reporter.ReportState($"[STEP] {node.Name} completed");
                     break;
 
                 case QuantumStatus.Yield:

@@ -40,7 +40,15 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
             // Ensure WPF Pack URI resolution targets plugin assembly
             if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
             {
-                Application.ResourceAssembly = typeof(MainWindow).Assembly;
+                try
+                {
+                    Application.ResourceAssembly = typeof(MainWindow).Assembly;
+                }
+                catch (InvalidOperationException)
+                {
+                    // Host has already pinned ResourceAssembly; resources may still
+                    // resolve if host assembly contains them. Per DEVIATION-003.
+                }
             }
 
             // Initialize on the host's dispatcher thread
