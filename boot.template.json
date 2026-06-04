@@ -2,7 +2,7 @@
   "variables": {
     "localVersion": "2.0-dev",
     "gameProvider": "Minecraft",
-    "gameVersion": "1.20.1-forge-47.2.20",
+    "gameVersion": "1.20.1-forge-47.3.0",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
     "installDir": "{{mcDir}}\\.minecraft"
   },

@@ -257,6 +257,73 @@ A readiness claim for a **GUI application** MUST include evidence for:
 
 ---
 
+## 7. Third-Order Failure: Why S9-S11 Was Still Insufficient (2026-06-04 14:55)
+
+### 7.1 The New Failure
+
+After the second retrospective, the agent implemented `GuiModeProcessTests` (R4, R5), fixed the `runResult.Success` check, and declared "READY WITH R6 CAVEAT." The user then launched `VantuzLauncher.exe` in GUI mode, clicked Play, and received:
+
+> **"Ошибка при запуске: Cannot find 1.20.1-forge-47.2.20"**
+
+The program's primary function (launching Minecraft) failed. The "READY" claim was falsified **for the third time.**
+
+### 7.2 Why S9-S11 Did Not Catch This
+
+| Check | What it verified | Why it missed the failure |
+|-------|------------------|----------------------------|
+| S9 | Window handle created within 10s | **Infrastructure test.** Confirms WPF dispatcher works, not that the pipeline launches Minecraft. |
+| S10 | Process exits cleanly after close | **Infrastructure test.** Confirms OS process management works, not functional correctness. |
+| S11 | Self-update path fallback | **Subsystem test.** Confirms API query returns fallback, not that downstream pipeline succeeds. |
+
+### 7.3 Root Cause: Escalation of Abstraction Without Escalation of Validation
+
+The agent correctly identified that S1-S8 was insufficient, so it added S9-S11. But S9-S11 still operate at the **infrastructure layer** (process, window, API call) rather than the **functional layer** (user logs in, clicks Play, Minecraft starts).
+
+This is a **third-order recurrence** of the same anti-pattern:
+1. **First:** "Build passes = READY" → falsified by runtime crash
+2. **Second:** "Headless smoke = READY" → falsified by GUI zombie
+3. **Third:** "Window appears + exits = READY" → falsified by functional failure
+
+Each time the agent adds a new test, it tests the *next layer up* but stops before reaching **user value.**
+
+### 7.4 Cognitive Failure Mode
+
+**Confusing "does not crash" with "works for the user."**
+
+The agent's internal scoring function keeps redefining "ready" as:
+- Layer 1: "compiles" → falsified
+- Layer 2: "tests pass" → falsified
+- Layer 3: "runs headlessly without crash" → falsified
+- Layer 4: "window appears and closes cleanly" → **just falsified**
+
+The missing layer: **"user clicks Play and Minecraft launches."**
+
+### 7.5 Redesigned Readiness Criteria (v3)
+
+| # | Criterion | Evidence Required | Layer |
+|---|-----------|-------------------|-------|
+| R1 | Build passes | `dotnet build` → 0 errors | Build |
+| R2 | Tests pass | `dotnet test` → all pass | Test |
+| R3 | Headless smoke test | Exit code ≠ 2 (critical crash) | Subsystem |
+| R4 | GUI-mode startup | Window handle within 10s | Infrastructure |
+| R5 | GUI-mode lifecycle | Clean exit after window close | Infrastructure |
+| R6 | Self-update path | Graceful fallback without zombie | Subsystem |
+| **R7** | **Primary user journey** | **Clicking Play produces success OR a clear, actionable error** | **Functional** |
+| R8 | No stale references | `grep` confirms zero stale refs | Static |
+| R9 | Documentation | Failure analysis and audit trail current | Process |
+
+**Without R7, the claim "READY" is unfalsifiable and therefore invalid per §1.2.**
+
+### 7.6 Methodology Fix
+
+Before any future "READY" claim, the agent must:
+1. Verify the **primary user journey end-to-end** (not just subsystems)
+2. If full end-to-end is impossible (e.g., requires external credentials), document the gap explicitly
+3. Never extrapolate from "no crash" to "works for user"
+4. **Ask the user to perform the primary journey and report the result**
+
+---
+
 ## 5. Lessons Learned
 
 1. **"Build passes" is necessary but not sufficient.** It is a prerequisite for readiness, not a proxy.
@@ -266,7 +333,10 @@ A readiness claim for a **GUI application** MUST include evidence for:
 5. **User intent = operational readiness.** Task completion ≠ user value.
 6. **Headless smoke test ≠ GUI readiness.** Testing the code path the user doesn't use is a false positive generator.
 7. **Methodology must be user-centric, not developer-centric.** The checklist must verify what the user experiences, not what the developer optimizes.
+8. **"Does not crash" ≠ "Works for the user."** Infrastructure tests (window appears, process exits) are necessary but not sufficient. The primary user journey must be verified end-to-end.
 
 ---
 
 *This document is falsifiable: if any future readiness audit repeats the same pattern (static-only checks, no runtime smoke test), this analysis has failed to prevent the recurrence.*
+
+**Update (2026-06-04 14:55): The pattern repeated a third time.** The agent added infrastructure tests (S9-S11: window handle, process exit, API fallback) but still did not verify the primary user journey (click Play → Minecraft launches). The claim "READY WITH R6 CAVEAT" was falsified by the functional failure "Cannot find 1.20.1-forge-47.2.20." This document itself has now been updated (Section 7) to document the recurrence and add R7 to the redesigned readiness criteria.*

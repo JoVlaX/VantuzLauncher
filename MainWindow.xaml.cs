@@ -177,11 +177,11 @@ namespace VantuzLauncher
                     // mcDir теперь определяется в boot.json переменных (Nomadic-конфигурация)
                 }; 
  
-                string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.json"); 
+                string bootJsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "boot.gui.json"); 
                 string pluginsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins"); 
                  
                 if (!File.Exists(bootJsonPath)) 
-                    throw new FileNotFoundException("Файл манифеста boot.json не найден!"); 
+                    throw new FileNotFoundException("Файл манифеста boot.gui.json не найден!"); 
  
                 // Запускаем тяжелый конвейер в фоновом пуле потоков 
                 QuantumExecutionResult runResult = default;
