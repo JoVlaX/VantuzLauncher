@@ -193,7 +193,13 @@ namespace VantuzLauncher
                 }); 
                 await _engineTask;
 
-                if (runResult.Payload != null && 
+                if (!runResult.Success)
+                {
+                    StatusText.Text = "Ошибка конвейера";
+                    MessageBox.Show($"Ошибка при запуске: {runResult.ErrorMessage ?? "Неизвестная ошибка"}", "Сбой", MessageBoxButton.OK, MessageBoxImage.Error);
+                    SetUIState(false);
+                }
+                else if (runResult.Payload != null && 
                     runResult.Payload.TryGetValue("UpdateReady", out var updateReadyObj) &&
                     updateReadyObj is bool updateReady && updateReady)
                 {
@@ -212,9 +218,11 @@ namespace VantuzLauncher
                         return;
                     }
                 }
-
-                StatusText.Text = "Запуск успешно завершен!"; 
-                this.Hide(); 
+                else
+                {
+                    StatusText.Text = "Запуск успешно завершен!"; 
+                    this.Hide();
+                } 
             } 
             catch (Exception ex) 
             { 

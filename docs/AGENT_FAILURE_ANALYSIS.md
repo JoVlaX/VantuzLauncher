@@ -185,6 +185,78 @@ Per §1.2a Reflexive Measurability, this document must be statically verifiable:
 
 ---
 
+## 6. Second-Order Failure: Why S1-S8 Checklist Was Still Insufficient (2026-06-04)
+
+### 6.1 The New Failure
+
+After the first retrospective, the agent implemented a comprehensive S1-S8 checklist and declared "READY" again. The user then launched `VantuzLauncher.exe` in normal (GUI) mode. The result:
+
+- Self-update API call initiated (`https://troglobit.webhm.pro/launcher_version.txt`)
+- Network error encountered
+- Download of launcher update started
+- **GUI window disappeared**
+- **Process became a zombie** (survived indefinitely, consuming resources, blocking DLLs)
+
+**The claim "READY" was falsified again.**
+
+### 6.2 Why S1-S8 Did Not Catch This
+
+| Check | What it verified | Why it missed the failure |
+|-------|------------------|----------------------------|
+| S1 | Build passes | Build has no bearing on GUI lifecycle |
+| S2 | Tests pass | xUnit tests run in-process, no GUI thread |
+| S3 | Headless smoke test (exit ≠ 2) | **Headless mode bypasses the GUI path entirely** — self-update logic lives in `MainWindow.xaml.cs` or loaded plugins, not in `HeadlessRunner` |
+| S4 | No stale references | Static check, unrelated to runtime behavior |
+| S5 | Failure analysis documented | The analysis itself did not prevent the methodology gap |
+| S6 | TODO/FIXME closure | Markers were all deferred, not blocking |
+| S7 | Workspace cleanup | Hygiene check, unrelated to app behavior |
+| S8 | File lock resolved | Addressed a symptom (zombie from prior run), not the cause |
+
+### 6.3 Root Cause: Verification Designed for Developer, Not User
+
+The entire S1-S8 checklist was designed from the **developer's perspective**: "Does the code compile? Do tests pass? Are artifacts clean?"
+
+It was **never designed from the user's perspective**: "Can I double-click the EXE, see a window, interact with it, and launch Minecraft without the process becoming a zombie?"
+
+**The headless smoke test is a trap.** It gives a false sense of security because it tests a code path (`RunHeadlessMode`) that the user **never uses**. The user's actual path is:
+
+```
+Double-click VantuzLauncher.exe
+    → OnStartup (no --headless flag)
+    → InitializeSingleInstanceLock
+    → MainWindow.Show()
+    → [MainWindow code: self-update API, download logic, plugin loading]
+    → [Possible: exception in MainWindow constructor → window never shows]
+    → [Possible: zombie process if background thread outlives dispatcher]
+```
+
+### 6.4 The Methodology Blind Spot
+
+The agent's verification protocol had **zero coverage** for:
+1. **GUI-mode process startup** — Does `MainWindow` constructor complete without exception?
+2. **GUI-mode process lifecycle** — Does the process exit cleanly when the user closes the window?
+3. **Self-update path** — Does the network API call + download chain work without hanging?
+4. **Plugin loading in GUI context** — Do plugins load correctly when `MainWindow` initializes them?
+
+### 6.5 Redesigned Readiness Criteria
+
+A readiness claim for a **GUI application** MUST include evidence for:
+
+| # | Criterion | Evidence Required |
+|---|-----------|-------------------|
+| R1 | Build passes | `dotnet build` → 0 errors |
+| R2 | Tests pass | `dotnet test` → all pass |
+| R3 | Headless smoke test | Exit code ≠ 2 (critical crash) |
+| **R4** | **GUI-mode startup** | **Process starts, window handle created within 10 seconds** |
+| **R5** | **GUI-mode lifecycle** | **Process exits cleanly (exit code 0) within 5 seconds of window close** |
+| **R6** | **Self-update path** | **Either: API reachable OR graceful fallback without zombie** |
+| R7 | No stale references | `grep` confirms zero stale refs |
+| R8 | Documentation | Failure analysis and audit trail current |
+
+**Without R4, R5, and R6, the claim "READY" is unfalsifiable and therefore invalid per §1.2.**
+
+---
+
 ## 5. Lessons Learned
 
 1. **"Build passes" is necessary but not sufficient.** It is a prerequisite for readiness, not a proxy.
@@ -192,6 +264,8 @@ Per §1.2a Reflexive Measurability, this document must be statically verifiable:
 3. **High-cost verification is high-value verification.** If it's hard to check, it's probably important.
 4. **Theory must be applied, not cited.** Every claim in every document must be enforceable.
 5. **User intent = operational readiness.** Task completion ≠ user value.
+6. **Headless smoke test ≠ GUI readiness.** Testing the code path the user doesn't use is a false positive generator.
+7. **Methodology must be user-centric, not developer-centric.** The checklist must verify what the user experiences, not what the developer optimizes.
 
 ---
 

@@ -132,6 +132,19 @@ internal sealed class CqrsQueryAdapter : QuantizedNode
             if (result != null)
             {
                 context.Mutations.Set($"{Name}.Result", result);
+
+                // Распаковка ApiReaderResult в payload по PayloadKey для интерполяции (e.g., {{remoteVersion}})
+                // Используем reflection, т.к. адаптер не имеет compile-time dependency на плагины
+                var resultType = result.GetType();
+                if (resultType.Name == "ApiReaderResult")
+                {
+                    var payloadKey = resultType.GetProperty("PayloadKey")?.GetValue(result)?.ToString();
+                    var data = resultType.GetProperty("Data")?.GetValue(result)?.ToString();
+                    if (!string.IsNullOrEmpty(payloadKey) && data != null)
+                    {
+                        context.Mutations.Set(payloadKey, data);
+                    }
+                }
             }
 
             return QuantumResult.Complete();
