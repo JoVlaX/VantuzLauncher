@@ -44,6 +44,7 @@
                         <TextBlock Text="Р›РћР“РРќ" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,5"/>
                         <Border Background="#FF333333" CornerRadius="4" Margin="0,0,0,12">
                             <TextBox x:Name="UsernameBox"
+                                    AutomationProperties.AutomationId="UsernameBox"
                                     Background="Transparent"
                                     Foreground="White"
                                     BorderThickness="0"
@@ -55,6 +56,7 @@
                         <TextBlock Text="РџРђР РћР›Р¬" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,5"/>
                         <Border Background="#FF333333" CornerRadius="4" Margin="0,0,0,10">
                             <PasswordBox x:Name="PasswordBox"
+                                        AutomationProperties.AutomationId="PasswordBox"
                                         Background="Transparent"
                                         Foreground="White"
                                         BorderThickness="0"
@@ -87,6 +89,7 @@
 
                         <!-- Play Button -->
                         <Button x:Name="PlayButton"
+                               AutomationProperties.AutomationId="PlayButton"
                                Content="РР“Р РђРўР¬"
                                Height="45"
                                Background="#FF4CAF50"

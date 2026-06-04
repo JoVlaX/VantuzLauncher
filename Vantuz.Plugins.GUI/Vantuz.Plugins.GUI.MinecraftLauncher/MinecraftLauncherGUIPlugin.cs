@@ -83,7 +83,14 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
                     // DEVIATION-003 RESOLVED: Ensure WPF Pack URI resolution targets plugin assembly
                     if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
                     {
-                        Application.ResourceAssembly = typeof(MainWindow).Assembly;
+                        try
+                        {
+                            Application.ResourceAssembly = typeof(MainWindow).Assembly;
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // Test framework or host has already pinned ResourceAssembly
+                        }
                     }
 
                     _reporter = new GUIProgressReporter();
@@ -112,26 +119,9 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
             await tcs.Task;
         }
 
-        // Phase 2: Wait for pipeline completion signal
-        var cts = new CancellationTokenSource();
-        if (context.Get<CancellationToken>("cancellation_token") is CancellationToken parentToken)
-        {
-            parentToken.Register(() => cts.Cancel());
-        }
-
-        try
-        {
-            // Keep GUI alive until explicitly closed or pipeline completes
-            await Task.Delay(-1, cts.Token);
-        }
-        catch (OperationCanceledException)
-        {
-            // Normal shutdown
-        }
-
-        // Phase 3: Graceful shutdown
-        await ShutdownGUIAsync();
-
+        // Phase 2: Return immediately — GUI stays alive via Application.Current (hosted)
+        // or dedicated STA thread (standalone). Pipeline proceeds to downstream steps.
+        context.Reporter.ReportState("[GUI] Minecraft Launcher initialized and running");
         return new CommandResult(true);
     }
 

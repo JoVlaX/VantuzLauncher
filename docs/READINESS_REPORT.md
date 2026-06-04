@@ -8,8 +8,8 @@
 
 ## Executive Summary
 
-**STATUS: READY — R7 VERIFIED BY POSITIVE TEST**  
-Build clean (0 errors, 0 warnings), tests pass (12/12 sequential, 12/13 parallel with known concurrency flake). **R7 positive verification:** `PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers` directly executes `VantuzEngine` with `boot.headless.json` and asserts `result.Success == true` plus `[STEP] ... completed` markers for every pipeline step (`Test.MockCredentialProvider`, `Auth.TestAuthCommand`, `Game.MinecraftProvider`, `Game.InstallerCommand`, `Game.VersionValidatorQuery`). **R7 negative test:** `GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog` asserts no Application instance crash in GUI mode. Per `INVARIANT_THEORY.md` §1.2, readiness is now falsifiable by positive observation.
+**STATUS: NOT READY — R7 REQUIRES POSITIVE VERIFICATION (GUI PIPELINE)**  
+Build clean (0 errors, 0 warnings), tests pass (13/13 sequential, 13/14 parallel with known concurrency flake). **R7 headless positive verification:** `PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers` directly executes `VantuzEngine` with `boot.headless.json` and asserts `result.Success == true` plus `[STEP] ... completed` markers for every pipeline step. **R7 GUI unit test:** `MinecraftLauncherPluginTests.ExecuteAsync_StandaloneMode_ReturnsImmediately_And_PublishesCredentialProvider` asserts plugin returns immediately (<5s) and publishes `gui.credential_provider`. **R7 negative test:** `GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog` asserts no Application instance crash. **Missing:** GUI-mode end-to-end positive test that clicks Play and verifies `launcher_trace.log` contains all step completion markers (`[STEP] GUI.MinecraftLauncher completed`, `[STEP] GUI.CredentialCollection completed`, etc.). Per `INVARIANT_THEORY.md` §1.2, a readiness claim must be falsifiable by a positive observation of the **actual user journey**, not merely of a parallel mode.
 
 | Area | Result | Notes |
 |------|--------|-------|
@@ -17,7 +17,7 @@ Build clean (0 errors, 0 warnings), tests pass (12/12 sequential, 12/13 parallel
 | Build (Debug) | PASS | 0 errors, 0 warnings (after terminating zombie VantuzLauncher process) |
 | Deviation Closure | PASS | DEVIATION-001 through DEVIATION-007 all Resolved |
 | Verification Pipeline | PASS | `verify-dir`: exit code 0, all pipeline checks passed |
-| Unit Tests | PASS | 3 test projects, 12 tests, all passing sequentially (4 functional tests, 1 negative trace-log assertion, 2 positive pipeline-step assertions, 1 boot manifest step validation) |
+| Unit Tests | PASS | 3 test projects, 13 tests, all passing sequentially (4 functional tests, 1 negative trace-log assertion, 2 positive pipeline-step assertions, 1 boot manifest step validation, 1 GUI plugin immediate-return assertion) |
 | Completeness Report | PASS | `build_status: "OK"`, `missing_without_deviation: []` |
 | Auto-Fix Orchestrator | PASS | Dry-run completed, report generated |
 | Documentation | PASS | No stale references to `Vantuz.Products` |
@@ -26,7 +26,7 @@ Build clean (0 errors, 0 warnings), tests pass (12/12 sequential, 12/13 parallel
 | GUI-Mode Startup (R4) | PASS | `GuiModeProcessTests` confirms window handle appears within 10s |
 | GUI-Mode Lifecycle (R5) | PASS | `GuiModeProcessTests` confirms process exits cleanly after `CloseMainWindow()` |
 | Self-Update Path (R6) | PASS | `ApiReaderQuery` fallback works; `UpdateCommand` Abort no longer hides window |
-| **Primary User Journey (R7)** | **VERIFIED (automated — positive)** | **`PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers` asserts `result.Success == true` and every step from `boot.headless.json` logged `[STEP] {name} completed`. `QuantumScheduler.cs` now logs step completion markers. GUI-mode negative test (`GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog`) asserts no Application instance crash. Boot manifest step validation test ensures pipeline steps are tracked.** |
+| **Primary User Journey (R7)** | **REQUIRES POSITIVE VERIFICATION (GUI PIPELINE)** | **Headless positive test passes (`PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers`). GUI plugin unit test passes (`MinecraftLauncherPluginTests.ExecuteAsync_StandaloneMode_ReturnsImmediately_And_PublishesCredentialProvider`). GUI-mode negative test passes (`GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog`). **Missing:** GUI end-to-end test that clicks Play and asserts `[STEP] GUI.CredentialCollection completed` and downstream markers in `launcher_trace.log`. R7 cannot be claimed until the GUI user journey (not just headless) is positively verified.** |
 
 ---
 

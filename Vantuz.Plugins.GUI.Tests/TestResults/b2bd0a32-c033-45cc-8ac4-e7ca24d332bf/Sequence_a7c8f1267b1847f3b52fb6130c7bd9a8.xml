@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<TestSequence>
+  <Test Name="Vantuz.Plugins.GUI.Tests.MinecraftLauncherPluginTests.ExecuteAsync_HostedMode_ReturnsImmediately_And_PublishesCredentialProvider" DisplayName="Vantuz.Plugins.GUI.Tests.MinecraftLauncherPluginTests.ExecuteAsync_HostedMode_ReturnsImmediately_And_PublishesCredentialProvider" Source="C:\000\projects\compositum\Vantuz.Plugins.GUI.Tests\bin\Release\net8.0-windows\Vantuz.Plugins.GUI.Tests.dll" Completed="False" />
+</TestSequence>

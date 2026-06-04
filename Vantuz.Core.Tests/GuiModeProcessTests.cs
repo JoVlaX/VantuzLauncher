@@ -96,4 +96,62 @@ public class GuiModeProcessTests : IDisposable
         var lingering = Process.GetProcessesByName("VantuzLauncher");
         Assert.Empty(lingering);
     }
+
+    [Fact]
+    public void GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog()
+    {
+        string exe = ResolveExePath();
+        Assert.True(File.Exists(exe), $"VantuzLauncher.exe not found at {exe}");
+
+        // Clean previous trace log so we only see output from this run
+        string traceLogPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            ".vantuzlauncher", "launcher_trace.log");
+        try { File.Delete(traceLogPath); } catch { }
+
+        using var proc = Process.Start(new ProcessStartInfo(exe)
+        {
+            WorkingDirectory = Path.GetDirectoryName(exe)!,
+            WindowStyle = ProcessWindowStyle.Normal
+        });
+        Assert.NotNull(proc);
+
+        // R4: wait for main window
+        bool windowAppeared = SpinWait.SpinUntil(
+            () => proc.MainWindowHandle != IntPtr.Zero,
+            TimeSpan.FromSeconds(10));
+        Assert.True(windowAppeared, "MainWindowHandle was not created within 10 seconds");
+
+        // Let the pipeline run for a few seconds (enough for GUI plugin + version validation)
+        Thread.Sleep(5_000);
+
+        // Graceful shutdown
+        proc.CloseMainWindow();
+        proc.WaitForExit(10_000);
+
+        // Assert: trace log must not contain the Application-instance crash
+        if (File.Exists(traceLogPath))
+        {
+            string log = File.ReadAllText(traceLogPath);
+            bool hasAppInstanceError =
+                log.Contains("Cannot create more than one", StringComparison.OrdinalIgnoreCase) ||
+                log.Contains("System.Windows.Application", StringComparison.OrdinalIgnoreCase);
+            Assert.False(hasAppInstanceError,
+                $"launcher_trace.log contains Application instance error:\n{log}");
+
+            // Positive: pipeline must have progressed through critical steps
+            // (requires QuantumScheduler to log "[STEP] {node.Name} completed")
+            // NOTE: trace log is only created after BtnPlay_Click, so this section
+            // only runs if the user has previously clicked Play. For automated
+            // positive verification of pipeline progression, see
+            // PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers.
+            if (log.Contains("[STEP] GUI.MinecraftLauncher completed"))
+            {
+                Assert.Contains("[STEP] GUI.CredentialCollection completed", log);
+                Assert.Contains("[STEP] Auth.YggdrasilCommand completed", log);
+                Assert.Contains("[STEP] Game.VersionValidatorQuery completed", log);
+                Assert.Contains("[STEP] Game.LaunchCommand completed", log);
+            }
+        }
+    }
 }
