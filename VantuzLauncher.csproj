@@ -21,9 +21,12 @@
     <Compile Remove="Vantuz.Plugins.Minecraft\**" />
     <Compile Remove="Vantuz.Builder\**" />
     <Compile Remove="Armatura.Core.Sdk\**" />
-    <!-- DEVIATION-001: GUI plugin in Products folder - Compile Remove per INVARIANT_THEORY.md Category Isolation -->
+    <Compile Remove="Vantuz.Plugins.GUI\**" />
     <Compile Remove="Vantuz.Products\**" />
     <Compile Remove="Vantuz.Plugins.Test\**" />
+    <Compile Remove="Vantuz.Builder.Tests\**" />
+    <Compile Remove="Vantuz.Core.Tests\**" />
+    <Compile Remove="Vantuz.Plugins.GUI.Tests\**" />
     <EmbeddedResource Remove="Vantuz.Core\**" />
     <EmbeddedResource Remove="Vantuz.Host\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.Auth\**" />
@@ -32,7 +35,11 @@
     <EmbeddedResource Remove="Vantuz.Plugins.Game\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.Minecraft\**" />
     <EmbeddedResource Remove="Vantuz.Builder\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.GUI\**" />
     <EmbeddedResource Remove="Vantuz.Products\**" />
+    <EmbeddedResource Remove="Vantuz.Builder.Tests\**" />
+    <EmbeddedResource Remove="Vantuz.Core.Tests\**" />
+    <EmbeddedResource Remove="Vantuz.Plugins.GUI.Tests\**" />
     <None Remove="Vantuz.Core\**" />
     <None Remove="Vantuz.Host\**" />
     <None Remove="Vantuz.Plugins.Auth\**" />
@@ -41,7 +48,11 @@
     <None Remove="Vantuz.Plugins.Game\**" />
     <None Remove="Vantuz.Plugins.Minecraft\**" />
     <None Remove="Vantuz.Builder\**" />
+    <None Remove="Vantuz.Plugins.GUI\**" />
     <None Remove="Vantuz.Products\**" />
+    <None Remove="Vantuz.Builder.Tests\**" />
+    <None Remove="Vantuz.Core.Tests\**" />
+    <None Remove="Vantuz.Plugins.GUI.Tests\**" />
     <Page Remove="Vantuz.Core\**" />
     <Page Remove="Vantuz.Host\**" />
     <Page Remove="Vantuz.Plugins.Auth\**" />
@@ -50,14 +61,18 @@
     <Page Remove="Vantuz.Plugins.Game\**" />
     <Page Remove="Vantuz.Plugins.Minecraft\**" />
     <Page Remove="Vantuz.Builder\**" />
+    <Page Remove="Vantuz.Plugins.GUI\**" />
     <Page Remove="Vantuz.Products\**" />
+    <Page Remove="Vantuz.Builder.Tests\**" />
+    <Page Remove="Vantuz.Core.Tests\**" />
+    <Page Remove="Vantuz.Plugins.GUI.Tests\**" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="Vantuz.Core\Vantuz.Core.csproj" />
     <ProjectReference Include="Vantuz.Host\Vantuz.Host.csproj" />
-    <!-- DEVIATION-001: Build order only - GUI plugin in Products folder per Component Scope violation -->
-    <ProjectReference Include="Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\Vantuz.Products.MinecraftLauncher.GUI.csproj">
+    <!-- DEVIATION-001 RESOLVED: GUI plugin migrated to Vantuz.Plugins.GUI per Component Scope Invariant -->
+    <ProjectReference Include="Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\Vantuz.Plugins.GUI.MinecraftLauncher.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
@@ -90,13 +105,16 @@
 
   <ItemGroup>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
-    <PackageReference Include="Obfuscar" Version="2.2.38">
+    <PackageReference Include="Obfuscar" Version="2.2.50">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 
-  <!-- Obfuscar temporarily disabled for refactoring
+  <!-- Obfuscar removed from build pipeline: Obfuscar 2.2.x unable to load .NET 8 WPF assemblies (issue #477). -->
+  <!-- DEVIATION-002 Phase 4: Evaluated and closed — build-time verification targets (Phases 1-3,5-7) are sufficient. -->
+  <!-- Future: Evaluate Obfuscar 3.x or alternative obfuscator for .NET 8+ support. -->
+  <!--
   <Target AfterTargets="AfterBuild" Name="Obfuscate" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
       <ObfuscarConfig>$(ProjectDir)obfuscar.xml</ObfuscarConfig>
@@ -143,13 +161,13 @@
   <!-- Release-only: dotnet run (Debug) does not guarantee GUI plugin output exists -->
   <Target Name="VerifyGUIPluginSourceExists" BeforeTargets="AssembleVantuz" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
-      <GUIPluginSource>$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\Vantuz.Products.MinecraftLauncher.GUI.dll</GUIPluginSource>
+      <GUIPluginSource>$(ProjectDir)Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\bin\$(Configuration)\net8.0-windows\Vantuz.Plugins.GUI.MinecraftLauncher.dll</GUIPluginSource>
     </PropertyGroup>
 
     <Error Condition="!Exists('$(GUIPluginSource)')"
-           Text="DEVIATION-002 ACTIVE: GUI Plugin DLL not found at '$(GUIPluginSource)'. Build Vantuz.Products.MinecraftLauncher.GUI project first. See docs/deviations/DEVIATION-002.md" />
+           Text="GUI Plugin DLL not found at '$(GUIPluginSource)'. Build Vantuz.Plugins.GUI.MinecraftLauncher project first." />
 
-    <Message Text="[Vantuz Assembler] DEVIATION-002: GUI Plugin source verified." Importance="high" />
+    <Message Text="[Vantuz Assembler] GUI Plugin source verified." Importance="high" />
   </Target>
 
   <Target Name="AssembleVantuz" AfterTargets="Build">
@@ -160,9 +178,9 @@
       <PluginOSFiles Include="$(ProjectDir)Vantuz.Plugins.OS\bin\$(Configuration)\net8.0\**\*.*" />
       <PluginGameFiles Include="$(ProjectDir)Vantuz.Plugins.Game\bin\$(Configuration)\net8.0\**\*.*" />
       <PluginMinecraftFiles Include="$(ProjectDir)Vantuz.Plugins.Minecraft\bin\$(Configuration)\net8.0\**\*.*" />
-      <!-- DEVIATION-001: Products folder for GUI plugin pending migration to Vantuz.Plugins.GUI -->
+      <!-- DEVIATION-001 RESOLVED: GUI plugin migrated to Vantuz.Plugins.GUI -->
       <!-- Note: WPF projects use net8.0-windows target framework -->
-      <PluginGUIFiles Include="$(ProjectDir)Vantuz.Products\Vantuz.Products.MinecraftLauncher.GUI\bin\$(Configuration)\net8.0-windows\**\*.*" />
+      <PluginGUIFiles Include="$(ProjectDir)Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\bin\$(Configuration)\net8.0-windows\**\*.*" />
       <!-- Headless test plugin per INVARIANT_THEORY.md Measurability -->
       <PluginTestFiles Include="$(ProjectDir)Vantuz.Plugins.Test\bin\$(Configuration)\net8.0\**\*.*" />
     </ItemGroup>
@@ -171,7 +189,7 @@
     <Copy SourceFiles="@(PluginOSFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PluginGameFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PluginMinecraftFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
-    <!-- DEVIATION-001: Copy GUI plugin from Products pending migration to Vantuz.Plugins.GUI -->
+    <!-- Copy GUI plugin from Vantuz.Plugins.GUI per Component Scope Invariant -->
     <Copy SourceFiles="@(PluginGUIFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <!-- Copy headless test plugin per INVARIANT_THEORY.md Measurability -->
     <Copy SourceFiles="@(PluginTestFiles)" DestinationFolder="$(TargetDir)plugins\%(RecursiveDir)" SkipUnchangedFiles="true" />
@@ -203,10 +221,10 @@
   <!-- DEVIATION-002: Post-build verification per INVARIANT_THEORY.md В§1.2 Measurability -->
   <!-- Release-only: Debug builds skip GUI plugin check to support dotnet run -->
   <Target Name="VerifyGUIPluginCopied" AfterTargets="AssembleVantuz" Condition="'$(Configuration)' == 'Release'">
-    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')"
-           Text="DEVIATION-002 ACTIVE: GUI Plugin DLL not copied to plugins directory. Check AssembleVantuz target. See docs/deviations/DEVIATION-002.md" />
+    <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.GUI.MinecraftLauncher.dll')"
+           Text="GUI Plugin DLL not copied to plugins directory. Check AssembleVantuz target." />
 
-    <Message Text="[Vantuz Assembler] DEVIATION-002: GUI Plugin copy verified in output/plugins." Importance="high" />
+    <Message Text="[Vantuz Assembler] GUI Plugin copy verified in output/plugins." Importance="high" />
   </Target>
 
   <!-- Armatura Full Automation: Post-Build Verification -->
@@ -246,9 +264,9 @@
     <Error Condition="!Exists('$(TargetDir)plugins\Vantuz.Plugins.Minecraft.dll')" 
            Text="ARM-BUILD-014: Minecraft plugin not found in output/plugins." />
     
-    <!-- ARM-BUILD-015: GUI plugin (DEVIATION-001) must be present (Release only) -->
-    <Error Condition="'$(Configuration)' == 'Release' And !Exists('$(TargetDir)plugins\Vantuz.Products.MinecraftLauncher.GUI.dll')" 
-           Text="ARM-BUILD-015: GUI plugin not found in output/plugins. DEVIATION-001 may not be correctly handled." />
+    <!-- ARM-BUILD-015: GUI plugin must be present (Release only) -->
+    <Error Condition="'$(Configuration)' == 'Release' And !Exists('$(TargetDir)plugins\Vantuz.Plugins.GUI.MinecraftLauncher.dll')" 
+           Text="ARM-BUILD-015: GUI plugin not found in output/plugins." />
     
     <!-- ARM-BUILD-016: Dev marker copied (Debug only) -->
     <Message Condition="'$(Configuration)' == 'Debug' And Exists('$(TargetDir).dev')" 

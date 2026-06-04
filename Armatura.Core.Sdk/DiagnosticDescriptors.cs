@@ -92,6 +92,7 @@ public static class DiagnosticDescriptors
         category: "Architecture",
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
-        description: "Context key inconsistency: similar keys with different separators detected (e.g., gui_credential_provider vs gui.credential_provider)."
+        description: "Context key inconsistency: similar keys with different separators detected (e.g., gui_credential_provider vs gui.credential_provider).",
+        customTags: new[] { "CompilationEnd" }
     );
 }

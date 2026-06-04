@@ -1,0 +1,266 @@
+﻿[VERIFY] PASS: All 15 pipeline names verified against 17 discovered plugin classes.
+dotnet : [VERIFY] ARM-BUILD-022: CQRS separation violations detected.
+строка:1 знак:1
++ dotnet run --project 'c:\000\projects\compositum\Vantuz.Builder\Vantu ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([VERIFY] ARM-BU...tions detected.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  CmlLib.Core.Files.GameFile in CmlLib.Core.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Game.GameVersionValidatorQuery in Vantuz.Plugins.Game.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ApiReaderQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ModpackManifestQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.OS.DeltaAnalyzerQuery in Vantuz.Plugins.OS.dll: mixes Command and Query characteristics
+[VERIFY] ARM-BUILD-023: Resource category violations detected.
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.<WaitForExitTaskAsync>b__12_0 in CmlLib.Core.dll: references System.Diagnostics.Process
+  ICSharpCode.SharpZipLib.Zip.ZipFile..ctor in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.ZipFile.UpdateCommentOnly in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.MakeTemporaryCopy in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.OpenForDirectUpdate in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  Vantuz.Host.AsyncFileReporter..ctor in Vantuz.Host.dll: references System.IO.FileStream
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+[VERIFY] PASS: All 5 pipeline names verified against 17 discovered plugin classes.
+[VERIFY] ARM-BUILD-022: CQRS separation violations detected.
+  CmlLib.Core.Files.GameFile in CmlLib.Core.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Game.GameVersionValidatorQuery in Vantuz.Plugins.Game.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ApiReaderQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ModpackManifestQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.OS.DeltaAnalyzerQuery in Vantuz.Plugins.OS.dll: mixes Command and Query characteristics
+[VERIFY] ARM-BUILD-023: Resource category violations detected.
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.<WaitForExitTaskAsync>b__12_0 in CmlLib.Core.dll: references System.Diagnostics.Process
+  ICSharpCode.SharpZipLib.Zip.ZipFile..ctor in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.ZipFile.UpdateCommentOnly in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.MakeTemporaryCopy in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.OpenForDirectUpdate in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  Vantuz.Host.AsyncFileReporter..ctor in Vantuz.Host.dll: references System.IO.FileStream
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+[VERIFY] PASS: All 13 pipeline names verified against 17 discovered plugin classes.
+[VERIFY] ARM-BUILD-022: CQRS separation violations detected.
+  CmlLib.Core.Files.GameFile in CmlLib.Core.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Game.GameVersionValidatorQuery in Vantuz.Plugins.Game.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ApiReaderQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ModpackManifestQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.OS.DeltaAnalyzerQuery in Vantuz.Plugins.OS.dll: mixes Command and Query characteristics
+[VERIFY] ARM-BUILD-023: Resource category violations detected.
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.<WaitForExitTaskAsync>b__12_0 in CmlLib.Core.dll: references System.Diagnostics.Process
+  ICSharpCode.SharpZipLib.Zip.ZipFile..ctor in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.ZipFile.UpdateCommentOnly in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.MakeTemporaryCopy in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.OpenForDirectUpdate in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  Vantuz.Host.AsyncFileReporter..ctor in Vantuz.Host.dll: references System.IO.FileStream
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+[VERIFY] PASS: All 5 pipeline names verified against 17 discovered plugin classes.
+[VERIFY] ARM-BUILD-022: CQRS separation violations detected.
+  CmlLib.Core.Files.GameFile in CmlLib.Core.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Game.GameVersionValidatorQuery in Vantuz.Plugins.Game.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ApiReaderQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ModpackManifestQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.OS.DeltaAnalyzerQuery in Vantuz.Plugins.OS.dll: mixes Command and Query characteristics
+[VERIFY] ARM-BUILD-023: Resource category violations detected.
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.<WaitForExitTaskAsync>b__12_0 in CmlLib.Core.dll: references System.Diagnostics.Process
+  ICSharpCode.SharpZipLib.Zip.ZipFile..ctor in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.ZipFile.UpdateCommentOnly in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.MakeTemporaryCopy in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.OpenForDirectUpdate in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  Vantuz.Host.AsyncFileReporter..ctor in Vantuz.Host.dll: references System.IO.FileStream
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+[VERIFY] PASS: All 10 pipeline names verified against 17 discovered plugin classes.
+[VERIFY] ARM-BUILD-022: CQRS separation violations detected.
+  CmlLib.Core.Files.GameFile in CmlLib.Core.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Game.GameVersionValidatorQuery in Vantuz.Plugins.Game.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ApiReaderQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.Net.ModpackManifestQuery in Vantuz.Plugins.Net.dll: mixes Command and Query characteristics
+  Vantuz.Plugins.OS.DeltaAnalyzerQuery in Vantuz.Plugins.OS.dll: mixes Command and Query characteristics
+[VERIFY] ARM-BUILD-023: Resource category violations detected.
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.MinecraftProcessBuilder.CreateProcess in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.ProcessStartInfo
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.StartWithEvents in CmlLib.Core.dll: references System.Diagnostics.Process
+  CmlLib.Core.ProcessBuilder.ProcessWrapper.<WaitForExitTaskAsync>b__12_0 in CmlLib.Core.dll: references System.Diagnostics.Process
+  ICSharpCode.SharpZipLib.Zip.ZipFile..ctor in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.ZipFile.UpdateCommentOnly in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.MakeTemporaryCopy in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  ICSharpCode.SharpZipLib.Zip.DiskArchiveStorage.OpenForDirectUpdate in ICSharpCode.SharpZipLib.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  SevenZip.LzmaAlone.Main2 in SevenZip.dll: references System.IO.FileStream
+  Vantuz.Host.AsyncFileReporter..ctor in Vantuz.Host.dll: references System.IO.FileStream
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.DownloadCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.ModpackManifestQuery..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient
+  Vantuz.Plugins.Net.UpdateCommand..ctor in Vantuz.Plugins.Net.dll: references System.Net.Http.HttpClient

@@ -15,6 +15,7 @@
     <PackageTags>roslyn;analyzer;architecture;armatura;cqrs;quantized</PackageTags>
     <DevelopmentDependency>true</DevelopmentDependency>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <NoWarn>RS2007</NoWarn>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzersToOutput</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 

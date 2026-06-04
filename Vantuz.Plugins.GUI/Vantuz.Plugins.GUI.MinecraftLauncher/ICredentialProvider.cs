@@ -1,8 +1,8 @@
-namespace Vantuz.Products.MinecraftLauncher.GUI;
+﻿namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 
 /// <summary>
 /// Credentials container for authentication.
-/// Per INVARIANT_THEORY.md §2.2 CQRS: immutable data transfer object.
+/// Per INVARIANT_THEORY.md В§2.2 CQRS: immutable data transfer object.
 /// </summary>
 public sealed class Credentials
 {
@@ -22,7 +22,7 @@ public sealed class Credentials
 
 /// <summary>
 /// Interface for collecting user credentials through GUI.
-/// Per COMPOSITUM_SPECIFICATION.md §4.2: Plugin-provided capability, not Core concern.
+/// Per COMPOSITUM_SPECIFICATION.md В§4.2: Plugin-provided capability, not Core concern.
 /// </summary>
 public interface ICredentialProvider
 {

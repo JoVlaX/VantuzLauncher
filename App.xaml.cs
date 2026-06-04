@@ -92,7 +92,7 @@ public partial class App : Application
     {
         options = new HeadlessRunner.HeadlessOptions();
 
-        var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var dict = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
         foreach (var arg in args)
         {
             if (arg.StartsWith("--"))
@@ -116,8 +116,8 @@ public partial class App : Application
 
         options = new HeadlessRunner.HeadlessOptions
         {
-            Username = dict.GetValueOrDefault("username", "test"),
-            Password = dict.GetValueOrDefault("password", "test"),
+            Username = dict.GetValueOrDefault("username", "test")!,
+            Password = dict.GetValueOrDefault("password", "test")!,
             RamMb = int.TryParse(dict.GetValueOrDefault("ram", "4096"), out var ram) ? ram : 4096,
             TestMode = dict.ContainsKey("test-mode") || dict.ContainsKey("test"),
             BootPath = dict.GetValueOrDefault("boot-path", null) ?? dict.GetValueOrDefault("boot", null),

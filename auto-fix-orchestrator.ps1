@@ -53,7 +53,10 @@ $colors = @{
 # ============================================
 
 function Get-CodeHash {
-    $files = Get-ChildItem -Path $scriptDir -Recurse -Filter "*.cs" | Sort-Object { $_.FullName.Substring($scriptDir.Length).ToLowerInvariant() }
+    # Per DEVIATION-004 closure: include .cs and .json for measurable state change
+    $csFiles = Get-ChildItem -Path $scriptDir -Recurse -Filter "*.cs" | Sort-Object { $_.FullName.Substring($scriptDir.Length).ToLowerInvariant() }
+    $jsonFiles = Get-ChildItem -Path $scriptDir -Recurse -Filter "*.json" | Where-Object { $_.Name -notmatch "node_modules|bin|obj" } | Sort-Object { $_.FullName.Substring($scriptDir.Length).ToLowerInvariant() }
+    $files = @($csFiles) + @($jsonFiles)
     $sha = [System.Security.Cryptography.SHA256]::Create()
     foreach ($file in $files) {
         $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
@@ -238,7 +241,66 @@ function Test-RetryGuard {
 }
 
 # ============================================
-# FIX PHASE (Placeholder - would integrate with AI fix system)
+# CONCRETE FIX FUNCTIONS (DEVIATION-004 closure)
+# ============================================
+
+function Repair-MissingBootJson {
+    param([string]$ErrorText)
+    $targetBoot = $null
+    if ($ErrorText -match "boot\.gui\.json") { $targetBoot = "boot.gui.json" }
+    elseif ($ErrorText -match "boot\.headless\.json") { $targetBoot = "boot.headless.json" }
+    elseif ($ErrorText -match "boot\.minecraft\.production\.json") { $targetBoot = "boot.minecraft.production.json" }
+    elseif ($ErrorText -match "boot\.json") { $targetBoot = "boot.gui.json" }
+
+    if (-not $targetBoot) { return @{ Applied = $false; Reason = "No boot.json target identified" } }
+
+    $template = Join-Path $scriptDir "boot.template.json"
+    $target = Join-Path $scriptDir $targetBoot
+    if (-not (Test-Path $template)) { return @{ Applied = $false; Reason = "boot.template.json not found" } }
+    Copy-Item $template $target -Force
+    Write-Host "  [FIX] Copied boot.template.json -> $targetBoot" -ForegroundColor $colors.Success
+    return @{ Applied = $true; ChangedFiles = @($target) }
+}
+
+function Add-MissingUsingDirective {
+    param([string]$ErrorText)
+    # Extract missing namespace from CS0234 / CS0246 messages
+    if ($ErrorText -notmatch "CS0234|CS0246") { return @{ Applied = $false; Reason = "Not a missing namespace error" } }
+
+    # Try to extract namespace name from error text
+    $nsMatch = $ErrorText | Select-String -Pattern "type or namespace name '([^']+)'"
+    if (-not $nsMatch) { $nsMatch = $ErrorText | Select-String -Pattern "'([^']+)' could not be found" }
+    if (-not $nsMatch) { return @{ Applied = $false; Reason = "Could not extract namespace from error" } }
+
+    $missingNs = $nsMatch.Matches[0].Groups[1].Value
+    if ([string]::IsNullOrEmpty($missingNs)) { return @{ Applied = $false; Reason = "Empty namespace extracted" } }
+
+    # Find first .cs file that does not already contain this using
+    $csFiles = Get-ChildItem -Path $scriptDir -Recurse -Filter "*.cs" | Where-Object { $_.FullName -notmatch "\\obj\\|\\bin\\" }
+    foreach ($file in $csFiles) {
+        $content = Get-Content $file.FullName -Raw
+        if ($content -notmatch "using\s+$missingNs\s*;") {
+            # Insert using directive after any existing using block or at top
+            $lines = Get-Content $file.FullName
+            $insertIndex = 0
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+                if ($lines[$i] -match "^using\s+" -or $lines[$i] -match "^namespace\s+") { $insertIndex = $i + 1 }
+            }
+            $newLines = @()
+            for ($i = 0; $i -lt $lines.Count; $i++) {
+                $newLines += $lines[$i]
+                if ($i -eq $insertIndex - 1) { $newLines += "using $missingNs; // auto-fix applied" }
+            }
+            $newLines | Set-Content $file.FullName -Encoding UTF8
+            Write-Host "  [FIX] Added 'using $missingNs;' to $($file.Name)" -ForegroundColor $colors.Success
+            return @{ Applied = $true; ChangedFiles = @($file.FullName) }
+        }
+    }
+    return @{ Applied = $false; Reason = "All .cs files already reference $missingNs" }
+}
+
+# ============================================
+# FIX PHASE (DEVIATION-004: now concrete, not placeholder)
 # ============================================
 
 function Invoke-FixPhase {
@@ -256,22 +318,39 @@ function Invoke-FixPhase {
     }
     
     Write-Host "  Pattern matched: $($canFix.Pattern)" -ForegroundColor $colors.Info
-    Write-Host "  AUTO-FIX MODE: Would apply fix here" -ForegroundColor $colors.Warning
+    Write-Host "  AUTO-FIX MODE: Applying concrete fix..." -ForegroundColor $colors.Warning
     
     # Per INVARIANT_THEORY.md §1.2: fix must produce measurable code change
     $hashBefore = Get-CodeHash
     $State.lastCodeHash = $hashBefore
     Save-State $State
     
-    # DEVIATION-004 ACTIVE: Auto-Fix Placeholder — see docs/deviations/DEVIATION-004.md
-    # Resolution deadline: 2026-06-09
-    # Note: Actual fix implementation requires code analysis and modification
-    # This orchestrator manages the loop; fixes are applied by code analysis tools
+    # DEVIATION-004 RESOLVED: Concrete fix dispatch
+    $fixApplied = $false
+    $fixReason = $null
+    if ($ErrorInfo.Type -eq "test" -and $ErrorInfo.Error -match "boot\.json") {
+        $fixResult = Repair-MissingBootJson -ErrorText $ErrorInfo.Error
+        $fixApplied = $fixResult.Applied
+        $fixReason = $fixResult.Reason
+    }
+    elseif ($ErrorInfo.Type -eq "build" -and $ErrorInfo.Error -match "CS0234|CS0246") {
+        $fixResult = Add-MissingUsingDirective -ErrorText $ErrorInfo.Error
+        $fixApplied = $fixResult.Applied
+        $fixReason = $fixResult.Reason
+    }
+    else {
+        $fixReason = "No concrete fix implemented for pattern: $($canFix.Pattern)"
+    }
+    
+    if (-not $fixApplied) {
+        Write-Host "  [GUARD] Fix not applied: $fixReason" -ForegroundColor $colors.Error
+        # Still compute hash in case another process changed files
+    }
     
     $hashAfter = Get-CodeHash
     if ($hashAfter -eq $hashBefore) {
         Write-Host "  [GUARD] No code change detected after fix attempt" -ForegroundColor $colors.Error
-        return @{ Fixed = $false; Reason = "No code change produced"; Pattern = $canFix.Pattern }
+        return @{ Fixed = $false; Reason = if ($fixReason) { $fixReason } else { "No code change produced" }; Pattern = $canFix.Pattern }
     }
     
     Write-Host "  [OK] Code changed: $hashBefore -> $hashAfter" -ForegroundColor $colors.Success

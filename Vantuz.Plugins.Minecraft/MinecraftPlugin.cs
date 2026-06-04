@@ -18,12 +18,12 @@ public class MinecraftProviderCommand : ICommandPlugin
     /// <summary>
     /// Registers the IGameProvider instance for use by Game.* plugins.
     /// </summary>
-    public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
+    public Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         // Register provider for universal game plugins to resolve
         context.Set($"GameProvider.{_provider.ProviderName}", _provider);
         context.Reporter.ReportState($"Провайдер {_provider.ProviderName} зарегистрирован.");
-        return new CommandResult(true);
+        return Task.FromResult(new CommandResult(true));
     }
 
     public ValueTask DisposeAsync() => _provider.DisposeAsync();

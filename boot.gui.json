@@ -10,7 +10,7 @@
     "_justification": "GUI plugins loaded as first step per COMPOSITUM_SPECIFICATION.md §4.1"
   },
   "plugins": {
-    "Vantuz.Products.MinecraftLauncher.GUI.dll": "",
+    "Vantuz.Plugins.GUI.MinecraftLauncher.dll": "",
     "Vantuz.Plugins.Auth.dll": "",
     "Vantuz.Plugins.Net.dll": "",
     "Vantuz.Plugins.OS.dll": "",

@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>Vantuz.Products.MinecraftLauncher.GUI</AssemblyName>
-    <RootNamespace>Vantuz.Products.MinecraftLauncher.GUI</RootNamespace>
+    <AssemblyName>Vantuz.Plugins.GUI.MinecraftLauncher</AssemblyName>
+    <RootNamespace>Vantuz.Plugins.GUI.MinecraftLauncher</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

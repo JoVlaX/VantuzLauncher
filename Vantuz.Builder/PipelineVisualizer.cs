@@ -12,7 +12,7 @@ namespace Vantuz.Builder;
 /// </summary>
 public static class PipelineVisualizer
 {
-    public static void Main(string[] args)
+    public static void Run(string[] args)
     {
         if (args.Length < 1)
         {

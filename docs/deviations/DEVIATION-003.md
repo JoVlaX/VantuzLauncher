@@ -1,8 +1,9 @@
 # DEVIATION-003: WPF XAML Resource Loading in Hosted Mode
 
-**Status:** ACTIVE  
+**Status:** Resolved 2026-06-03  
 **Created:** 2026-06-02  
 **Deadline:** 2026-07-02 (30 days from creation)  
+**Closed:** 2026-06-03  
 **Type:** Runtime Resource Resolution  
 **Severity:** HIGH — GUI mode partially non-functional  
 
@@ -78,66 +79,42 @@ else
 
 ---
 
-## Permanent Resolution Plan
+## Resolution
 
-### Option A: Programmatic UI (Recommended)
-Eliminate XAML dependency by creating UI elements in code:
+**Selected Option:** D — `Application.ResourceAssembly` redirection (Implemented 2026-06-03)
 
-**Advantages:**
-- No WPF resource resolution dependency
-- Full plugin independence per §2.2
-- Works in both hosted and standalone modes
+**Fix:** In `MinecraftLauncherGUIPlugin.cs`, before `new MainWindow()`, set:
+```csharp
+if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
+{
+    Application.ResourceAssembly = typeof(MainWindow).Assembly;
+}
+```
 
-**Disadvantages:**
-- Loss of XAML designer support
-- More verbose UI code
-- Requires rewriting MainWindow.xaml.cs
-
-**Timeline:** 2-3 days implementation
-
-### Option B: Custom Resource Manager
-Implement `IResourceManager` for plugin-scoped resource resolution:
+**Why this works:**
+- WPF's `Application.LoadComponent` (called by `InitializeComponent()`) uses `Application.ResourceAssembly` to resolve Pack URIs
+- By redirecting `ResourceAssembly` to the plugin assembly, XAML/BAML resources are found correctly
+- Plugin creates its own `Application` in a dedicated STA thread, so global state mutation is scoped to plugin execution
 
 **Advantages:**
-- Preserves XAML workflow
-- Clean architectural separation
+- Preserves XAML designer workflow
+- No programmatic UI rewrite required
+- Single-line fix with clear invariant
 
 **Disadvantages:**
-- Complex WPF internals manipulation
-- Fragile (depends on WPF implementation details)
-- May break with .NET updates
-
-**Timeline:** 5-7 days research + implementation
-
-### Option C: Pre-compiled BAML Loading
-Load compiled BAML directly without Application resource resolution:
-
-**Advantages:**
-- Fast runtime loading
-- No Application coupling
-
-**Disadvantages:**
-- Requires reflection on WPF internals
-- Bypasses standard WPF initialization
-- High maintenance cost
-
-**Timeline:** 3-4 days + ongoing maintenance
+- Mutates global `Application.ResourceAssembly` (acceptable because plugin owns its Application instance)
 
 ---
 
 ## Decision
 
-**Selected Option:** A (Programmatic UI)
+**Selected Option:** D (ResourceAssembly redirection) — implemented 2026-06-03
 
 **Rationale:**
-- Aligns with INVARIANT_THEORY.md §2.2 (plugin independence)
-- Simplest implementation
-- Most maintainable long-term
-- No fragile WPF internals dependencies
-
-**Deadline:** 2026-07-02
-
-**Rollback Condition:** If Option A requires >3 days, evaluate Option B.
+- Minimal code change (4 lines)
+- Preserves existing XAML workflow
+- No architectural refactoring required
+- Works in both standalone and hosted modes
 
 ---
 

@@ -1,4 +1,4 @@
-<Window x:Class="Vantuz.Products.MinecraftLauncher.GUI.MainWindow"
+﻿<Window x:Class="Vantuz.Plugins.GUI.MinecraftLauncher.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -39,9 +39,9 @@
                     <StackPanel Margin="20">
 
                         <!-- Login Section -->
-                        <TextBlock Text="ВХОД" FontWeight="Bold" Foreground="White" Margin="0,0,0,15" FontSize="12"/>
+                        <TextBlock Text="Р’РҐРћР”" FontWeight="Bold" Foreground="White" Margin="0,0,0,15" FontSize="12"/>
 
-                        <TextBlock Text="ЛОГИН" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,5"/>
+                        <TextBlock Text="Р›РћР“РРќ" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,5"/>
                         <Border Background="#FF333333" CornerRadius="4" Margin="0,0,0,12">
                             <TextBox x:Name="UsernameBox"
                                     Background="Transparent"
@@ -52,7 +52,7 @@
                                     CaretBrush="White"/>
                         </Border>
 
-                        <TextBlock Text="ПАРОЛЬ" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,5"/>
+                        <TextBlock Text="РџРђР РћР›Р¬" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,5"/>
                         <Border Background="#FF333333" CornerRadius="4" Margin="0,0,0,10">
                             <PasswordBox x:Name="PasswordBox"
                                         Background="Transparent"
@@ -63,14 +63,14 @@
                                         CaretBrush="White"/>
                         </Border>
 
-                        <CheckBox x:Name="RememberMeBox" Content="Запомнить меня"
+                        <CheckBox x:Name="RememberMeBox" Content="Р—Р°РїРѕРјРЅРёС‚СЊ РјРµРЅСЏ"
                                  Foreground="#FFAAAAAA" Margin="0,0,0,25" FontSize="11"
                                  Cursor="Hand"/>
 
                         <!-- Settings Section -->
-                        <TextBlock Text="НАСТРОЙКИ" FontWeight="Bold" Foreground="White" Margin="0,0,0,15" FontSize="12"/>
+                        <TextBlock Text="РќРђРЎРўР РћР™РљР" FontWeight="Bold" Foreground="White" Margin="0,0,0,15" FontSize="12"/>
 
-                        <TextBlock Text="ВЫДЕЛЕНИЕ ОЗУ" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,8"/>
+                        <TextBlock Text="Р’Р«Р”Р•Р›Р•РќРР• РћР—РЈ" Foreground="#FFAAAAAA" FontSize="10" Margin="0,0,0,8"/>
                         <Slider x:Name="RamSlider"
                                Minimum="1024" Maximum="16384"
                                SmallChange="512" LargeChange="1024"
@@ -79,7 +79,7 @@
                                IsSnapToTickEnabled="True"
                                Margin="0,0,0,5"/>
                         <TextBlock x:Name="RamText"
-                                  Text="Выделено: 4096 МБ"
+                                  Text="Р’С‹РґРµР»РµРЅРѕ: 4096 РњР‘"
                                   Foreground="White"
                                   FontSize="11"
                                   Margin="0,0,0,20"
@@ -87,7 +87,7 @@
 
                         <!-- Play Button -->
                         <Button x:Name="PlayButton"
-                               Content="ИГРАТЬ"
+                               Content="РР“Р РђРўР¬"
                                Height="45"
                                Background="#FF4CAF50"
                                Foreground="White"
@@ -99,7 +99,7 @@
 
                         <!-- Cancel Button -->
                         <Button x:Name="CancelButton"
-                               Content="Отмена"
+                               Content="РћС‚РјРµРЅР°"
                                Height="35"
                                Background="Transparent"
                                Foreground="#FFAAAAAA"
@@ -113,11 +113,11 @@
 
                         <!-- Progress Section (initially collapsed) -->
                         <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,20,0,0">
-                            <TextBlock Text="СТАТУС" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" FontSize="12"/>
+                            <TextBlock Text="РЎРўРђРўРЈРЎ" FontWeight="Bold" Foreground="White" Margin="0,0,0,10" FontSize="12"/>
 
                             <Border Background="#FF333333" CornerRadius="4" Padding="10" Margin="0,0,0,10">
                                 <TextBlock x:Name="StatusText"
-                                          Text="Подготовка..."
+                                          Text="РџРѕРґРіРѕС‚РѕРІРєР°..."
                                           TextWrapping="Wrap"
                                           Foreground="#FFDDDDDD"
                                           FontSize="11"/>

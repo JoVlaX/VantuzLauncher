@@ -1,8 +1,8 @@
-namespace Vantuz.Products.MinecraftLauncher.GUI;
+﻿namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 
 /// <summary>
 /// Configuration model for Minecraft Launcher.
-/// Per INVARIANT_THEORY.md §11.2: Explicit configuration externalized from code.
+/// Per INVARIANT_THEORY.md В§11.2: Explicit configuration externalized from code.
 /// </summary>
 public class LauncherConfig
 {

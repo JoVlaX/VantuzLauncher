@@ -1,13 +1,13 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Vantuz.Core;
 using Vantuz.Host;
 
-namespace Vantuz.Products.MinecraftLauncher.GUI;
+namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 
 /// <summary>
 /// Pipeline step for collecting user credentials through GUI.
-/// Per INVARIANT_THEORY.md §2.2 CQRS: Command (UI interaction) separate from Query (auth validation).
-/// Per COMPOSITUM_SPECIFICATION.md §4.1: Plugin scope, not Core.
+/// Per INVARIANT_THEORY.md В§2.2 CQRS: Command (UI interaction) separate from Query (auth validation).
+/// Per COMPOSITUM_SPECIFICATION.md В§4.1: Plugin scope, not Core.
 /// </summary>
 public class CredentialCollectionStep : ICommandPlugin
 {
@@ -34,7 +34,7 @@ public class CredentialCollectionStep : ICommandPlugin
             var credentials = await credentialProvider.CollectAsync(cts.Token);
 
             // Store in context for downstream plugins (Auth, etc.)
-            // Per INVARIANT_THEORY.md §2.1: keys must match consumer expectations (YggdrasilPlugin expects "username"/"password")
+            // Per INVARIANT_THEORY.md В§2.1: keys must match consumer expectations (YggdrasilPlugin expects "username"/"password")
             context.Set("auth.credentials", credentials);
             context.Set("username", credentials.Username);  // YggdrasilPlugin.cs:22 expects "username"
             context.Set("password", credentials.Password);  // YggdrasilPlugin.cs:23 expects "password"

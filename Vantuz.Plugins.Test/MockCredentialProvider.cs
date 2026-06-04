@@ -56,7 +56,9 @@ public class MockCredentialProvider : ICommandPlugin
         public void ShowProgress() { }
         public void UpdateStatus(string message) { }
 
+        #pragma warning disable CS0067 // Events unused in test stub
         public event EventHandler<Vantuz.Core.CredentialsSubmittedEventArgs>? CredentialsSubmitted;
         public event EventHandler? CredentialsCancelled;
+        #pragma warning restore CS0067
     }
 }

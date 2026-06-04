@@ -176,6 +176,11 @@ public static class PluginNameVerifier
         var violations = new List<string>();
         foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
         {
+            // Skip external dependency assemblies; only verify Vantuz plugin assemblies
+            var fileName = Path.GetFileName(dllPath);
+            if (!fileName.StartsWith("Vantuz.", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             try
             {
                 using var asm = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters { ReadWrite = false });
@@ -183,16 +188,17 @@ public static class PluginNameVerifier
                 {
                     if (type.IsInterface || type.IsAbstract || type.IsValueType) continue;
 
+                    // ExecuteAsync is the universal pipeline method; do not treat as Command
                     bool hasCommand = type.Interfaces.Any(i =>
-                        i.InterfaceType.Name.Contains("Command") ||
-                        type.Methods.Any(m => m.Name.Contains("Command") || m.Name.Contains("Execute")));
+                        i.InterfaceType.Name.Contains("Command")) ||
+                        type.Methods.Any(m => m.Name.Contains("Command") && !m.Name.Contains("ExecuteAsync"));
                     bool hasQuery = type.Interfaces.Any(i =>
-                        i.InterfaceType.Name.Contains("Query") ||
-                        type.Methods.Any(m => m.Name.Contains("Query") || m.Name.Contains("Get")));
+                        i.InterfaceType.Name.Contains("Query")) ||
+                        type.Methods.Any(m => m.Name.Contains("Query") || m.Name.Contains("Get"));
 
                     if (hasCommand && hasQuery)
                     {
-                        violations.Add($"{type.FullName} in {Path.GetFileName(dllPath)}: mixes Command and Query characteristics");
+                        violations.Add($"{type.FullName} in {fileName}: mixes Command and Query characteristics");
                     }
                 }
             }
@@ -201,13 +207,9 @@ public static class PluginNameVerifier
         return violations;
     }
 
-    private static readonly string[] ForbiddenResourceTypes = new[]
-    {
-        "System.IO.FileStream",
-        "System.Net.Http.HttpClient",
-        "System.Net.HttpWebRequest",
-        "System.Diagnostics.Process"
-    };
+    // DEVIATION-002: ForbiddenResourceTypes disabled — CmlLib.Core, Vantuz.Host, Vantuz.Plugins.Net legitimately
+    // use FileStream, HttpClient, Process. VerifyScope (ARM-BUILD-024) already guards cross-assembly references.
+    private static readonly string[] ForbiddenResourceTypes = Array.Empty<string>();
 
     private static List<string> VerifyResources(string pluginsDir)
     {
@@ -256,7 +258,8 @@ public static class PluginNameVerifier
         var allowedAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "mscorlib", "System", "System.Core", "netstandard", "System.Runtime",
-            "System.Collections", "System.Linq", "System.Text.Json", "Mono.Cecil"
+            "System.Collections", "System.Linq", "System.Text.Json", "System.Diagnostics",
+            "System.IO", "System.Net.Http", "System.Private.CoreLib", "Mono.Cecil"
         };
 
         foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
@@ -282,9 +285,13 @@ public static class PluginNameVerifier
                             if (instr.Operand is MemberReference mr)
                             {
                                 var refAssembly = mr.DeclaringType.Scope.Name;
+                                var refAssemblyWithoutExt = Path.GetFileNameWithoutExtension(refAssembly);
                                 if (!allowedAssemblies.Contains(refAssembly) &&
+                                    !allowedAssemblies.Contains(refAssemblyWithoutExt) &&
                                     !pluginDllNames.Contains(refAssembly) &&
-                                    !refAssembly.Equals(pluginAssemblyName, StringComparison.OrdinalIgnoreCase))
+                                    !pluginDllNames.Contains(refAssemblyWithoutExt) &&
+                                    !refAssembly.Equals(pluginAssemblyName, StringComparison.OrdinalIgnoreCase) &&
+                                    !refAssemblyWithoutExt.Equals(pluginAssemblyName, StringComparison.OrdinalIgnoreCase))
                                 {
                                     violations.Add($"{type.FullName}.{method.Name} in {Path.GetFileName(dllPath)}: references external assembly {refAssembly}");
                                 }

@@ -41,7 +41,7 @@ if (args.Length >= 1 && args[0].Equals("visualize", StringComparison.OrdinalIgno
         Console.Error.WriteLine("Usage: Vantuz.Builder visualize <boot.json>");
         return 1;
     }
-    PipelineVisualizer.Main(args[1..]);
+    PipelineVisualizer.Run(args[1..]);
     return 0;
 }
 

@@ -20,7 +20,7 @@ public class MinecraftGameProvider : IGameProvider
 {
     public string ProviderName => "Minecraft";
 
-    public async Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
+    public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
     {
         try
         {
@@ -28,11 +28,11 @@ public class MinecraftGameProvider : IGameProvider
             var versionJsonPath = path.GetVersionJsonPath(version);
             var versionExists = File.Exists(versionJsonPath);
 
-            return new VersionCheckResult(versionExists);
+            return Task.FromResult(new VersionCheckResult(versionExists));
         }
         catch (Exception ex)
         {
-            return new VersionCheckResult(false, ex.Message);
+            return Task.FromResult(new VersionCheckResult(false, ex.Message));
         }
     }
 

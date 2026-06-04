@@ -10,8 +10,4 @@ ARM012 | Architecture | Error | Mutable State in Query
 
 ### Changed Rules
 
-None
-
 ### Removed Rules
-
-None

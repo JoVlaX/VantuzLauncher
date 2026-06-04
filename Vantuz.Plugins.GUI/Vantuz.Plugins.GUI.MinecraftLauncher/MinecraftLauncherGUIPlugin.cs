@@ -1,15 +1,15 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Threading;
 using Vantuz.Core;
 using Vantuz.Host;
 
-namespace Vantuz.Products.MinecraftLauncher.GUI;
+namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 
 /// <summary>
 /// Product-specific GUI plugin for Minecraft Launcher.
-/// Per INVARIANT_THEORY.md §498: Explicit side-effect only when included in pipeline.
+/// Per INVARIANT_THEORY.md В§498: Explicit side-effect only when included in pipeline.
 /// </summary>
 public class MinecraftLauncherGUIPlugin : ICommandPlugin
 {
@@ -33,9 +33,15 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
         {
             try
             {
-                // Per §11.5 Agentic: explicit initialization
+                // Per В§11.5 Agentic: explicit initialization
                 _app = new Application();
                 _app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+                // DEVIATION-003 RESOLVED: Ensure WPF Pack URI resolution targets plugin assembly
+                if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
+                {
+                    Application.ResourceAssembly = typeof(MainWindow).Assembly;
+                }
 
                 // Create reporter that marshals to UI thread
                 _reporter = new GUIProgressReporter();
@@ -113,7 +119,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
 
 /// <summary>
 /// Status reporter that marshals updates to WPF UI thread.
-/// Per §2.2 CQRS: separates UI updates from business logic.
+/// Per В§2.2 CQRS: separates UI updates from business logic.
 /// </summary>
 public class GUIProgressReporter : IStatusReporter
 {

@@ -4,15 +4,9 @@
 
 ### New Rules
 
-None
-
 ### Changed Rules
 
-None
-
 ### Removed Rules
-
-None
 
 ## Release 1.0
 

@@ -1,15 +1,15 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Vantuz.Products.MinecraftLauncher.GUI;
+namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 
 /// <summary>
 /// Main window for Minecraft Launcher GUI.
-/// Per INVARIANT_THEORY.md §498: Explicit UI component, loaded only when needed.
-/// Per COMPOSITUM_SPECIFICATION.md §4.1: Implements ICredentialProvider as plugin capability.
+/// Per INVARIANT_THEORY.md В§498: Explicit UI component, loaded only when needed.
+/// Per COMPOSITUM_SPECIFICATION.md В§4.1: Implements ICredentialProvider as plugin capability.
 /// </summary>
 public partial class MainWindow : Window, ICredentialProvider
 {
@@ -41,7 +41,7 @@ public partial class MainWindow : Window, ICredentialProvider
 
         // Initial state
         LogTextBox.Text = $"[{DateTime.Now:HH:mm:ss}] GUI initialized\n";
-        StatusText.Text = "Введите логин и пароль";
+        StatusText.Text = "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ";
         VersionText.Text = $"v{DateTime.Now:yyyyMMdd.HHmm}";
     }
 
@@ -85,7 +85,7 @@ public partial class MainWindow : Window, ICredentialProvider
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            MessageBox.Show("Пожалуйста, введите логин и пароль.", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІРІРµРґРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ.", "Р’РЅРёРјР°РЅРёРµ", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -108,7 +108,7 @@ public partial class MainWindow : Window, ICredentialProvider
     private void RamSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         int value = (int)e.NewValue;
-        RamText.Text = $"Выделено: {value} МБ";
+        RamText.Text = $"Р’С‹РґРµР»РµРЅРѕ: {value} РњР‘";
     }
 
     #endregion
@@ -192,7 +192,7 @@ public partial class MainWindow : Window, ICredentialProvider
             RamSlider.Minimum = 1024;
             RamSlider.Value = 4096;
         }
-        RamText.Text = $"Выделено: {(int)RamSlider.Value} МБ";
+        RamText.Text = $"Р’С‹РґРµР»РµРЅРѕ: {(int)RamSlider.Value} РњР‘";
     }
 
     private void LoadSavedConfig()
@@ -210,7 +210,7 @@ public partial class MainWindow : Window, ICredentialProvider
                     RememberMeBox.IsChecked = config.RememberMe;
                     int ramValue = Math.Clamp(config.RamMb, (int)RamSlider.Minimum, (int)RamSlider.Maximum);
                     RamSlider.Value = ramValue;
-                    RamText.Text = $"Выделено: {ramValue} МБ";
+                    RamText.Text = $"Р’С‹РґРµР»РµРЅРѕ: {ramValue} РњР‘";
                 }
             }
         }

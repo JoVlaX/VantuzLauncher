@@ -22,19 +22,19 @@ public static class ForgeVersionResolver
     /// Fetches available Forge versions for given Minecraft version.
     /// Per INVARIANT_THEORY.md §11.5 Agentic - no hidden state, all inputs explicit.
     /// </summary>
-    public static async Task<IReadOnlyList<string>> GetAvailableVersionsAsync(
-        string mcVersion, 
+    public static Task<IReadOnlyList<string>> GetAvailableVersionsAsync(
+        string mcVersion,
         IStatusReporter reporter,
         CancellationToken ct)
     {
         // Per §1.2 Measurability - explicit logging of query
         reporter.ReportState($"[FORGE QUERY] Fetching versions for MC {mcVersion}");
-        
+
         // Per §11.5 Agentic - explicit validation of inputs
         if (string.IsNullOrWhiteSpace(mcVersion))
         {
             reporter.ReportState("[FORGE QUERY ERROR] mcVersion is null or empty");
-            return new List<string>().AsReadOnly();
+            return Task.FromResult<IReadOnlyList<string>>(new List<string>().AsReadOnly());
         }
 
         try
@@ -43,13 +43,13 @@ public static class ForgeVersionResolver
             // TODO: Re-implement using CmlLib.Core.ModLoaders when Forge support is restored
             // Deviation: DEVIATION-002 build-blocker fix, no functional impact on headless tests
             reporter.ReportState("[FORGE QUERY] CmlLib.Core 4.0.6 does not expose ForgeInstaller. Returning empty list.");
-            return new List<string>().AsReadOnly();
+            return Task.FromResult<IReadOnlyList<string>>(new List<string>().AsReadOnly());
         }
         catch (Exception ex)
         {
             // Per §11.5 - agentic error reporting
             reporter.ReportState($"[FORGE QUERY ERROR] {ex.GetType().Name}: {ex.Message}");
-            return new List<string>().AsReadOnly();
+            return Task.FromResult<IReadOnlyList<string>>(new List<string>().AsReadOnly());
         }
     }
     

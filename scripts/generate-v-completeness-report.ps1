@@ -7,7 +7,6 @@ param(
 
 $projectRoot = Resolve-Path "$PSScriptRoot\.."
 $builderDir = Join-Path $projectRoot "Vantuz.Builder"
-$deviationsDir = Join-Path $projectRoot "docs\deviations"
 
 function Test-Verifier {
     param([string]$FilePath, [string]$Pattern)
@@ -54,6 +53,8 @@ foreach ($v in $verifiers) {
         $report.build_status = "ERROR"
     }
 }
+
+$OutputDir = $OutputDir.Trim('"', "'")
 
 $json = $report | ConvertTo-Json -Depth 5
 
