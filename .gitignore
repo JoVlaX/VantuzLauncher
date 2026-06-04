@@ -25,3 +25,19 @@ Thumbs.db
 temp/ 
 test/ 
 testing/
+
+# Diagnostic artifacts (per INVARIANT_THEORY.md §9.4 — audit trail in docs/audit-trail/)
+run_*.py
+fix_*.py
+inspect_*.py
+check_ts.py
+test_*.ps1
+mini.ps1
+auto-fix-orchestrator2.ps1
+build_*.txt
+verify*.txt
+runtime*.txt
+noverify*.txt
+dotnet_run_raw*.txt
+minidiag.log
+boot.template.json.bak

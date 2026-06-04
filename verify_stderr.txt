@@ -1,7 +1,0 @@
-C:\000\projects\compositum\verify-plugin-names.ps1 : [PLUGIN NAME MISMATCH] Pipeline references 'Net.ApiReaderQuery' but no plugin class reports that Name.
-C:\000\projects\compositum\verify-plugin-names.ps1:80 §­ Є:9
-+         Write-Error "[PLUGIN NAME MISMATCH] Pipeline references '$m'  ...
-+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (:) [Write-Error], WriteErrorException
-    + FullyQualifiedErrorId : Microsoft.PowerShell.Commands.WriteErrorException,verify-plugin-names.ps1
- 

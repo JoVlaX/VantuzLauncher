@@ -152,6 +152,58 @@ The following items are **non-blocking** and tracked for future work:
 
 ---
 
+## 5. Technical Debt Closure (2026-06-04)
+
+### 5.1 TODO/FIXME Status
+
+| Marker | Location | Status | Deviation / Owner |
+|--------|----------|--------|-------------------|
+| `TODO: Re-implement ForgeInstaller` | `ForgeVersionResolver.cs:43` | Documented | DEVIATION-002 — deferred until CmlLib.Core restores API |
+| `TODO: Refactor FileStream` | `DownloadCommand.cs:1` | Documented | ARM010 — workaround with `#pragma`, no runtime impact |
+| `HACK / XXX` | None found in active code | N/A | — |
+
+**Result:** All TODO/FIXME markers are either resolved or documented with owner and falsifier.
+
+### 5.2 Legacy Cleanup
+
+| Item | Action | Status |
+|------|--------|--------|
+| `Vantuz.Products\**` Remove entries | Removed from `VantuzLauncher.csproj` | [x] |
+| `Vantuz.Products` Solution Folder | Removed from `VantuzLauncher.sln` | [x] |
+| `Vantuz.Products` namespace in analyzer | Removed from `ComponentScopeAnalyzer.cs` | [x] |
+| `preprocess.xml` | Deleted (obsolete, contained stale references) | [x] |
+| `boot.minecraft.production.json` stale plugin ref | Fixed to `Vantuz.Plugins.GUI.MinecraftLauncher.dll` | [x] |
+| `scripts/smoke-test.ps1` stale plugin ref | Fixed to `Vantuz.Plugins.GUI.MinecraftLauncher.dll` | [x] |
+
+**Result:** Zero stale `Vantuz.Products` references remain in active code or build artifacts.
+
+---
+
+## 6. Workspace Cleanup (2026-06-04)
+
+**Per INVARIANT_THEORY.md §9.4 (Legacy Compatibility):** Diagnostic artifacts preserved in `docs/audit-trail/` with manifest, removed from project root.
+
+### 6.1 Archived to Audit Trail
+
+| Category | Files | Location |
+|----------|-------|----------|
+| Debug Python scripts | 20 `run_*.py`, `fix_*.py`, `inspect_*.py`, `check_ts.py` | `docs/audit-trail/` |
+| Diagnostic PS scripts | `test_*.ps1`, `mini.ps1`, `auto-fix-orchestrator2.ps1` | `docs/audit-trail/` |
+| Representative logs | `build_msbuild3.log`, `temp_launcher_test.log`, `temp_orchestrator5.log`, `verify-output.txt`, `auto-fix-report.json`, `auto-fix-transcript.log` | `docs/audit-trail/` |
+| Other artifacts | `boot.template.json.bak` | `docs/audit-trail/` |
+
+**Manifest:** `docs/audit-trail/MANIFEST.md`
+
+### 6.2 Deleted from Root
+
+All remaining one-time debug scripts, duplicate logs, temp files, and stale artifacts. **Zero** diagnostic files remain in the project root.
+
+### 6.3 Prevention
+
+`.gitignore` updated with patterns for diagnostic artifacts to prevent future root accumulation.
+
+---
+
 ## Recommendations
 
 1. **Immediate:** None. Project is stable and ready.
@@ -193,5 +245,7 @@ The initial readiness audit (2026-06-03) falsely claimed "READY" based solely on
 | S3 | Runtime smoke test passes | `VantuzLauncher.exe --headless` → exit code ≠ 2 | [x] |
 | S4 | No stale references | `grep -r "Vantuz.Products"` → 0 matches in active code | [x] |
 | S5 | Failure analysis documented | `docs/AGENT_FAILURE_ANALYSIS.md` exists and passes self-check | [x] |
+| S6 | TODO/FIXME closure | All markers resolved or documented with deviation owner | [x] |
+| S7 | Workspace cleanup | Debug artifacts archived to `docs/audit-trail/`, root clean | [x] |
 
 **Result:** All checks pass.

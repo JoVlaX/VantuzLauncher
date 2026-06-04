@@ -22,7 +22,6 @@
     <Compile Remove="Vantuz.Builder\**" />
     <Compile Remove="Armatura.Core.Sdk\**" />
     <Compile Remove="Vantuz.Plugins.GUI\**" />
-    <Compile Remove="Vantuz.Products\**" />
     <Compile Remove="Vantuz.Plugins.Test\**" />
     <Compile Remove="Vantuz.Builder.Tests\**" />
     <Compile Remove="Vantuz.Core.Tests\**" />
@@ -36,7 +35,6 @@
     <EmbeddedResource Remove="Vantuz.Plugins.Minecraft\**" />
     <EmbeddedResource Remove="Vantuz.Builder\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.GUI\**" />
-    <EmbeddedResource Remove="Vantuz.Products\**" />
     <EmbeddedResource Remove="Vantuz.Builder.Tests\**" />
     <EmbeddedResource Remove="Vantuz.Core.Tests\**" />
     <EmbeddedResource Remove="Vantuz.Plugins.GUI.Tests\**" />
@@ -49,7 +47,6 @@
     <None Remove="Vantuz.Plugins.Minecraft\**" />
     <None Remove="Vantuz.Builder\**" />
     <None Remove="Vantuz.Plugins.GUI\**" />
-    <None Remove="Vantuz.Products\**" />
     <None Remove="Vantuz.Builder.Tests\**" />
     <None Remove="Vantuz.Core.Tests\**" />
     <None Remove="Vantuz.Plugins.GUI.Tests\**" />
@@ -62,7 +59,6 @@
     <Page Remove="Vantuz.Plugins.Minecraft\**" />
     <Page Remove="Vantuz.Builder\**" />
     <Page Remove="Vantuz.Plugins.GUI\**" />
-    <Page Remove="Vantuz.Products\**" />
     <Page Remove="Vantuz.Builder.Tests\**" />
     <Page Remove="Vantuz.Core.Tests\**" />
     <Page Remove="Vantuz.Plugins.GUI.Tests\**" />

@@ -24,8 +24,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Armatura.Core.Sdk", "Armatu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.Test", "Vantuz.Plugins.Test\Vantuz.Plugins.Test.csproj", "{C3D4E5F6-7890-1234-5678-90ABCDEF1234}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Vantuz.Products", "Vantuz.Products", "{61C6CCE3-57B1-48D8-B5B3-F6115AF3D589}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Plugins.GUI.MinecraftLauncher", "Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\Vantuz.Plugins.GUI.MinecraftLauncher.csproj", "{6855179A-35A2-400E-B6AD-D12E92FC20BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vantuz.Builder.Tests", "Vantuz.Builder.Tests\Vantuz.Builder.Tests.csproj", "{1EE38D68-410C-4BF6-8F6E-0EEAF6469BDD}"
@@ -108,6 +106,5 @@ Global
 		SolutionGuid = {DF4737A1-2DA0-4BE7-BD29-29D7B40628E9}
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6855179A-35A2-400E-B6AD-D12E92FC20BB} = {61C6CCE3-57B1-48D8-B5B3-F6115AF3D589}
 	EndGlobalSection
 EndGlobal

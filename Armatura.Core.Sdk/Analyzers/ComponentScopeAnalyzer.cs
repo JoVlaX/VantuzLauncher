@@ -71,7 +71,7 @@ public class ComponentScopeAnalyzer : DiagnosticAnalyzer
     /// Level 1: Vantuz.Core (Contracts)
     /// Level 2: Vantuz.Host, Vantuz.Plugins.* (Plugins)
     /// Level 3: Vantuz.Builder (Tools)
-    /// Level 4: Vantuz.Products.*, VantuzLauncher (Products/Applications)
+    /// Level 4: VantuzLauncher (Application)
     /// </summary>
     private static int? DetermineComponentLevel(INamedTypeSymbol symbol)
     {
@@ -90,9 +90,8 @@ public class ComponentScopeAnalyzer : DiagnosticAnalyzer
         if (namespaceName.StartsWith("Vantuz.Builder"))
             return 3;
 
-        // Level 4: Products and root application
-        if (namespaceName.StartsWith("Vantuz.Products") ||
-            namespaceName == "VantuzLauncher")
+        // Level 4: Root application
+        if (namespaceName == "VantuzLauncher")
             return 4;
 
         return null; // Not a Vantuz component

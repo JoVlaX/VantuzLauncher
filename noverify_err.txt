@@ -1,1 +1,0 @@
-Usage: Vantuz.Builder <templatePath> <pluginsDirPath> <outputPath>
