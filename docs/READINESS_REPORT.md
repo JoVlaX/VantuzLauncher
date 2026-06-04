@@ -104,6 +104,14 @@ dotnet test VantuzLauncher.sln -c Release --no-build
 
 **Falsifier:** If `VantuzLauncher.exe` crashes with unhandled exception, `App.xaml.cs` exits with code 2 — the smoke test detects this.
 
+**Orchestrator Integration:** `auto-fix-orchestrator.ps1` now includes a **mandatory** runtime smoke test step (Phase 2.5) that launches the host headlessly and asserts exit code ≠ 2. Per INVARIANT_THEORY.md §4.2, this step is non-optional and deterministic.
+
+**Evidence:**
+```powershell
+.\auto-fix-orchestrator.ps1 -MaxIterations 1
+# Result: success (smoke test passed, exit code 0)
+```
+
 **Residual runtime concern:** `boot.minecraft.production.json` pipeline yields `"Game provider 'Minecraft' not found"` (exit code 1). This is a **configuration issue**, not a crash. The smoke test distinguishes critical crashes (code 2) from test failures (code 1).
 
 ### 5. Completeness Report

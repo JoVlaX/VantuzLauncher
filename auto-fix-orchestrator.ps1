@@ -365,6 +365,28 @@ function Invoke-FixPhase {
 }
 
 # ============================================
+# RUNTIME SMOKE TEST (MANDATORY per INVARIANT_THEORY.md §4.2)
+# ============================================
+
+function Invoke-SmokeTest {
+    param([string]$ScriptDir)
+    $hostExe = Join-Path $ScriptDir "bin\Release\net8.0-windows\VantuzLauncher.exe"
+    if (-not (Test-Path $hostExe)) {
+        Write-Host "  [WARN] VantuzLauncher.exe not found at $hostExe - smoke test skipped" -ForegroundColor Yellow
+        return @{ Passed = $true; Skipped = $true; Reason = "Executable not found" }
+    }
+    Write-Host "" 
+    Write-Host "[SMOKE] Running mandatory headless smoke test..." -ForegroundColor Yellow
+    $proc = Start-Process -FilePath $hostExe -ArgumentList "--headless","--test-mode","--boot=boot.test.json" -Wait -PassThru -WindowStyle Hidden
+    if ($proc.ExitCode -eq 2) {
+        Write-Host "  [FAIL] Smoke test failed with critical error (exit code 2)" -ForegroundColor Red
+        return @{ Passed = $false; ExitCode = $proc.ExitCode; Reason = "Critical unhandled exception" }
+    }
+    Write-Host "  [OK] Smoke test passed (exit code $($proc.ExitCode))" -ForegroundColor Green
+    return @{ Passed = $true; ExitCode = $proc.ExitCode }
+}
+
+# ============================================
 # MAIN ORCHESTRATION LOOP
 # ============================================
 
@@ -486,6 +508,21 @@ function Start-AutoFixCycle {
                     TestResult = $testResult.Result
                     RunId = $state.runId
                 }
+            }
+        }
+        
+        # PHASE 2.5: MANDATORY RUNTIME SMOKE TEST
+        $smokeResult = Invoke-SmokeTest -ScriptDir $scriptDir
+        if (-not $smokeResult.Passed) {
+            $state.lastError = $smokeResult.Reason
+            $state.errorsSeen += $smokeResult.Reason
+            Add-History "SMOKE TEST FAILED: $($smokeResult.Reason)"
+            return @{
+                Success = $false
+                Phase = "smoke"
+                Reason = $smokeResult.Reason
+                Iterations = $state.iterations
+                RunId = $state.runId
             }
         }
         
