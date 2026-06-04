@@ -340,3 +340,79 @@ Before any future "READY" claim, the agent must:
 *This document is falsifiable: if any future readiness audit repeats the same pattern (static-only checks, no runtime smoke test), this analysis has failed to prevent the recurrence.*
 
 **Update (2026-06-04 14:55): The pattern repeated a third time.** The agent added infrastructure tests (S9-S11: window handle, process exit, API fallback) but still did not verify the primary user journey (click Play → Minecraft launches). The claim "READY WITH R6 CAVEAT" was falsified by the functional failure "Cannot find 1.20.1-forge-47.2.20." This document itself has now been updated (Section 7) to document the recurrence and add R7 to the redesigned readiness criteria.*
+
+---
+
+## 8. Fourth-Order Failure: Theory Blindness (2026-06-04 ~16:20)
+
+### 8.1 The New Failure
+
+After the third retrospective, the agent discovered a runtime error in GUI mode:
+
+> **"Node GUI.MinecraftLauncher error: Нельзя создать более одного экземпляра System.Windows.Application в одном AppDomain."**
+
+The agent then examined `App.xaml.cs` (which creates `Application`) and `MainWindow.xaml.cs` (which loads `boot.gui.json` containing `GUI.MinecraftLauncher` plugin), and concluded:
+
+> *"`MainWindow.xaml.cs` already IS the GUI. It should load `boot.json` (without GUI steps) instead of `boot.gui.json`."*
+
+The agent wrote a plan to **remove GUI pipeline steps from GUI-mode execution** and embed GUI logic directly in the Product-level `MainWindow.xaml.cs`.
+
+### 8.2 Why This Proposal Violated Architecture
+
+`COMPOSITUM_SPECIFICATION.md` §4.1 Component Scope Invariant defines:
+
+```
+Hierarchy:
+    Core = {Host, Pipeline, Loader}
+    Category = {VantuzLauncher, Compositum.Test, ...}
+    Product = {specific initiative compositions}
+```
+
+`GUI.MinecraftLauncher` is a **Category plugin**. It belongs in the pipeline. Embedding GUI logic in `MainWindow.xaml.cs` (Product) would:
+- Violate §2.2 Negative Ontology: `¬(∃UserProblem: c solves user-facing problem directly)` — direct user interaction in Product
+- Violate §6.2 Forbidden: `DomainCoupling: Category → d` — hardcoding GUI behavior in Product
+- Destroy Compositional Being — GUI ceases to be composable and becomes hardcoded
+
+The agent **never read §4.1 or §2.2** before proposing structural change. The agent read only implementation files (`App.xaml.cs`, `MainWindow.xaml.cs`, `boot.json`) and inferred architecture from code, not from specification.
+
+### 8.3 Root Cause: Code-Driven Inference vs. Theory-Driven Design
+
+The agent's thought process was:
+1. "Test passes → done" (R7 declared fixed)
+2. "Runtime fails → patch code" (proposed boot.gui.json → boot.json)
+3. Never: "Read specification → understand why GUI is a plugin"
+
+`DEVIATION-003.md` already documented the correct dual-mode plugin design (hosted vs standalone). The agent ignored it.
+
+**The real bug:** `MinecraftLauncherGUIPlugin.cs:37` unconditionally creates `new Application()` even when `Application.Current != null` (hosted mode). The fix is to use hosted mode, not to remove the GUI plugin from the pipeline.
+
+### 8.4 Redesigned Readiness Criteria (v4)
+
+| # | Criterion | Evidence Required | Layer |
+|---|-----------|-------------------|-------|
+| R1 | Build passes | `dotnet build` → 0 errors | Build |
+| R2 | Tests pass | `dotnet test` → all pass | Test |
+| R3 | Headless smoke test | Exit code ≠ 2 (critical crash) | Subsystem |
+| R4 | GUI-mode startup | Window handle within 10s | Infrastructure |
+| R5 | GUI-mode lifecycle | Clean exit after window close | Infrastructure |
+| R6 | Self-update path | Graceful fallback without zombie | Subsystem |
+| **R7** | **Primary user journey** | **Clicking Play produces success OR a clear, actionable error** | **Functional** |
+| **R10** | **Theory compliance before architecture** | **Any structural proposal cites COMPOSITUM_SPECIFICATION.md §4.1 and §2.2** | **Process** |
+| R8 | No stale references | `grep` confirms zero stale refs | Static |
+| R9 | Documentation | Failure analysis and audit trail current | Process |
+
+**Without R10, an agent may propose architecturally invalid fixes that compound the failure.**
+
+---
+
+## 5. Lessons Learned
+
+1. **"Build passes" is necessary but not sufficient.** It is a prerequisite for readiness, not a proxy.
+2. **`verify-dir` validates structure, not behavior.** Do not conflate the two.
+3. **High-cost verification is high-value verification.** If it's hard to check, it's probably important.
+4. **Theory must be applied, not cited.** Every claim in every document must be enforceable.
+5. **User intent = operational readiness.** Task completion ≠ user value.
+6. **Headless smoke test ≠ GUI readiness.** Testing the code path the user doesn't use is a false positive generator.
+7. **Methodology must be user-centric, not developer-centric.** The checklist must verify what the user experiences, not what the developer optimizes.
+8. **"Does not crash" ≠ "Works for the user."** Infrastructure tests (window appears, process exits) are necessary but not sufficient. The primary user journey must be verified end-to-end.
+9. **Read theory before architecture.** Code is evidence of implementation; theory is evidence of intent. When code contradicts theory, theory wins. Any structural or architectural proposal MUST cite `COMPOSITUM_SPECIFICATION.md` §4.1 (Component Scope) and §2.2 (Negative Ontology) before execution.

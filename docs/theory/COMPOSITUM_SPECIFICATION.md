@@ -548,6 +548,7 @@ Compositum instantiates INVARIANT_THEORY principles:
 | §3.2 Nomadic Invariant | No host-specific code in any category |
 | §11.5 Agentic Execution | Composition(C) executable by autonomous agents |
 | §12.3 Namespace Correspondence | Category structure reflects filesystem hierarchy |
+| §9 Agentic Architecture Constraint | Theory-first execution before structural changes |
 
 ### §8.2 Meta-Invariance
 
@@ -558,6 +559,46 @@ Compositum instantiates INVARIANT_THEORY principles:
 ∀code ∈ Compositum, ∀tᵢ, tⱼ:
     Valid(code, Context(tᵢ)) → Valid(code, Context(tⱼ))
     where Context(tⱼ) = Evolution(Context(tᵢ), ΔINVARIANT_THEORY)
+```
+
+---
+
+## §9. Agentic Architecture Constraint
+
+### §9.1 Theory-First Execution
+
+**Statement:** Any autonomous agent proposing structural or architectural changes MUST cite `COMPOSITUM_SPECIFICATION.md` §4.1 (Component Scope Invariant) and §2.2 (Negative Ontology) before execution.
+
+**Formalization:**
+```
+∀Agent A, ∀change Δ:
+    Proposes(A, Δ) → Cites(A, §4.1) ∧ Cites(A, §2.2)
+```
+
+**Falsification:** Plan without explicit theory citation referencing §4.1 and §2.2 → Invalid.
+
+### §9.2 Code-Driven Inference Prohibition
+
+**Statement:** Agents MUST NOT infer architecture solely from implementation code when a higher-level specification exists.
+
+**Formalization:**
+```
+∀Agent A:
+    InfersArchitecture(A, code) ∧ ∃Specification(S) →
+    MustRead(A, S) before InfersArchitecture
+```
+
+**Justification (§1.2a Reflexive Measurability):** Code is evidence of implementation; specification is evidence of intent. When code contradicts theory, theory wins.
+
+### §9.3 Deviation Audit Requirement
+
+**Statement:** Before proposing fixes for architectural failures, agents MUST check `docs/deviations/` for existing related deviations.
+
+**Formalization:**
+```
+∀Agent A, ∀bug b:
+    ProposesFix(A, b) →
+    ∃d ∈ Deviations: Related(d, b) → Read(A, d)
 ```
 
 ---

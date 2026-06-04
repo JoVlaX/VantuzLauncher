@@ -18,6 +18,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
     private MainWindow? _mainWindow;
     private GUIProgressReporter? _reporter;
     private Application? _app;
+    private bool _ownsApplication = false;
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
@@ -26,63 +27,90 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuzlauncher");
         Directory.CreateDirectory(workspacePath);
 
-        // Phase 1: Initialize WPF Application (UI thread)
-        var tcs = new TaskCompletionSource<bool>();
+        // Phase 1: Detect hosted vs standalone mode
+        bool isHosted = Application.Current != null;
 
-        var thread = new Thread(() =>
+        if (isHosted)
         {
-            try
+            // Hosted mode: reuse existing Application (VantuzLauncher host)
+            // Per DEVIATION-003: plugin adapts to existing WPF context
+            _app = Application.Current;
+            _ownsApplication = false;
+
+            // Ensure WPF Pack URI resolution targets plugin assembly
+            if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
             {
-                // Per В§11.5 Agentic: explicit initialization
-                _app = new Application();
-                _app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                Application.ResourceAssembly = typeof(MainWindow).Assembly;
+            }
 
-                // DEVIATION-003 RESOLVED: Ensure WPF Pack URI resolution targets plugin assembly
-                if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
-                {
-                    Application.ResourceAssembly = typeof(MainWindow).Assembly;
-                }
-
-                // Create reporter that marshals to UI thread
+            // Initialize on the host's dispatcher thread
+            await _app!.Dispatcher.InvokeAsync(() =>
+            {
                 _reporter = new GUIProgressReporter();
-
-                // Create main window with credential provider capability
                 _mainWindow = new MainWindow(_reporter, workspacePath);
                 _mainWindow.Show();
 
                 // Set capabilities in context for downstream plugins
                 context.Set("gui_reporter", _reporter);
                 context.Set("gui_window", _mainWindow);
-                context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);  // Sync with CredentialCollectionStep.cs:27
+                context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);
                 context.Set("workspace_path", workspacePath);
 
-                // Subscribe to context updates
-                context.Reporter.ReportState("[GUI] Minecraft Launcher initialized");
+                context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (hosted mode)");
+            });
+        }
+        else
+        {
+            // Standalone mode: create new Application on dedicated STA thread
+            _ownsApplication = true;
+            var tcs = new TaskCompletionSource<bool>();
 
-                tcs.SetResult(true);
-
-                // Run message loop
-                _app.Run();
-            }
-            catch (Exception ex)
+            var thread = new Thread(() =>
             {
-                tcs.SetException(ex);
-            }
-        });
+                try
+                {
+                    _app = new Application();
+                    _app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
-        thread.SetApartmentState(ApartmentState.STA);
-        thread.Start();
+                    // DEVIATION-003 RESOLVED: Ensure WPF Pack URI resolution targets plugin assembly
+                    if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
+                    {
+                        Application.ResourceAssembly = typeof(MainWindow).Assembly;
+                    }
 
-        // Wait for initialization
-        await tcs.Task;
-        
+                    _reporter = new GUIProgressReporter();
+                    _mainWindow = new MainWindow(_reporter, workspacePath);
+                    _mainWindow.Show();
+
+                    context.Set("gui_reporter", _reporter);
+                    context.Set("gui_window", _mainWindow);
+                    context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);
+                    context.Set("workspace_path", workspacePath);
+
+                    context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (standalone mode)");
+
+                    tcs.SetResult(true);
+                    _app.Run();
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+
+            await tcs.Task;
+        }
+
         // Phase 2: Wait for pipeline completion signal
         var cts = new CancellationTokenSource();
         if (context.Get<CancellationToken>("cancellation_token") is CancellationToken parentToken)
         {
             parentToken.Register(() => cts.Cancel());
         }
-        
+
         try
         {
             // Keep GUI alive until explicitly closed or pipeline completes
@@ -92,21 +120,26 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
         {
             // Normal shutdown
         }
-        
+
         // Phase 3: Graceful shutdown
         await ShutdownGUIAsync();
-        
+
         return new CommandResult(true);
     }
 
     private async Task ShutdownGUIAsync()
     {
         if (_app == null) return;
-        
+
         await _app.Dispatcher.InvokeAsync(() =>
         {
             _mainWindow?.Close();
-            _app.Shutdown();
+            // Only shutdown Application if we created it (standalone mode)
+            // Hosted mode: never shutdown the host Application
+            if (_ownsApplication)
+            {
+                _app.Shutdown();
+            }
         });
     }
 

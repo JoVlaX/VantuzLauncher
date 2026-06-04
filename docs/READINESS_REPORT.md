@@ -1,6 +1,6 @@
 # Readiness Report — Compositum / VantuzLauncher
 
-**Date:** 2026-06-04T15:40+05:00 (updated after R7 fix — configuration root cause identified and fixed, pending user verification)
+**Date:** 2026-06-04T17:15+05:00 (updated after R7 runtime fix — MinecraftLauncherGUIPlugin hosted mode implemented, pending user verification)
 **Auditor:** Cascade (AI Assistant)
 **Project:** `c:\000\projects\compositum`
 
@@ -9,7 +9,7 @@
 ## Executive Summary
 
 **STATUS: NOT READY — R7 PENDING USER VERIFICATION**  
-Build clean, tests pass, GUI-mode startup and lifecycle verified. **R7 root cause FIXED:** `MainWindow.xaml.cs` was loading `boot.json` (with stale `gameVersion: 1.20.1-forge-47.2.20`) instead of `boot.gui.json` (with `47.3.0`). Fix: load `boot.gui.json`, sync `boot.template.json`. **User must verify clicking Play no longer produces "Cannot find" error.**
+Build clean (0 errors, 0 warnings), tests pass (12/12), GUI-mode startup and lifecycle verified. **R7 runtime fix:** `MinecraftLauncherGUIPlugin.cs` now detects hosted mode (`Application.Current != null`) and reuses the existing WPF Application instead of crashing with "Cannot create more than one instance." Theory hardening: `AGENT_FAILURE_ANALYSIS.md` Section 8 + Lesson #9; `COMPOSITUM_SPECIFICATION.md` §9. **User must verify clicking Play no longer produces any error and pipeline proceeds to version validation.**
 
 | Area | Result | Notes |
 |------|--------|-------|
@@ -17,7 +17,7 @@ Build clean, tests pass, GUI-mode startup and lifecycle verified. **R7 root caus
 | Build (Debug) | PASS | 0 errors, 0 warnings (after terminating zombie VantuzLauncher process) |
 | Deviation Closure | PASS | DEVIATION-001 through DEVIATION-007 all Resolved |
 | Verification Pipeline | PASS | `verify-dir`: exit code 0, all pipeline checks passed |
-| Unit Tests | PASS | 3 test projects, 10 tests, all passing (4 functional tests cover R7 configuration) |
+| Unit Tests | PASS | 3 test projects, 12 tests, all passing (4 functional tests cover R7 configuration) |
 | Completeness Report | PASS | `build_status: "OK"`, `missing_without_deviation: []` |
 | Auto-Fix Orchestrator | PASS | Dry-run completed, report generated |
 | Documentation | PASS | No stale references to `Vantuz.Products` |
@@ -26,7 +26,7 @@ Build clean, tests pass, GUI-mode startup and lifecycle verified. **R7 root caus
 | GUI-Mode Startup (R4) | PASS | `GuiModeProcessTests` confirms window handle appears within 10s |
 | GUI-Mode Lifecycle (R5) | PASS | `GuiModeProcessTests` confirms process exits cleanly after `CloseMainWindow()` |
 | Self-Update Path (R6) | PASS | `ApiReaderQuery` fallback works; `UpdateCommand` Abort no longer hides window |
-| **Primary User Journey (R7)** | **FIXED — PENDING USER VERIFICATION** | **Root cause: wrong manifest loaded. Fix: `MainWindow.xaml.cs` → `boot.gui.json`, `boot.template.json` synced. User must confirm by clicking Play.** |
+| **Primary User Journey (R7)** | **FIXED — PENDING USER VERIFICATION** | **Root cause: `MinecraftLauncherGUIPlugin` unconditionally created `new Application()` inside already-running WPF host. Fix: hosted mode detection (`Application.Current != null`) reuses existing Application. Theory: AGENT_FAILURE_ANALYSIS.md §8 + Lesson #9; COMPOSITUM_SPECIFICATION.md §9. User must confirm by clicking Play.** |
 
 ---
 
@@ -266,18 +266,65 @@ When the user clicked Play, the pipeline loaded `boot.json` → `Game.VersionVal
 - `GuiModeFunctionalTests.GeneratedBootJson_MatchesGuiManifest_GameVersion` → PASS (would have caught the mismatch)
 - `GuiModeFunctionalTests.MainWindow_Loads_GuiManifest_NotTemplate` → PASS (verifies the code fix)
 
+### Pending (Configuration Fix)
+
+~~User must launch `VantuzLauncher.exe`, click Play, and confirm the "Cannot find" error is resolved.~~  
+**New blocker discovered:** `Node GUI.MinecraftLauncher error: Нельзя создать более одного экземпляра System.Windows.Application`. See "R7 Runtime Fix" below.
+
+---
+
+## R7 Runtime Fix: "Cannot create more than one instance of System.Windows.Application"
+
+### Root Cause
+
+`MinecraftLauncherGUIPlugin.cs:37` unconditionally created `new Application()` on a new STA thread:
+
+```csharp
+_app = new Application();
+```
+
+`App.xaml.cs` (VantuzLauncher host) had already created a WPF `Application` and shown `MainWindow`. WPF restricts one `Application` instance per AppDomain. When the pipeline reached `GUI.MinecraftLauncher` (step 1 of `boot.gui.json`), the plugin crashed immediately with:
+
+> **"Нельзя создать более одного экземпляра System.Windows.Application в одном AppDomain."**
+
+The pipeline aborted before ever reaching `Game.VersionValidatorQuery`.
+
+**Important:** This error masked the configuration fix. The user never saw "Cannot find 47.2.20" because the pipeline crashed on step 1.
+
+### Fix Applied
+
+| File | Change |
+|------|--------|
+| `MinecraftLauncherGUIPlugin.cs` | Hosted mode: detect `Application.Current != null`, reuse existing Application via `Dispatcher.InvokeAsync`. Standalone mode: preserved (new STA thread + `new Application()`). Safe shutdown: only call `_app.Shutdown()` in standalone mode. |
+| `AGENT_FAILURE_ANALYSIS.md` | Section 8 (Fourth-Order Failure: Theory Blindness) + Lesson #9 |
+| `COMPOSITUM_SPECIFICATION.md` | §9 Agentic Architecture Constraint (Theory-First Execution, Code-Driven Inference Prohibition, Deviation Audit Requirement) |
+
+### Theory Hardening
+
+- **AGENT_FAILURE_ANALYSIS.md Lesson #9:** "Read theory before architecture. Code is evidence of implementation; theory is evidence of intent. When code contradicts theory, theory wins."
+- **COMPOSITUM_SPECIFICATION.md §9.1:** Any structural proposal MUST cite §4.1 (Component Scope) and §2.2 (Negative Ontology) before execution.
+- **COMPOSITUM_SPECIFICATION.md §9.2:** Agents MUST NOT infer architecture solely from code when a higher-level specification exists.
+
+### Verification
+
+- `dotnet build VantuzLauncher.sln -c Release` → 0 errors, 0 warnings
+- `dotnet test` → 12/12 tests pass
+- `GuiModeProcessTests` → PASS (window handle, clean exit)
+- `GuiModeFunctionalTests` → PASS (manifest consistency, version format)
+
 ### Pending
 
-**User must launch `VantuzLauncher.exe`, click Play, and confirm the "Cannot find" error is resolved.** Until this confirmation, S13 remains `[ ]`.
+**User must launch `VantuzLauncher.exe`, click Play, and confirm neither "Application instance" nor "Cannot find" error occurs.** The pipeline should proceed past `GUI.MinecraftLauncher` → `Auth.YggdrasilCommand` → `Game.VersionValidatorQuery`. Until this confirmation, S13 remains `[ ]`.
 
 ---
 
 ## Recommendations
 
 1. **Immediate:** ~~Fix "Cannot find 1.20.1-forge-47.2.20"~~ **FIXED** — Root cause was `MainWindow.xaml.cs` loading `boot.json` instead of `boot.gui.json`. Manifests synced, `GuiModeFunctionalTests` added.
-2. **Short-term:** User verifies clicking Play works with the fixed manifest. Add deeper end-to-end pipeline execution test if user confirms R7 passes.
-3. **Medium-term:** Evaluate Obfuscar 3.x or ConfuserEx for .NET 8+ release obfuscation.
-4. **Long-term:** Monitor CmlLib.Core changelog for ForgeInstaller API restoration.
+2. **Immediate:** ~~Fix "Cannot create more than one instance of System.Windows.Application"~~ **FIXED** — Root cause was `MinecraftLauncherGUIPlugin` unconditionally creating `new Application()` in hosted mode. Fix: hosted mode detection (`Application.Current != null`), `Dispatcher.InvokeAsync` initialization, safe shutdown. Theory: AGENT_FAILURE_ANALYSIS.md §8 + Lesson #9; COMPOSITUM_SPECIFICATION.md §9.
+3. **Short-term:** User verifies clicking Play works. Pipeline should proceed past `GUI.MinecraftLauncher` → `Auth.YggdrasilCommand` → `Game.VersionValidatorQuery`. Add deeper end-to-end pipeline execution test if user confirms R7 passes.
+4. **Medium-term:** Evaluate Obfuscar 3.x or ConfuserEx for .NET 8+ release obfuscation.
+5. **Long-term:** Monitor CmlLib.Core changelog for ForgeInstaller API restoration.
 
 ---
 
@@ -286,12 +333,12 @@ When the user clicked Play, the pipeline loaded `boot.json` → `Game.VersionVal
 | Role | Status |
 |------|--------|
 | Build Engineer | APPROVED |
-| QA / Verification | **PENDING USER CONFIRMATION** — R7 configuration fix applied (wrong manifest loaded). User must verify clicking Play works before approval. |
+| QA / Verification | **PENDING USER CONFIRMATION** — R7 runtime fix applied (`MinecraftLauncherGUIPlugin` hosted mode). User must verify clicking Play works before approval. |
 | Technical Debt Review | APPROVED |
 | Documentation | APPROVED |
 
-**Overall Readiness:** **AMBER — CONFIGURATION-READY, PENDING USER VERIFICATION**  
-Previous "READY" claims (2026-06-03, 2026-06-04 13:50, 2026-06-04 14:45) are all **RETRACTED**. S1-S12 pass. **R7 root cause identified and fixed** (`MainWindow.xaml.cs` → `boot.gui.json`). The application builds, starts, exits cleanly, and loads the correct manifest. **Empirical confirmation required:** user must click Play and confirm no "Cannot find" error.
+**Overall Readiness:** **AMBER — RUNTIME-FIXED, PENDING USER VERIFICATION**  
+Previous "READY" claims (2026-06-03, 2026-06-04 13:50, 2026-06-04 14:45, 2026-06-04 15:40) are all **RETRACTED**. S1-S12 pass. **R7 runtime root cause identified and fixed** (`MinecraftLauncherGUIPlugin` hosted mode, theory hardening in AGENT_FAILURE_ANALYSIS.md §8 + COMPOSITUM_SPECIFICATION.md §9). The application builds, starts, exits cleanly, loads the correct manifest, and the GUI plugin no longer crashes on Application instance conflict. **Empirical confirmation required:** user must click Play and confirm pipeline proceeds past GUI initialization.
 
 ---
 
@@ -307,6 +354,8 @@ The initial readiness audit (2026-06-03) falsely claimed "READY" based solely on
 
 **Third lesson:** `Infrastructure test ≠ Functional correctness`. S9-S11 verified window creation, process exit, and API fallback — but none of these verify that clicking Play launches Minecraft. See AGENT_FAILURE_ANALYSIS.md Section 7.
 
+**Fourth lesson:** `Theory must precede architecture`. The agent proposed embedding GUI in Product (`MainWindow.xaml.cs`) without reading `COMPOSITUM_SPECIFICATION.md` §4.1, violating Compositional Being. Code is evidence of implementation; theory is evidence of intent. See AGENT_FAILURE_ANALYSIS.md Section 8.
+
 ---
 
 ## Self-Verification Checklist (§1.2a Reflexive Measurability)
@@ -314,7 +363,7 @@ The initial readiness audit (2026-06-03) falsely claimed "READY" based solely on
 | # | Check | Evidence | Status |
 |---|-------|----------|--------|
 | S1 | Build passes | `dotnet build -c Release` → 0 errors | [x] |
-| S2 | Tests pass | `dotnet test -c Release` → 10/10 passed | [x] |
+| S2 | Tests pass | `dotnet test -c Release` → 12/12 passed | [x] |
 | S3 | Runtime smoke test passes | `VantuzLauncher.exe --headless` → exit code ≠ 2 | [x] |
 | S4 | No stale references | `grep -r "Vantuz.Products"` → 0 matches in active code | [x] |
 | S5 | Failure analysis documented | `docs/AGENT_FAILURE_ANALYSIS.md` exists and passes self-check | [x] |
@@ -325,6 +374,6 @@ The initial readiness audit (2026-06-03) falsely claimed "READY" based solely on
 | S10 | GUI-mode lifecycle | `GuiModeProcessTests.GuiMode_ProcessKilled_NoZombieRemains` → PASS (infrastructure only) | [x] |
 | S11 | Self-update path | `ApiReaderQuery` fallback + `UpdateCommand` Abort handling + window visibility fix | [x] |
 | S12 | Primary user journey — configuration | `GuiModeFunctionalTests` confirm manifest consistency, version format, `boot.gui.json` loaded | [x] |
-| **S13** | **Primary user journey — runtime** | **PENDING USER VERIFICATION — user must click Play and confirm no "Cannot find" error** | **[ ]** |
+| **S13** | **Primary user journey — runtime** | **PENDING USER VERIFICATION — user must click Play and confirm no "Application instance" or "Cannot find" error** | **[ ]** |
 
 **Result:** S1-S12 pass. **S13 (R7 runtime) is PENDING USER VERIFICATION.** The project is **BUILD-READY, INFRASTRUCTURE-READY, CONFIGURATION-READY** but requires **empirical user confirmation** before claiming USER-READY.
