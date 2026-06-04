@@ -15,7 +15,7 @@
     "Vantuz.Plugins.OS.dll": "",
     "Vantuz.Plugins.Game.dll": "",
     "Vantuz.Plugins.Minecraft.dll": "",
-    "Vantuz.Products.MinecraftLauncher.GUI.dll": ""
+    "Vantuz.Plugins.GUI.MinecraftLauncher.dll": ""
   },
   "pipeline": [
     {

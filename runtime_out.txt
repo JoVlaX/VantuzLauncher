@@ -1,0 +1,9 @@
+[06:24:57] Initializing VantuzEngine...
+[06:24:58] [WARN] Node Auth.YggdrasilCommand error: The given key was not present in the dictionary.
+[06:24:58] Проверка версии 1.20.1-forge-47.3.0 перед установкой...
+
+=== TEST RESULT ===
+Status: failed
+Duration: 0,77s
+Error: Game provider 'Minecraft' not found
+Output: C:\000\projects\compositum\bin\Release\net8.0-windows\test-result.json

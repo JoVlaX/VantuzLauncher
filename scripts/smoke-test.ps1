@@ -58,7 +58,7 @@ $allPassed = (Test-FileExists "$pluginsDir\Vantuz.Plugins.Net.dll" "Net Plugin")
 $allPassed = (Test-FileExists "$pluginsDir\Vantuz.Plugins.OS.dll" "OS Plugin") -and $allPassed
 $allPassed = (Test-FileExists "$pluginsDir\Vantuz.Plugins.Game.dll" "Game Plugin") -and $allPassed
 $allPassed = (Test-FileExists "$pluginsDir\Vantuz.Plugins.Minecraft.dll" "Minecraft Plugin") -and $allPassed
-$allPassed = (Test-FileExists "$pluginsDir\Vantuz.Products.MinecraftLauncher.GUI.dll" "GUI Plugin") -and $allPassed
+$allPassed = (Test-FileExists "$pluginsDir\Vantuz.Plugins.GUI.MinecraftLauncher.dll" "GUI Plugin") -and $allPassed
 Write-Host
 
 # Test 4: Dev markers (optional in production)
