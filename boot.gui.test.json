@@ -1,0 +1,73 @@
+{
+  "_description": "GUI test manifest with deterministic stubs for automated E2E testing per INVARIANT_THEORY.md §1.2",
+  "variables": {
+    "localVersion": "2.0-test",
+    "gameProvider": "Minecraft",
+    "gameVersion": "1.20.1-forge-47.3.0",
+    "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
+    "installDir": "{{mcDir}}\\.minecraft",
+    "operationTimeout": "00:05:00"
+  },
+  "plugins": {
+    "Vantuz.Plugins.GUI.MinecraftLauncher.dll": "",
+    "Vantuz.Plugins.Test.dll": "",
+    "Vantuz.Plugins.Auth.dll": "",
+    "Vantuz.Plugins.Net.dll": "",
+    "Vantuz.Plugins.OS.dll": "",
+    "Vantuz.Plugins.Game.dll": "",
+    "Vantuz.Plugins.Minecraft.dll": ""
+  },
+  "pipeline": [
+    {
+      "_comment": "Phase 1: Initialize GUI and provide ICredentialProvider capability",
+      "pluginName": "GUI.MinecraftLauncher",
+      "config": {}
+    },
+    {
+      "_comment": "Phase 2: Collect username/password from user via GUI (blocks until user submits)",
+      "pluginName": "GUI.CredentialCollection",
+      "config": {}
+    },
+    {
+      "_comment": "Phase 3: Authentication with deterministic test plugin (no network per INVARIANT_THEORY.md §1.2)",
+      "pluginName": "Auth.TestAuthCommand",
+      "config": {
+        "launcherVersion": "2.0-test"
+      }
+    },
+    {
+      "_comment": "Phase 4: Register Minecraft game provider for universal game plugins",
+      "pluginName": "Game.MinecraftProvider",
+      "config": {}
+    },
+    {
+      "_comment": "Phase 5: Version validation",
+      "pluginName": "Game.VersionValidatorQuery",
+      "config": {
+        "provider": "Minecraft",
+        "version": "1.20.1-forge-47.3.0",
+        "installDir": "{{installDir}}"
+      }
+    },
+    {
+      "_comment": "Phase 6: Game installation (dry-run in test mode)",
+      "pluginName": "Game.InstallerCommand",
+      "config": {
+        "provider": "Minecraft",
+        "version": "1.20.1-forge-47.3.0",
+        "installDir": "{{installDir}}",
+        "dryRun": true
+      }
+    },
+    {
+      "_comment": "Phase 7: Launch (dry-run in test mode — no actual game execution)",
+      "pluginName": "Game.LaunchCommand",
+      "config": {
+        "provider": "Minecraft",
+        "version": "1.20.1-forge-47.3.0",
+        "installDir": "{{installDir}}",
+        "dryRun": true
+      }
+    }
+  ]
+}

@@ -54,14 +54,18 @@
                 <!-- Username -->
                 <TextBlock Text="ЛОГИН" Foreground="#A1A1AA" FontSize="11" Margin="0,0,0,8" FontWeight="SemiBold"/>
                 <Border Background="#18181B" CornerRadius="8" BorderBrush="#27272A" BorderThickness="1" Margin="0,0,0,20" Height="48">
-                    <TextBox x:Name="UsernameBox" Background="Transparent" Foreground="#F4F4F5" BorderThickness="0"
+                    <TextBox x:Name="UsernameBox"
+                             AutomationProperties.AutomationId="RootUsernameBox"
+                             Background="Transparent" Foreground="#F4F4F5" BorderThickness="0"
                              Padding="14,12" FontSize="15" VerticalContentAlignment="Center" CaretBrush="#F4F4F5"/>
                 </Border>
 
                 <!-- Password -->
                 <TextBlock Text="ПАРОЛЬ" Foreground="#A1A1AA" FontSize="11" Margin="0,0,0,8" FontWeight="SemiBold"/>
                 <Border Background="#18181B" CornerRadius="8" BorderBrush="#27272A" BorderThickness="1" Margin="0,0,0,15" Height="48">
-                    <PasswordBox x:Name="PasswordBox" Background="Transparent" Foreground="#F4F4F5" BorderThickness="0"
+                    <PasswordBox x:Name="PasswordBox"
+                                 AutomationProperties.AutomationId="RootPasswordBox"
+                                 Background="Transparent" Foreground="#F4F4F5" BorderThickness="0"
                                  Padding="14,12" FontSize="15" VerticalContentAlignment="Center" CaretBrush="#F4F4F5"/>
                 </Border>
 
@@ -94,7 +98,9 @@
                 </CheckBox>
 
                 <!-- Play Button -->
-                <Button x:Name="BtnPlay" Height="52" Cursor="Hand" Click="BtnPlay_Click">
+                <Button x:Name="BtnPlay"
+                        AutomationProperties.AutomationId="RootBtnPlay"
+                        Height="52" Cursor="Hand" Click="BtnPlay_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="#F4F4F5" CornerRadius="8" x:Name="btnBorder">

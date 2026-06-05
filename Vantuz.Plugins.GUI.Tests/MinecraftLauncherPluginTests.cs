@@ -26,9 +26,9 @@ public class MinecraftLauncherPluginTests
     {
         // Arrange: ensure NO Application.Current (standalone mode simulation)
         // If another test leaked an Application, shut it down first.
-        if (Application.Current != null)
+        if (System.Windows.Application.Current != null)
         {
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
             await Task.Delay(300);
         }
 

@@ -34,6 +34,17 @@ public class GameLaunchCommand : ICommandPlugin
 
             installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
+            // Check dryRun mode per INVARIANT_THEORY.md §1.2 Measurability - test must not mutate state
+            bool dryRun = stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean();
+            if (dryRun)
+            {
+                context.Reporter.ReportState($"[DRY RUN] Launch of {versionName} would occur here. No process started.");
+                context.Set("gameCommand", "dry-run");
+                context.Set("gameArgs", "--dry-run");
+                context.Set("gameWorkDir", installDir);
+                return new CommandResult(true);
+            }
+
             // Read launch options from context (set by Auth or other plugins)
             string playerName = context.Get<string>("playerName") ?? "Player";
             string? accessToken = context.Get<string>("accessToken");
