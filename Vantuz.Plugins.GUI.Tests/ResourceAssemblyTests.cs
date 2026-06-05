@@ -8,17 +8,18 @@ public class ResourceAssemblyTests
     [Fact]
     public void PluginAssembly_ContainsMainWindowType()
     {
-        // Per DEVIATION-003: plugin assembly must expose MainWindow for WPF Pack URI resolution
+        // Per DEVIATION-003: plugin assembly must expose MainWindow for GUI resolution
         var pluginAssembly = typeof(MainWindow).Assembly;
         Assert.NotNull(pluginAssembly.GetType("Vantuz.Plugins.GUI.MinecraftLauncher.MainWindow"));
     }
 
     [Fact]
-    public void PluginAssembly_HasBamlResources()
+    public void PluginAssembly_ReferencesAvalonia()
     {
-        // Verify XAML resources are embedded in the plugin assembly (required for Pack URI)
+        // Avalonia plugin must reference Avalonia assemblies
         var pluginAssembly = typeof(MainWindow).Assembly;
-        var resourceNames = pluginAssembly.GetManifestResourceNames();
-        Assert.Contains(resourceNames, r => r.EndsWith(".g.resources"));
+        var refs = pluginAssembly.GetReferencedAssemblies().Select(a => a.Name).ToList();
+        Assert.Contains("Avalonia.Controls", refs);
+        Assert.Contains("Avalonia.Base", refs);
     }
 }

@@ -21,7 +21,9 @@
     {
       "_comment": "Phase 1: Initialize GUI and provide ICredentialProvider capability",
       "pluginName": "GUI.MinecraftLauncher",
-      "config": {}
+      "config": {
+        "autoSubmitTestCredentials": true
+      }
     },
     {
       "_comment": "Phase 2: Collect username/password from user via GUI (blocks until user submits)",

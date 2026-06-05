@@ -3,11 +3,17 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Vantuz.Plugins.GUI.MinecraftLauncher</AssemblyName>
     <RootNamespace>Vantuz.Plugins.GUI.MinecraftLauncher</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.10" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.10" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Vantuz.Core\Vantuz.Core.csproj" />

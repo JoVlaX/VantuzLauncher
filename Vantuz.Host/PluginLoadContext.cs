@@ -27,6 +27,16 @@ namespace Vantuz.Host
             return LoadFromStream(stream);
         }
 
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        {
+            string? libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (libraryPath != null)
+            {
+                return LoadUnmanagedDllFromPath(libraryPath);
+            }
+            return IntPtr.Zero;
+        }
+
         protected override Assembly? Load(AssemblyName assemblyName) 
         { 
             if (assemblyName.Name == null) return null; 

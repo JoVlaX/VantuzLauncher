@@ -50,7 +50,7 @@ public static class HeadlessRunner
 
         try
         {
-            string mcDir = App.WorkspacePath;
+            string mcDir = options.WorkspacePath ?? AppDomain.CurrentDomain.BaseDirectory;
             string configPath = Path.Combine(mcDir, "launcher_config.json");
             string bootJsonPath = !string.IsNullOrEmpty(options.BootPath) 
                 ? options.BootPath 

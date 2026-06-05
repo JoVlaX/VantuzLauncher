@@ -316,11 +316,24 @@ public static class PluginNameVerifier
         "Microsoft.Win32"
     };
 
+    private static readonly string[] ThirdPartyPInvokeWhitelist = new[]
+    {
+        "Avalonia", "SkiaSharp", "HarfBuzzSharp", "Tmds.DBus",
+        "Mono.Cecil", "ICSharpCode.SharpZipLib", "SevenZip",
+        "CmlLib.Core", "CmlLib.Core.Commons",
+        "Vantuz.Core", "Vantuz.Host" // Core/Host are not plugins; P/Invoke in them is architecture-level
+    };
+
     private static List<string> VerifyNomadic(string pluginsDir)
     {
         var violations = new List<string>();
         foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
         {
+            var dllName = Path.GetFileNameWithoutExtension(dllPath);
+            // Skip third-party dependencies that legitimately use P/Invoke (GUI frameworks, compression, etc.)
+            if (ThirdPartyPInvokeWhitelist.Any(w => dllName.StartsWith(w, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
             try
             {
                 using var asm = AssemblyDefinition.ReadAssembly(dllPath, new ReaderParameters { ReadWrite = false });

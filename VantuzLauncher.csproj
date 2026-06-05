@@ -5,10 +5,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
     <SelfContained>false</SelfContained>
-    <!-- Workaround: SDK duplicates TargetFrameworkAttribute for WPF net8.0-windows (CS0579) -->
-    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
   </PropertyGroup>
 
   <ItemGroup>

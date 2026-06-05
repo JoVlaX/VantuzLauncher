@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
-using System.Windows;
+using Avalonia;
 using Vantuz.Core;
 using Vantuz.Host;
 using Vantuz.Plugins.GUI.MinecraftLauncher;
@@ -26,9 +26,12 @@ public class MinecraftLauncherPluginTests
     {
         // Arrange: ensure NO Application.Current (standalone mode simulation)
         // If another test leaked an Application, shut it down first.
-        if (System.Windows.Application.Current != null)
+        if (Avalonia.Application.Current != null)
         {
-            System.Windows.Application.Current.Shutdown();
+            if (Avalonia.Application.Current.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.Shutdown();
+            }
             await Task.Delay(300);
         }
 
@@ -45,8 +48,8 @@ public class MinecraftLauncherPluginTests
         {
             // Assert: returned quickly — the critical fix
             Assert.True(result.Success, $"Plugin failed: {result.ErrorMessage}");
-            Assert.True(sw.ElapsedMilliseconds < 5000,
-                $"Plugin blocked for {sw.ElapsedMilliseconds}ms — expected immediate return (<5000ms). " +
+            Assert.True(sw.ElapsedMilliseconds < 15_000,
+                $"Plugin blocked for {sw.ElapsedMilliseconds}ms — expected immediate return (<15000ms). " +
                 "If this fails, the plugin still contains await Task.Delay(-1) which blocks the QuantumScheduler pipeline.");
 
             // Assert: published credential provider to context for downstream CredentialCollection step

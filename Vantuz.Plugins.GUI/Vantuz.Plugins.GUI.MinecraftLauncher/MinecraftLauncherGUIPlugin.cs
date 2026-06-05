@@ -1,7 +1,9 @@
 ﻿using System.IO;
 using System.Text.Json;
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using Vantuz.Core;
 using Vantuz.Host;
 
@@ -17,48 +19,29 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
 
     private MainWindow? _mainWindow;
     private GUIProgressReporter? _reporter;
-    private Application? _app;
+    private Avalonia.Application? _app;
     private bool _ownsApplication = false;
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
-        // Extract workspace path from context (provided by Host or boot manifest)
-        string workspacePath = context.Get<string>("workspace_path") ?? 
+        string workspacePath = context.Get<string>("workspace_path") ??
                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".vantuzlauncher");
         Directory.CreateDirectory(workspacePath);
 
-        // Phase 1: Detect hosted vs standalone mode
-        bool isHosted = Application.Current != null;
+        bool autoSubmit = stepConfig.TryGetProperty("autoSubmitTestCredentials", out var autoSubmitProp) && autoSubmitProp.GetBoolean();
+        bool isHosted = Avalonia.Application.Current != null;
 
         if (isHosted)
         {
-            // Hosted mode: reuse existing Application (VantuzLauncher host)
-            // Per DEVIATION-003: plugin adapts to existing WPF context
-            _app = Application.Current;
+            _app = Avalonia.Application.Current;
             _ownsApplication = false;
 
-            // Ensure WPF Pack URI resolution targets plugin assembly
-            if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
-            {
-                try
-                {
-                    Application.ResourceAssembly = typeof(MainWindow).Assembly;
-                }
-                catch (InvalidOperationException)
-                {
-                    // Host has already pinned ResourceAssembly; resources may still
-                    // resolve if host assembly contains them. Per DEVIATION-003.
-                }
-            }
-
-            // Initialize on the host's dispatcher thread
-            await _app!.Dispatcher.InvokeAsync(() =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 _reporter = new GUIProgressReporter();
-                _mainWindow = new MainWindow(_reporter, workspacePath);
+                _mainWindow = new MainWindow(_reporter, workspacePath, autoSubmit);
                 _mainWindow.Show();
 
-                // Set capabilities in context for downstream plugins
                 context.Set("gui_reporter", _reporter);
                 context.Set("gui_window", _mainWindow);
                 context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);
@@ -69,43 +52,18 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
         }
         else
         {
-            // Standalone mode: create new Application on dedicated STA thread
             _ownsApplication = true;
             var tcs = new TaskCompletionSource<bool>();
+            _reporter = new GUIProgressReporter();
 
             var thread = new Thread(() =>
             {
                 try
                 {
-                    _app = new Application();
-                    _app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-
-                    // DEVIATION-003 RESOLVED: Ensure WPF Pack URI resolution targets plugin assembly
-                    if (Application.ResourceAssembly != typeof(MainWindow).Assembly)
-                    {
-                        try
-                        {
-                            Application.ResourceAssembly = typeof(MainWindow).Assembly;
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            // Test framework or host has already pinned ResourceAssembly
-                        }
-                    }
-
-                    _reporter = new GUIProgressReporter();
-                    _mainWindow = new MainWindow(_reporter, workspacePath);
-                    _mainWindow.Show();
-
-                    context.Set("gui_reporter", _reporter);
-                    context.Set("gui_window", _mainWindow);
-                    context.Set("gui.credential_provider", (ICredentialProvider)_mainWindow);
-                    context.Set("workspace_path", workspacePath);
-
-                    context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (standalone mode)");
-
-                    tcs.SetResult(true);
-                    _app.Run();
+                    AppBuilder.Configure(() => new PluginApp(_reporter, workspacePath, context, tcs, autoSubmit))
+                        .UsePlatformDetect()
+                        .LogToTrace()
+                        .StartWithClassicDesktopLifetime(Array.Empty<string>());
                 }
                 catch (Exception ex)
                 {
@@ -119,26 +77,23 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
             await tcs.Task;
         }
 
-        // Phase 2: Return immediately — GUI stays alive via Application.Current (hosted)
-        // or dedicated STA thread (standalone). Pipeline proceeds to downstream steps.
         context.Reporter.ReportState("[GUI] Minecraft Launcher initialized and running");
         return new CommandResult(true);
     }
 
     private async Task ShutdownGUIAsync()
     {
-        if (_app == null) return;
-
-        await _app.Dispatcher.InvokeAsync(() =>
+        if (_ownsApplication)
         {
-            _mainWindow?.Close();
-            // Only shutdown Application if we created it (standalone mode)
-            // Hosted mode: never shutdown the host Application
-            if (_ownsApplication)
+            if (_app?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                _app.Shutdown();
+                await Dispatcher.UIThread.InvokeAsync(() => desktop.Shutdown());
             }
-        });
+        }
+        else if (_mainWindow != null)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => _mainWindow.Close());
+        }
     }
 
     public ValueTask DisposeAsync()
@@ -148,8 +103,49 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
     }
 }
 
+public class PluginApp : Avalonia.Application
+{
+    private readonly GUIProgressReporter _reporter;
+    private readonly string _workspacePath;
+    private readonly CommandContext _context;
+    private readonly TaskCompletionSource<bool> _tcs;
+
+    private readonly bool _autoSubmit;
+
+    public PluginApp(GUIProgressReporter reporter, string workspacePath, CommandContext context, TaskCompletionSource<bool> tcs, bool autoSubmitTestCredentials = false)
+    {
+        _reporter = reporter;
+        _workspacePath = workspacePath;
+        _context = context;
+        _tcs = tcs;
+        _autoSubmit = autoSubmitTestCredentials;
+        Styles.Add(new Avalonia.Themes.Fluent.FluentTheme());
+    }
+
+    public override void OnFrameworkInitializationCompleted()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            var window = new MainWindow(_reporter, _workspacePath, _autoSubmit);
+            desktop.MainWindow = window;
+            window.Show();
+            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            _context.Set("gui_reporter", _reporter);
+            _context.Set("gui_window", window);
+            _context.Set("gui.credential_provider", (ICredentialProvider)window);
+            _context.Set("workspace_path", _workspacePath);
+
+            _context.Reporter.ReportState("[GUI] Minecraft Launcher initialized (standalone mode)");
+
+            _tcs.SetResult(true);
+        }
+        base.OnFrameworkInitializationCompleted();
+    }
+}
+
 /// <summary>
-/// Status reporter that marshals updates to WPF UI thread.
+/// Status reporter that marshals updates to UI thread via SynchronizationContext.
 /// Per В§2.2 CQRS: separates UI updates from business logic.
 /// </summary>
 public class GUIProgressReporter : IStatusReporter

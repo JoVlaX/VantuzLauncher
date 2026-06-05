@@ -9,6 +9,8 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
+  <!-- UseWPF is required here only for System.Windows.Automation (UIAutomationClient).
+       The Product itself contains NO WPF. Per COMPOSITUM_SPECIFICATION.md §4.1. -->
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
