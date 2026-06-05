@@ -82,16 +82,23 @@ class Program
         if (!result.Success)
         {
             string error = result.ErrorMessage ?? "Unknown error";
-            string msg = $"Pipeline failed: {error}";
-            Console.Error.WriteLine(msg);
-            // Surface to user — WinExe hides console
-            MessageBoxW(0, msg, "Vantuz Launcher — Ошибка", MB_OK | MB_ICONERROR);
-            // Also persist to crash log for diagnostics
+            string detailedMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Pipeline failed: {error}";
+            Console.Error.WriteLine(detailedMsg);
+
+            // Persist to crash log for diagnostics first
             try
             {
-                File.AppendAllText(crashLogPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}\n");
+                File.AppendAllText(crashLogPath, detailedMsg + "\n");
             }
             catch { }
+
+            // Surface to user — WinExe hides console, so use Win32 MessageBox
+            // Keep message user-friendly and actionable
+            string userFriendly = $"Ошибка запуска:\n{error}\n\nПодробности записаны в:\n{crashLogPath}";
+            MessageBoxW(0, userFriendly, "Vantuz Launcher — Ошибка", MB_OK | MB_ICONERROR);
+
+            // Give the dialog a moment to render before the process exits
+            await Task.Delay(100);
             Environment.Exit(1);
         }
 

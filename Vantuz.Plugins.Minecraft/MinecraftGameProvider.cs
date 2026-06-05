@@ -9,6 +9,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
+using CmlLib.Core.Installer.Forge;
+using CmlLib.Core.Installers;
 using CmlLib.Core.ProcessBuilder;
 using Vantuz.Core;
 
@@ -53,13 +55,31 @@ public class MinecraftGameProvider : IGameProvider
             };
 
             reporter.ReportState($"Installing Minecraft {version}...");
-            await launcher.InstallAsync(version);
+
+            if (IsForgeVersion(version))
+            {
+                reporter.ReportState($"Обнаружена Forge-версия {version}. Установка Forge...");
+                var (mcVersion, forgeVersion) = ParseForgeVersion(version);
+                var forgeInstaller = new ForgeInstaller(launcher);
+                await forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
+                {
+                    FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+                    {
+                        reporter.ReportProgress($"Установка Forge {forgeVersion}", args.ProgressedTasks / (double)args.TotalTasks * 100);
+                    }),
+                    SkipIfAlreadyInstalled = true
+                });
+            }
+            else
+            {
+                await launcher.InstallAsync(version);
+            }
             
             return new InstallResult(true);
         }
         catch (Exception ex)
         {
-            return new InstallResult(false, ex.Message);
+            return new InstallResult(false, $"Ошибка установки {version}: {ex.Message}");
         }
     }
 
@@ -113,6 +133,37 @@ public class MinecraftGameProvider : IGameProvider
             process.StartInfo.Arguments,
             process.StartInfo.WorkingDirectory
         );
+    }
+
+    private static bool IsForgeVersion(string version)
+    {
+        return version.Contains("forge", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Parses a combined Forge version string like "1.20.1-forge-47.3.0"
+    /// into ("1.20.1", "47.3.0").
+    /// </summary>
+    private static (string McVersion, string ForgeVersion) ParseForgeVersion(string version)
+    {
+        // Expected format: {mcVersion}-forge-{forgeVersion}
+        var idx = version.IndexOf("-forge-", StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+        {
+            var mcVersion = version.Substring(0, idx);
+            var forgeVersion = version.Substring(idx + "-forge-".Length);
+            return (mcVersion, forgeVersion);
+        }
+
+        // Fallback: try splitting by "-"
+        var allParts = version.Split('-');
+        if (allParts.Length >= 3)
+        {
+            // e.g. "1.20.1-forge-47.3.0" -> mc="1.20.1", forge="47.3.0"
+            return (allParts[0], string.Join("-", allParts.Skip(2)));
+        }
+
+        throw new InvalidOperationException($"Невозможно разобрать Forge-версию из строки: {version}");
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
