@@ -47,14 +47,20 @@ public class ExecuteCommand : ICommandPlugin
             CreateNoWindow = true 
         }; 
  
-        using var process = new Process { StartInfo = startInfo }; 
- 
-        // Перенаправляем вывод процесса в наш UI через Reporter 
-        process.OutputDataReceived += (sender, e) => { 
-            if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[OUT] {e.Data}"); 
-        }; 
-        process.ErrorDataReceived += (sender, e) => { 
-            if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[ERR] {e.Data}"); 
+        using var process = new Process { StartInfo = startInfo };
+
+        var stderrBuilder = new System.Text.StringBuilder();
+
+        // Перенаправляем вывод процесса в наш UI через Reporter
+        process.OutputDataReceived += (sender, e) => {
+            if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[OUT] {e.Data}");
+        };
+        process.ErrorDataReceived += (sender, e) => {
+            if (!string.IsNullOrWhiteSpace(e.Data))
+            {
+                context.Reporter.ReportState($"[ERR] {e.Data}");
+                stderrBuilder.AppendLine(e.Data);
+            }
         }; 
  
         try 
@@ -63,24 +69,32 @@ public class ExecuteCommand : ICommandPlugin
             process.BeginOutputReadLine(); 
             process.BeginErrorReadLine(); 
  
-            if (waitForExit) 
-            { 
-                await process.WaitForExitAsync(context.CancellationToken); 
-                 
+            if (waitForExit)
+            {
+                await process.WaitForExitAsync(context.CancellationToken);
+
                 if (process.ExitCode != 0)
                 {
-                    return new CommandResult(false, $"Процесс {Path.GetFileName(fileName)} завершился с ошибкой (ExitCode: {process.ExitCode})");
-                } 
-            } 
-            else 
-            { 
-                // Если мы не ждем завершения (например, запуск самой игры), 
-                // просто даем процессу немного времени на старт перед тем, как отпустить конвейер 
-                await Task.Delay(2000, context.CancellationToken); 
+                    var stderr = stderrBuilder.ToString().Trim();
+                    var details = string.IsNullOrEmpty(stderr)
+                        ? $""
+                        : $"\nStderr:\n{stderr}";
+                    return new CommandResult(false, $"Процесс {Path.GetFileName(fileName)} завершился с ошибкой (ExitCode: {process.ExitCode}){details}");
+                }
+            }
+            else
+            {
+                // Если мы не ждем завершения (например, запуск самой игры),
+                // просто даем процессу немного времени на старт перед тем, как отпустить конвейер
+                await Task.Delay(2000, context.CancellationToken);
                 if (process.HasExited && process.ExitCode != 0)
                 {
-                    return new CommandResult(false, $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode})");
-                } 
+                    var stderr = stderrBuilder.ToString().Trim();
+                    var details = string.IsNullOrEmpty(stderr)
+                        ? $""
+                        : $"\nStderr:\n{stderr}";
+                    return new CommandResult(false, $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode}){details}");
+                }
             } 
         } 
         catch (Exception ex) when (ex is not OperationCanceledException)

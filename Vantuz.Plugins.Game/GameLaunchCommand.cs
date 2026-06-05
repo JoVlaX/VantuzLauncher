@@ -24,9 +24,12 @@ public class GameLaunchCommand : ICommandPlugin
                 ? Interpolate(prov.GetString() ?? "", context)
                 : throw new InvalidOperationException("provider is missing in stepConfig");
 
-            string versionName = stepConfig.TryGetProperty("version", out var vn)
+            string configVersionName = stepConfig.TryGetProperty("version", out var vn)
                 ? Interpolate(vn.GetString() ?? "", context)
                 : throw new InvalidOperationException("version is missing in stepConfig");
+
+            // If Forge installer produced an InstalledVersionName, use it (Forge normalizes the name)
+            string versionName = context.Get<string>("installedVersion") ?? configVersionName;
 
             string installDir = stepConfig.TryGetProperty("installDir", out var id)
                 ? Interpolate(id.GetString() ?? "", context)

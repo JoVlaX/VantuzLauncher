@@ -61,14 +61,26 @@ public class MinecraftGameProvider : IGameProvider
                 reporter.ReportState($"Обнаружена Forge-версия {version}. Установка Forge...");
                 var (mcVersion, forgeVersion) = ParseForgeVersion(version);
                 var forgeInstaller = new ForgeInstaller(launcher);
-                await forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
+                var installedName = await forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
                 {
                     FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
                     {
-                        reporter.ReportProgress($"Установка Forge {forgeVersion}", args.ProgressedTasks / (double)args.TotalTasks * 100);
+                        var progress = args.TotalTasks > 0
+                            ? args.ProgressedTasks / (double)args.TotalTasks * 100
+                            : 0;
+                        reporter.ReportProgress($"Установка Forge {forgeVersion}", progress);
+                    }),
+                    ByteProgress = new Progress<ByteProgress>(args =>
+                    {
+                        var progress = args.TotalBytes > 0
+                            ? args.ProgressedBytes / (double)args.TotalBytes * 100
+                            : 0;
+                        reporter.ReportProgress($"Скачивание Forge {forgeVersion}", progress);
                     }),
                     SkipIfAlreadyInstalled = true
                 });
+                reporter.ReportState($"Forge установлен: {installedName}");
+                return new InstallResult(true, null, installedName);
             }
             else
             {

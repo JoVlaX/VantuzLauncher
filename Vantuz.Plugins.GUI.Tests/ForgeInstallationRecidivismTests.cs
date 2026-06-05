@@ -227,11 +227,33 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 "This means the Forge-specific code path was skipped or the old 'Cannot find' error occurred silently.\n" +
                 $"Trace log:\n{lastTrace}\nCrash log:\n{lastCrash ?? "(none)"}");
 
+            // Must see that Forge installation actually progressed (ByteProgress fired)
+            Assert.True(
+                lastTrace.Contains("Скачивание Forge") ||
+                lastTrace.Contains("Установка Forge") ||
+                lastTrace.Contains("Forge установлен:"),
+                "Forge download/install progress was never reported. ByteProgress may not be wired.\n" +
+                $"Trace log:\n{lastTrace}");
+
+            // Must see either that Forge installed OR that it was skipped because already cached
+            Assert.True(
+                lastTrace.Contains("Forge установлен:") ||
+                lastTrace.Contains("пропуск установки"),
+                "Neither Forge installation nor skip message found. " +
+                "GameInstallerCommand may have failed silently before reaching the provider.\n" +
+                $"Trace log:\n{lastTrace}");
+
             // If it failed, the error must be human-readable (not raw CmlLib internals)
             if (lastCrash != null && lastCrash.Contains("Pipeline failed"))
             {
                 Assert.DoesNotContain("Cannot find 1.20.1-forge-47.3.0", lastCrash);
                 Assert.DoesNotContain("KeyNotFoundException", lastCrash);
+                Assert.DoesNotContain("ExitCode: 1", lastCrash);
+                // stderr must now be included in the crash message
+                Assert.True(
+                    lastCrash.Contains("Stderr:") || lastCrash.Contains("Ошибка установки"),
+                    "Crash log contains a bare ExitCode without stderr context. OS.ExecuteCommand may not capture stderr.\n" +
+                    $"Crash log:\n{lastCrash}");
             }
         }
         finally

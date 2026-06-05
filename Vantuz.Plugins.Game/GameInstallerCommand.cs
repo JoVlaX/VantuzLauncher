@@ -89,6 +89,10 @@ public class GameInstallerCommand : ICommandPlugin
 
             context.Reporter.ReportState($"Версия {versionName} успешно установлена.");
             context.Set("InstallSuccess", true);
+            if (!string.IsNullOrEmpty(installResult.InstalledVersionName))
+            {
+                context.Set("installedVersion", installResult.InstalledVersionName);
+            }
             
             return new CommandResult(true);
         }

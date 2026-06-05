@@ -130,8 +130,9 @@ public record VersionCheckResult(
 /// Result of install operation
 /// </summary>
 public record InstallResult(
-    bool Success, 
-    string? ErrorMessage = null
+    bool Success,
+    string? ErrorMessage = null,
+    string? InstalledVersionName = null
 );
 
 /// <summary>
