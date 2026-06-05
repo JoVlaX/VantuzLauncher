@@ -43,8 +43,8 @@ public class GameInstallerCommand : ICommandPlugin
                 return new CommandResult(true);
             }
 
-            // Check previous validator result
-            var checkResult = context.Get<VersionCheckResult>("Game.VersionValidator.Result");
+            // Check previous validator result (Query adapter stores under plugin name + ".Result")
+            var checkResult = context.Get<VersionCheckResult>("Game.VersionValidatorQuery.Result");
             if (checkResult == null)
             {
                 // No validator ran, run check ourselves

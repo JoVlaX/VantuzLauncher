@@ -97,7 +97,7 @@
         "version": "{{gameVersion}}",
         "installDir": "{{installDir}}",
         "authlibPath": "{{mcDir}}\\authlib-injector.jar",
-        "authlibUrl": "{{authEndpoint}}/yggdrasil/"
+        "authlibUrl": "https://troglobit.webhm.pro/yggdrasil/"
       }
     },
     {

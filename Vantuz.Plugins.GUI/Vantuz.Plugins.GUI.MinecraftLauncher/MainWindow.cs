@@ -12,6 +12,7 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Vantuz.Core;
 
 namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 
@@ -51,6 +52,10 @@ public class MainWindow : Window, ICredentialProvider
 
         reporter.StateChanged += OnStateChanged;
         reporter.ProgressChanged += OnProgressChanged;
+
+        // Bridge host-side ConsoleReporter into GUI window
+        ReportHub.StateReported += OnHubStateReported;
+        ReportHub.ProgressReported += OnHubProgressReported;
 
         InitializeRamSlider();
         LoadSavedConfig();
@@ -303,6 +308,26 @@ public class MainWindow : Window, ICredentialProvider
         });
     }
 
+    private void OnHubStateReported(string message)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            StatusText.Text = message;
+            AppendToLog($"[ENGINE] {message}");
+        });
+    }
+
+    private void OnHubProgressReported(string taskName, double percent)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            MainProgressBar.Value = percent;
+            ProgressPercentText.Text = $"{percent:F1}%";
+            UpdateOperationProgress(taskName, percent);
+            AppendToLog($"[ENGINE] {taskName}: {percent:F1}%");
+        });
+    }
+
     private void UpdateOperationProgress(string operationId, double percent)
     {
         if (!_operationTexts.ContainsKey(operationId))
@@ -414,6 +439,8 @@ public class MainWindow : Window, ICredentialProvider
     {
         _reporter.StateChanged -= OnStateChanged;
         _reporter.ProgressChanged -= OnProgressChanged;
+        ReportHub.StateReported -= OnHubStateReported;
+        ReportHub.ProgressReported -= OnHubProgressReported;
         _credentialsTcs.TrySetCanceled();
         base.OnClosing(e);
     }

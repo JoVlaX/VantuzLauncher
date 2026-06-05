@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,12 @@ class Program
 {
     public static string WorkspacePath { get; private set; } = string.Empty;
 
+    // Win32 MessageBox for WinExe error surfacing — console is invisible
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int MessageBoxW(nint hWnd, string text, string caption, uint type);
+    private const uint MB_OK = 0x0;
+    private const uint MB_ICONERROR = 0x10;
+
     [STAThread]
     static async Task Main(string[] args)
     {
@@ -21,7 +28,9 @@ class Program
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
             var ex = (Exception)e.ExceptionObject;
-            Console.Error.WriteLine($"CRITICAL: {ex.Message}\n{ex.StackTrace}");
+            string msg = $"CRITICAL: {ex.Message}\n{ex.StackTrace}";
+            Console.Error.WriteLine(msg);
+            MessageBoxW(0, msg, "Vantuz Launcher — Critical Error", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         };
 
@@ -44,7 +53,9 @@ class Program
         }
         catch (UnauthorizedAccessException)
         {
-            Console.Error.WriteLine($"Ошибка доступа! Нет прав на запись в рабочую папку:\n{WorkspacePath}\nЗапустите от имени Администратора или удалите файл .portable.");
+            string msg = $"Ошибка доступа! Нет прав на запись в рабочую папку:\n{WorkspacePath}\nЗапустите от имени Администратора или удалите файл .portable.";
+            Console.Error.WriteLine(msg);
+            MessageBoxW(0, msg, "Vantuz Launcher — Ошибка доступа", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -54,7 +65,9 @@ class Program
 
         if (!File.Exists(bootJsonPath))
         {
-            Console.Error.WriteLine($"boot.gui.json not found at {bootJsonPath}");
+            string msg = $"boot.gui.json not found at {bootJsonPath}";
+            Console.Error.WriteLine(msg);
+            MessageBoxW(0, msg, "Vantuz Launcher — Missing Config", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -68,7 +81,17 @@ class Program
 
         if (!result.Success)
         {
-            Console.Error.WriteLine($"Pipeline failed: {result.ErrorMessage ?? "Unknown error"}");
+            string error = result.ErrorMessage ?? "Unknown error";
+            string msg = $"Pipeline failed: {error}";
+            Console.Error.WriteLine(msg);
+            // Surface to user — WinExe hides console
+            MessageBoxW(0, msg, "Vantuz Launcher — Ошибка", MB_OK | MB_ICONERROR);
+            // Also persist to crash log for diagnostics
+            try
+            {
+                File.AppendAllText(crashLogPath, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {msg}\n");
+            }
+            catch { }
             Environment.Exit(1);
         }
 
@@ -180,6 +203,7 @@ class ConsoleReporter : IStatusReporter
         string line = $"[{DateTime.UtcNow:HH:mm:ss}] {taskName}: {percentage:F1}%";
         Console.WriteLine(line);
         AppendToLog(line);
+        ReportHub.ReportProgress(taskName, percentage);
     }
 
     public void ReportState(string message)
@@ -187,6 +211,7 @@ class ConsoleReporter : IStatusReporter
         string line = $"[{DateTime.UtcNow:HH:mm:ss}] {message}";
         Console.WriteLine(line);
         AppendToLog(line);
+        ReportHub.ReportState(message);
     }
 
     private void AppendToLog(string line)

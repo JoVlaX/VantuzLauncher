@@ -10,24 +10,43 @@
     "operationTimeout": "00:05:00"
   },
   "plugins": {
+    "Vantuz.Plugins.GUI.MinecraftLauncher.dll": "",
     "Vantuz.Plugins.Auth.dll": "",
     "Vantuz.Plugins.Net.dll": "",
     "Vantuz.Plugins.OS.dll": "",
     "Vantuz.Plugins.Game.dll": "",
-    "Vantuz.Plugins.Minecraft.dll": "",
-    "Vantuz.Plugins.GUI.MinecraftLauncher.dll": ""
+    "Vantuz.Plugins.Minecraft.dll": ""
   },
   "pipeline": [
     {
-      "_comment": "Phase 1: User authentication (production)",
-      "pluginName": "Auth.YggdrasilCommand",
+      "_comment": "Phase 1: Initialize GUI and collect credentials",
+      "pluginName": "GUI.MinecraftLauncher",
       "config": {
-        "provider": "Yggdrasil",
-        "authServer": "https://authserver.mojang.com"
+        "theme": "dark",
+        "showProgress": true,
+        "autoCloseOnLaunch": false
       }
     },
     {
-      "_comment": "Phase 2: Game installation",
+      "_comment": "Phase 2: Credential collection via GUI",
+      "pluginName": "GUI.CredentialCollection",
+      "config": {}
+    },
+    {
+      "_comment": "Phase 3: User authentication (production)",
+      "pluginName": "Auth.YggdrasilCommand",
+      "config": {
+        "url": "https://authserver.mojang.com",
+        "ignoreSslErrors": false
+      }
+    },
+    {
+      "_comment": "Phase 4: Register Minecraft game provider",
+      "pluginName": "Game.MinecraftProvider",
+      "config": {}
+    },
+    {
+      "_comment": "Phase 5: Game installation",
       "pluginName": "Game.InstallerCommand",
       "config": {
         "provider": "{{gameProvider}}",
@@ -36,7 +55,7 @@
       }
     },
     {
-      "_comment": "Phase 3: Version validation",
+      "_comment": "Phase 6: Version validation",
       "pluginName": "Game.VersionValidatorQuery",
       "config": {
         "provider": "{{gameProvider}}",
@@ -45,7 +64,7 @@
       }
     },
     {
-      "_comment": "Phase 4: Launch preparation",
+      "_comment": "Phase 7: Launch preparation",
       "pluginName": "Game.LaunchCommand",
       "config": {
         "provider": "{{gameProvider}}",
@@ -56,12 +75,13 @@
       }
     },
     {
-      "_comment": "Phase 5: GUI - Per §498, GUI is explicit pipeline step",
-      "pluginName": "GUI.MinecraftLauncher",
+      "_comment": "Phase 8: Execute the game process",
+      "pluginName": "OS.ExecuteCommand",
       "config": {
-        "theme": "dark",
-        "showProgress": true,
-        "autoCloseOnLaunch": false
+        "fileName": "{{gameCommand}}",
+        "arguments": "{{gameArgs}}",
+        "workDir": "{{gameWorkDir}}",
+        "waitForExit": false
       }
     }
   ]

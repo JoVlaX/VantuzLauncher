@@ -119,6 +119,96 @@ public class PipelinePositiveVerificationTests
     }
 
     /// <summary>
+    /// E_doc: boot.gui.json contains no unresolved {{variable}} placeholders.
+    /// F_doc: A placeholder references a variable that is never defined in variables[] nor injected at runtime.
+    ///        This recidivism occurred with {{authEndpoint}} leaking into JVM args.
+    /// </summary>
+    [Theory]
+    [InlineData("boot.gui.json")]
+    [InlineData("boot.headless.json")]
+    [InlineData("boot.minecraft.production.json")]
+    public void Manifest_NoUnresolvedPlaceholders(string fileName)
+    {
+        var searchDirs = new[]
+        {
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..")),
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..")),
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..")),
+        };
+        string? bootPath = searchDirs.Select(d => Path.Combine(d, fileName)).FirstOrDefault(File.Exists);
+        Assert.True(bootPath != null, $"{fileName} not found");
+
+        var json = File.ReadAllText(bootPath);
+        var doc = JsonSerializer.Deserialize<JsonElement>(json);
+
+        // Collect defined variables + known runtime-injected keys
+        var knownVars = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "gameProvider", "gameVersion", "mcDir", "installDir",
+            "operationTimeout", "localVersion", "workspace", "username",
+            "password", "ramMb", "gameCommand", "gameArgs", "gameWorkDir",
+            "testUser", "testPass", "remoteVersion"
+        };
+        if (doc.TryGetProperty("variables", out var vars))
+        {
+            foreach (var prop in vars.EnumerateObject())
+                knownVars.Add(prop.Name);
+        }
+
+        // Find all {{...}} references in the entire JSON text
+        var raw = json;
+        var unresolved = new List<string>();
+        int i = 0;
+        while ((i = raw.IndexOf("{{", i, StringComparison.Ordinal)) >= 0)
+        {
+            int end = raw.IndexOf("}}", i + 2, StringComparison.Ordinal);
+            Assert.True(end > i, $"Unclosed placeholder in {fileName} at offset {i}");
+            string key = raw.Substring(i + 2, end - i - 2);
+            if (!knownVars.Contains(key))
+                unresolved.Add(key);
+            i = end + 2;
+        }
+
+        Assert.Empty(unresolved);
+    }
+
+    /// <summary>
+    /// E_doc: In every production manifest, Game.LaunchCommand is immediately followed by OS.ExecuteCommand.
+    /// F_doc: The ExecuteCommand step is missing after LaunchCommand, so the game process is never started.
+    ///        This recidivism occurred in boot.minecraft.production.json.
+    /// </summary>
+    [Theory]
+    [InlineData("boot.gui.json")]
+    [InlineData("boot.minecraft.production.json")]
+    public void Manifest_LaunchCommand_IsFollowedByExecuteCommand(string fileName)
+    {
+        var searchDirs = new[]
+        {
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..")),
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..")),
+            Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "..")),
+        };
+        string? bootPath = searchDirs.Select(d => Path.Combine(d, fileName)).FirstOrDefault(File.Exists);
+        Assert.True(bootPath != null, $"{fileName} not found");
+
+        var json = File.ReadAllText(bootPath);
+        var doc = JsonSerializer.Deserialize<JsonElement>(json);
+        var pipeline = doc.GetProperty("pipeline");
+        var steps = pipeline.EnumerateArray()
+            .Select(s => s.GetProperty("pluginName").GetString())
+            .ToList();
+
+        int launchIndex = steps.IndexOf("Game.LaunchCommand");
+        if (launchIndex < 0) return; // Not all manifests need a launch step
+
+        int executeIndex = steps.IndexOf("OS.ExecuteCommand");
+        Assert.True(executeIndex >= 0,
+            $"{fileName}: OS.ExecuteCommand is missing after Game.LaunchCommand. Game will never start.");
+        Assert.True(executeIndex == launchIndex + 1,
+            $"{fileName}: OS.ExecuteCommand must immediately follow Game.LaunchCommand (found at index {executeIndex}, expected {launchIndex + 1}).");
+    }
+
+    /// <summary>
     /// Simple reporter that records every ReportState call for post-run assertion.
     /// </summary>
     private class ListReporter : IStatusReporter
