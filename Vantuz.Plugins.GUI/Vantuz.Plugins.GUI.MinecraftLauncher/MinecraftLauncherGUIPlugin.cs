@@ -96,10 +96,9 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
         }
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        _ = ShutdownGUIAsync();
-        return ValueTask.CompletedTask;
+        await ShutdownGUIAsync();
     }
 }
 
@@ -129,7 +128,7 @@ public class PluginApp : Avalonia.Application
             var window = new MainWindow(_reporter, _workspacePath, _autoSubmit);
             desktop.MainWindow = window;
             window.Show();
-            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             _context.Set("gui_reporter", _reporter);
             _context.Set("gui_window", window);

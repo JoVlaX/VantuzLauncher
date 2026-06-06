@@ -33,14 +33,21 @@ public class PipelinePositiveVerificationTests
         string? bootPath = searchDirs.Select(d => Path.Combine(d, "boot.headless.json")).FirstOrDefault(File.Exists);
         Assert.True(bootPath != null, $"boot.headless.json not found. Searched: {string.Join(", ", searchDirs)}");
 
-        string? pluginsDir = searchDirs
-            .Select(d => Path.Combine(d, "bin", "Release", "net8.0-windows", "plugins"))
+        string? sourcePluginsDir = searchDirs
+            .Select(d => Path.Combine(d, "bin", "Debug", "net8.0-windows", "plugins"))
+            .Concat(searchDirs.Select(d => Path.Combine(d, "bin", "Release", "net8.0-windows", "plugins")))
             .FirstOrDefault(Directory.Exists);
-        Assert.True(pluginsDir != null, $"plugins directory not found. Searched: {string.Join(", ", searchDirs.Select(d => Path.Combine(d, "bin", "Release", "net8.0-windows", "plugins")))}");
+        Assert.True(sourcePluginsDir != null, $"plugins directory not found. Searched: {string.Join(", ", searchDirs.Select(d => Path.Combine(d, "bin", "Release", "net8.0-windows", "plugins")))}");
 
         // Use a temp workspace so we do not pollute the user profile
         string workspace = Path.Combine(Path.GetTempPath(), $"vantuz_positive_test_{Guid.NewGuid():N}");
         Directory.CreateDirectory(workspace);
+
+        // Copy plugins to an isolated temp directory to avoid file-lock conflicts
+        // with parallel GUI tests that launch VantuzLauncher.exe
+        string pluginsDir = Path.Combine(workspace, "plugins");
+        CopyDirectory(sourcePluginsDir, pluginsDir);
+
         try
         {
             var reporter = new ListReporter();
@@ -206,6 +213,18 @@ public class PipelinePositiveVerificationTests
             $"{fileName}: OS.ExecuteCommand is missing after Game.LaunchCommand. Game will never start.");
         Assert.True(executeIndex == launchIndex + 1,
             $"{fileName}: OS.ExecuteCommand must immediately follow Game.LaunchCommand (found at index {executeIndex}, expected {launchIndex + 1}).");
+    }
+
+    private static void CopyDirectory(string source, string dest)
+    {
+        Directory.CreateDirectory(dest);
+        foreach (var file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+        {
+            string relPath = Path.GetRelativePath(source, file);
+            string destPath = Path.Combine(dest, relPath);
+            Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            File.Copy(file, destPath, true);
+        }
     }
 
     /// <summary>

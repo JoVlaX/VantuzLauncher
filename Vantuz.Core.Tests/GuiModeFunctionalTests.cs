@@ -95,14 +95,15 @@ public class GuiModeFunctionalTests
     }
 
     [Fact]
-    public void MainWindow_Loads_GuiManifest_NotTemplate()
+    public void Program_Loads_GuiManifest_NotTemplate()
     {
-        // Per AGENT_FAILURE_ANALYSIS.md §7.3: MainWindow.xaml.cs must load boot.gui.json
+        // Per AGENT_FAILURE_ANALYSIS.md §7.3: GUI mode must load boot.gui.json
         // in GUI mode, not boot.json (generated from boot.template.json).
-        string mainWindowPath = ResolvePath("MainWindow.xaml.cs");
-        Assert.True(File.Exists(mainWindowPath), "MainWindow.xaml.cs not found");
+        // The entry point (Program.cs) now owns manifest selection.
+        string programPath = ResolvePath("Program.cs");
+        Assert.True(File.Exists(programPath), "Program.cs not found");
 
-        string source = File.ReadAllText(mainWindowPath);
+        string source = File.ReadAllText(programPath);
         Assert.Contains("boot.gui.json", source);
         Assert.DoesNotContain("\"boot.json\"", source);
     }

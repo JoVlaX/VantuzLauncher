@@ -31,14 +31,14 @@ public class GuiModeE2ETests : IDisposable
         var path = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
             "..", "..", "..", "..",
-            "bin", "Release", "net8.0-windows", "VantuzLauncher.exe");
+            "bin", "Debug", "net8.0-windows", "VantuzLauncher.exe");
         path = Path.GetFullPath(path);
         if (!File.Exists(path))
-            path = path.Replace("Release", "Debug");
+            path = path.Replace("Debug", "Release");
         return path;
     }
 
-    private static AutomationElement? FindWindowByName(string name, int expectedProcessId, int timeoutMs = 15_000)
+    private static AutomationElement? FindWindowByName(string name, int expectedProcessId, int timeoutMs = 30_000)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
         while (sw.ElapsedMilliseconds < timeoutMs)

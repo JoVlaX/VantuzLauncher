@@ -23,11 +23,18 @@ public class ExecuteCommand : ICommandPlugin
         string arguments = stepConfig.TryGetProperty("arguments", out var argsProp) ? argsProp.GetString() ?? "" : ""; 
         string workDir = stepConfig.TryGetProperty("workDir", out var wdProp) ? wdProp.GetString() ?? AppContext.BaseDirectory : AppContext.BaseDirectory; 
         bool waitForExit = stepConfig.TryGetProperty("waitForExit", out var waitProp) ? waitProp.GetBoolean() : true; 
- 
+
         // Интерполяция переменных: заменяем {{key}} на значения из Payload конвейера 
         fileName = Interpolate(fileName, context); 
         arguments = Interpolate(arguments, context); 
         workDir = Interpolate(workDir, context); 
+
+        // Skip real process launch in dry-run / test mode per INVARIANT_THEORY.md §1.2
+        if (stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean())
+        {
+            context.Reporter.ReportState($"[DRY RUN] Would execute: {Path.GetFileName(fileName)} {arguments} (workDir: {workDir})");
+            return new CommandResult(true);
+        }
  
         if (!File.Exists(fileName) && !IsSystemCommand(fileName))
         {

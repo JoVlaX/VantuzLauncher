@@ -130,6 +130,13 @@ public class MinecraftGameProvider : IGameProvider
                 
                 if (!string.IsNullOrEmpty(authlibPath) && !string.IsNullOrEmpty(authlibUrl))
                 {
+                    if (!File.Exists(authlibPath))
+                    {
+                        throw new InvalidOperationException(
+                            $"authlib-injector.jar not found at {authlibPath}. " +
+                            "Ensure the download step ran before launch.");
+                    }
+
                     launchOption.ExtraJvmArguments = new[]
                     {
                         new MArgument($"-javaagent:{authlibPath}={authlibUrl}")

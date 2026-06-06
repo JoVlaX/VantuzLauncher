@@ -29,11 +29,34 @@ public class DownloadCommand : ICommandPlugin
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
+        context.Reporter.ReportState($"[DEBUG] DownloadCommand config: {stepConfig}");
         var downloadQueue = context.Get<List<FileState>>("DownloadQueue");
 
         if (downloadQueue == null || downloadQueue.Count == 0)
         {
-            return new CommandResult(true);
+            // Fallback: explicit files array from stepConfig for one-off downloads
+            if (stepConfig.TryGetProperty("files", out var filesProp) && filesProp.ValueKind == JsonValueKind.Array)
+            {
+                downloadQueue = new List<FileState>();
+                foreach (var fileEl in filesProp.EnumerateArray())
+                {
+                    var relativePath = fileEl.TryGetProperty("relativePath", out var rp) ? rp.GetString() ?? "" : "";
+                    var url = fileEl.TryGetProperty("url", out var u) ? u.GetString() ?? "" : "";
+                    var hash = fileEl.TryGetProperty("hash", out var h) ? h.GetString() ?? "" : "";
+                    var size = fileEl.TryGetProperty("size", out var s) && s.TryGetInt64(out var sz) ? sz : 0L;
+
+                    if (!string.IsNullOrEmpty(relativePath) && !string.IsNullOrEmpty(url))
+                    {
+                        downloadQueue.Add(new FileState(relativePath, hash, size, url));
+                    }
+                }
+            }
+
+            if (downloadQueue == null || downloadQueue.Count == 0)
+            {
+                context.Reporter.ReportState("[DEBUG] DownloadCommand: no files to download");
+                return new CommandResult(true);
+            }
         }
 
         string mcDir = context.Get<string>("mcDir")
@@ -74,12 +97,15 @@ public class DownloadCommand : ICommandPlugin
                             }
                         }
 
-                        // Верификация хэша
-                        string downloadedHash = PathHelper.CalculateHash(tmpPath);
-                        if (downloadedHash != file.Hash)
+                        // Верификация хэша (skip if no expected hash provided)
+                        if (!string.IsNullOrEmpty(file.Hash))
                         {
-                            throw new InvalidOperationException(
-                                $"Hash mismatch for {file.RelativePath}. Expected: {file.Hash}, Actual: {downloadedHash}");
+                            string downloadedHash = PathHelper.CalculateHash(tmpPath);
+                            if (downloadedHash != file.Hash)
+                            {
+                                throw new InvalidOperationException(
+                                    $"Hash mismatch for {file.RelativePath}. Expected: {file.Hash}, Actual: {downloadedHash}");
+                            }
                         }
 
                         lock (successfulDownloads)

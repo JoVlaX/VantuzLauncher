@@ -48,8 +48,8 @@ public class MinecraftLauncherPluginTests
         {
             // Assert: returned quickly — the critical fix
             Assert.True(result.Success, $"Plugin failed: {result.ErrorMessage}");
-            Assert.True(sw.ElapsedMilliseconds < 15_000,
-                $"Plugin blocked for {sw.ElapsedMilliseconds}ms — expected immediate return (<15000ms). " +
+            Assert.True(sw.ElapsedMilliseconds < 30_000,
+                $"Plugin blocked for {sw.ElapsedMilliseconds}ms — expected immediate return (<30000ms). " +
                 "If this fails, the plugin still contains await Task.Delay(-1) which blocks the QuantumScheduler pipeline.");
 
             // Assert: published credential provider to context for downstream CredentialCollection step

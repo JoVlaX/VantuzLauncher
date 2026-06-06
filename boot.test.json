@@ -88,7 +88,8 @@
         "installDir": "{{installDir}}",
         "authlibPath": "{{mcDir}}\\authlib-injector.jar",
         "authlibUrl": "test://yggdrasil/",
-        "_testMode": true
+        "_testMode": true,
+        "dryRun": true
       }
     },
     {
@@ -96,7 +97,8 @@
       "pluginName": "OS.ExecuteCommand",
       "config": {
         "_testMode": true,
-        "_recordJavaPid": true
+        "_recordJavaPid": true,
+        "dryRun": true
       }
     }
   ]

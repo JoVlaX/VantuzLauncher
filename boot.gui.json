@@ -91,13 +91,27 @@
     { "pluginName": "Net.DownloadCommand", "config": {} },
     { "pluginName": "OS.BatchPurgeCommand", "config": {} },
     {
+      "pluginName": "Net.DownloadCommand",
+      "config": {
+        "_description": "Download authlib-injector before launch",
+        "files": [
+          {
+            "relativePath": "authlib-injector.jar",
+            "url": "https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.7/authlib-injector-1.2.7.jar",
+            "hash": "",
+            "size": 0
+          }
+        ]
+      }
+    },
+    {
       "pluginName": "Game.LaunchCommand",
       "config": {
         "provider": "{{gameProvider}}",
         "version": "{{gameVersion}}",
         "installDir": "{{installDir}}",
         "authlibPath": "{{mcDir}}\\authlib-injector.jar",
-        "authlibUrl": "https://troglobit.webhm.pro/yggdrasil/"
+        "authlibUrl": "https://yggdrasil.example.com/"
       }
     },
     {

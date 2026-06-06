@@ -42,6 +42,8 @@ internal sealed class QuantumScheduler
         var mergedPayload = new Dictionary<string, object>(_globalPayload);
         var stateSnapshots = new Dictionary<QuantizedNode, object?>();
 
+        _reporter.ReportState($"[DEBUG] Pipeline has {pipeline.Count} steps: {string.Join(", ", pipeline.Select(p => p.Node.Name))}");
+
         for (int i = 0; i < pipeline.Count; i++)
         {
             var (node, config) = pipeline[i];

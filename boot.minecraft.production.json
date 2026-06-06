@@ -64,7 +64,21 @@
       }
     },
     {
-      "_comment": "Phase 7: Launch preparation",
+      "_comment": "Phase 7: Download authlib-injector before launch",
+      "pluginName": "Net.DownloadCommand",
+      "config": {
+        "files": [
+          {
+            "relativePath": "authlib-injector.jar",
+            "url": "https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.7/authlib-injector-1.2.7.jar",
+            "hash": "",
+            "size": 0
+          }
+        ]
+      }
+    },
+    {
+      "_comment": "Phase 8: Launch preparation",
       "pluginName": "Game.LaunchCommand",
       "config": {
         "provider": "{{gameProvider}}",

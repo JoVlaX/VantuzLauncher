@@ -122,7 +122,7 @@ class Program
         }
 
         Console.WriteLine("Pipeline completed successfully.");
-        Environment.Exit(0);
+        // Let the GUI lifetime control process exit (ShutdownMode.OnMainWindowClose).
     }
 
     static async Task RunHeadlessAsync(HeadlessRunner.HeadlessOptions options)
