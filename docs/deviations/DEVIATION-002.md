@@ -115,6 +115,28 @@
   - Only user can verify: interactive GUI button-click behavior
   - Manual surface reduced to a single interactive check per release.
 
+### Phase 10: Test Coverage Gap — Tests Pass but Java Crashes (2026-06-07) ✅
+- [x] **Crash reported:** `[2026-06-07 10:25:11] Pipeline failed: Процесс крашнулся при запуске (ExitCode: 1)` after clicking "Играть".
+- [x] **Why tests missed it:**
+  - `GuiPipeline_ResolvesAllPlugins` only checks `BuildQuantumPipeline` (name resolution), not step execution.
+  - `GuiPipeline_ExecutesWithoutPluginNotFoundCrash` uses a 3-second timeout — pipeline with 13 steps + HTTP requests never reaches step 12 (`Game.LaunchCommand`) → 13 (`OS.ExecuteCommand`).
+  - No test verified that `OS.ExecuteCommand` arguments are valid before `Process.Start`.
+- [x] **Recidivism root cause:** `GuiPipeline PASS` was incorrectly interpreted as "GUI pipeline works end-to-end" when it only proved "plugin names load without exception".
+- [x] **Fix — Pre-flight validation in `Game.LaunchCommand`:**
+  - Check `installDir` exists before calling provider
+  - Check `javaPath` exists (or resolves in PATH)
+  - Check `authlibPath` exists (if provided)
+- [x] **Fix — Early failure in `OS.ExecuteCommand`:**
+  - Fail fast if `fileName`, `arguments`, or `workDir` contain unresolved `{{...}}` placeholders
+  - Log full command line in crash error message
+  - Capture stderr even in `waitForExit=false` mode for diagnostics
+- [x] **Fix — New tests:** `LaunchArgumentValidationTests.cs`
+  - `MissingInstallDir_ReturnsFailureWithClearMessage`
+  - `MissingJava_ReturnsFailureWithClearMessage`
+  - `UnresolvedPlaceholder_ReturnsFailureWithClearMessage`
+  - `DummyExecutable_ReturnsSuccess` (proves `OS.ExecuteCommand` can launch a real process)
+- [x] **Confidence Boundary updated:** Green `GuiPipeline` test does NOT prove Java launches. Pre-flight checks and `LaunchArgumentValidationTests` close the gap between "names resolve" and "arguments are valid". Only manual QA can verify real Java/Minecraft execution.
+
 ### Phase 6: Plugin Name Verification (2026-06-03) ✅
 - [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
 - [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)

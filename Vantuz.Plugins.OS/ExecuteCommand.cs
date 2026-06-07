@@ -1,6 +1,7 @@
 namespace Vantuz.Plugins.OS;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -31,9 +32,16 @@ public class ExecuteCommand : ICommandPlugin
 
         context.Reporter.ReportState($"[ExecuteCommand] waitForExit={waitForExit}, fileName={fileName}, workDir={workDir}");
 
-        if (fileName.Contains("{{") || arguments.Contains("{{") || workDir.Contains("{{"))
+        // Fail fast if placeholders remain unresolved — prevents cryptic "file not found" from Process.Start
+        var unresolved = new List<string>();
+        if (fileName.Contains("{{")) unresolved.Add($"fileName='{fileName}'");
+        if (arguments.Contains("{{")) unresolved.Add($"arguments='{arguments}'");
+        if (workDir.Contains("{{")) unresolved.Add($"workDir='{workDir}'");
+        if (unresolved.Count > 0)
         {
-            context.Reporter.ReportState("[WARN] OS.ExecuteCommand arguments contain unresolved {{...}} placeholders after interpolation.");
+            return new CommandResult(false,
+                $"OS.ExecuteCommand cannot launch: unresolved placeholders in {string.Join(", ", unresolved)}. " +
+                "Upstream step (e.g. Game.LaunchCommand) did not set required context keys.");
         }
 
         // Skip real process launch in dry-run / test mode per INVARIANT_THEORY.md §1.2
@@ -59,39 +67,41 @@ public class ExecuteCommand : ICommandPlugin
             CreateNoWindow = true 
         }; 
 
+        // Always redirect stderr so we can capture crash diagnostics regardless of waitForExit
+        startInfo.RedirectStandardError = true;
+
         if (waitForExit)
         {
             startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
         }
 
         var process = new Process { StartInfo = startInfo };
 
         var stderrBuilder = new System.Text.StringBuilder();
+        process.ErrorDataReceived += (sender, e) => {
+            if (!string.IsNullOrWhiteSpace(e.Data))
+            {
+                context.Reporter.ReportState($"[ERR] {e.Data}");
+                stderrBuilder.AppendLine(e.Data);
+            }
+        };
 
         if (waitForExit)
         {
-            // Перенаправляем вывод процесса в наш UI через Reporter
+            // Перенаправляем stdout процесса в наш UI через Reporter
             process.OutputDataReceived += (sender, e) => {
                 if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[OUT] {e.Data}");
             };
-            process.ErrorDataReceived += (sender, e) => {
-                if (!string.IsNullOrWhiteSpace(e.Data))
-                {
-                    context.Reporter.ReportState($"[ERR] {e.Data}");
-                    stderrBuilder.AppendLine(e.Data);
-                }
-            }; 
         }
  
         try 
         { 
-            process.Start(); 
+            process.Start();
+            process.BeginErrorReadLine();
 
             if (waitForExit)
             {
                 process.BeginOutputReadLine(); 
-                process.BeginErrorReadLine(); 
                 await process.WaitForExitAsync(context.CancellationToken);
 
                 if (process.ExitCode != 0)
@@ -105,7 +115,7 @@ public class ExecuteCommand : ICommandPlugin
             }
             else
             {
-                // Fire-and-forget: do not redirect streams and do not Dispose while child is alive.
+                // Fire-and-forget: do not Dispose while child is alive.
                 // Give process a brief grace period to detect immediate crash.
                 try
                 {
@@ -118,7 +128,13 @@ public class ExecuteCommand : ICommandPlugin
 
                 if (process.HasExited && process.ExitCode != 0)
                 {
-                    return new CommandResult(false, $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode})");
+                    var stderr = stderrBuilder.ToString().Trim();
+                    var fullCmd = $"{fileName} {arguments}";
+                    var details = string.IsNullOrEmpty(stderr)
+                        ? ""
+                        : $"\nStderr:\n{stderr}";
+                    return new CommandResult(false,
+                        $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode}). Command: {fullCmd} (workDir: {workDir}){details}");
                 }
             } 
         } 

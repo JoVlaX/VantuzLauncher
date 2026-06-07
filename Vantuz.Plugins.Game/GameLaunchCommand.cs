@@ -85,6 +85,26 @@ public class GameLaunchCommand : ICommandPlugin
 
             context.Reporter.ReportState($"Генерация аргументов запуска {versionName}...");
 
+            // Pre-flight validation: ensure critical paths exist before attempting launch
+            if (!Directory.Exists(installDir))
+            {
+                return new CommandResult(false, $"Install directory not found: {installDir}");
+            }
+
+            string effectiveJavaPath = javaPath ?? "java";
+            if (!File.Exists(effectiveJavaPath) && !IsInPath(effectiveJavaPath))
+            {
+                return new CommandResult(false, $"Java executable not found: {effectiveJavaPath}. Please install Java or set javaPath in context.");
+            }
+
+            if (extraOptions.TryGetValue("authlibPath", out var authlibPathObj) &&
+                authlibPathObj?.ToString() is string authlibPathResolved &&
+                !string.IsNullOrEmpty(authlibPathResolved) &&
+                !File.Exists(authlibPathResolved))
+            {
+                return new CommandResult(false, $"authlib-injector not found at {authlibPathResolved}. Ensure the download step ran before launch.");
+            }
+
             // Resolve provider
             var provider = ResolveProvider(context, providerName);
             if (provider == null)
@@ -143,6 +163,33 @@ public class GameLaunchCommand : ICommandPlugin
             text = text.Replace($"{{{{{kvp.Key}}}}}", kvp.Value?.ToString() ?? "");
         }
         return text;
+    }
+
+    /// <summary>
+    /// Checks whether an executable name (without path) can be resolved via PATH.
+    /// </summary>
+    private static bool IsInPath(string fileName)
+    {
+        if (fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains('/'))
+            return false;
+
+        var pathVar = Environment.GetEnvironmentVariable("PATH") ?? "";
+        var extensions = new[] { "" };
+        if (OperatingSystem.IsWindows())
+        {
+            extensions = (Environment.GetEnvironmentVariable("PATHEXT") ?? ".COM;.EXE;.BAT;.CMD")
+                .Split(';', StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        foreach (var dir in pathVar.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries))
+        {
+            foreach (var ext in extensions)
+            {
+                var fullPath = Path.Combine(dir, fileName + ext);
+                if (File.Exists(fullPath)) return true;
+            }
+        }
+        return false;
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

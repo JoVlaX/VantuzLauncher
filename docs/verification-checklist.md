@@ -94,14 +94,23 @@
 
 **Automated (headless / CI):**
 - [ ] Headless pipeline (`boot.headless.json`) — `HeadlessSmokeTests` + `PipelinePositiveVerificationTests`
-- [ ] GUI pipeline resolution (`boot.json`) — `GuiPipelinePositiveVerificationTests` (13 steps resolve without "Plugin X not found")
+- [ ] GUI pipeline **resolution** (`boot.json`) — `GuiPipelinePositiveVerificationTests` (13 plugin names load without "Plugin X not found")
+- [ ] Launch argument **validation** — `LaunchArgumentValidationTests` (pre-flight checks: installDir exists, Java exists, no unresolved placeholders)
 
 **Manual (only the user can perform):**
 - [ ] Launcher запускается без критических ошибок
 - [ ] GUI отображается
 - [ ] Кнопка «Играть» инициирует pipeline без crash
 
-> **Confidence Boundary:** AI can verify static correctness (compilation, name resolution, hash integrity) and headless pipeline execution. It cannot execute GUI applications or perform interactive testing. The automated tests reduce the manual surface to "does the GUI button work?" — a single interactive check per release.
+> **Confidence Boundary (updated 2026-06-07):**
+> - AI can verify **static correctness** (compilation, name resolution, hash integrity)
+> - AI can verify **headless pipeline execution** (5 steps, `dryRun=true`)
+> - AI can verify **GUI pipeline resolution** (13 plugin names → loaded nodes)
+> - AI can verify **launch argument pre-flight** (paths exist, placeholders resolved)
+> - AI **cannot verify** that the actual Java/Minecraft process launches successfully in the user's environment
+> - Green `GuiPipeline` test does NOT prove the Java process launches — it only proves plugin names resolve. The manual surface is reduced to "does the real game launch?"
+>
+> **Recidivism lesson:** A previous `GuiPipeline PASS` was incorrectly interpreted as "GUI pipeline works end-to-end" while the actual crash occurred at `OS.ExecuteCommand` during Java process launch. The test timeout (3 sec) cancelled the pipeline before reaching step 12-13. This gap is now closed by `LaunchArgumentValidationTests` and explicit documentation.
 
 ---
 
