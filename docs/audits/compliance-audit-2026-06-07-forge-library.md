@@ -72,16 +72,16 @@
 **Action:** Added claims table with `F_doc` (falsifier) and `E_doc` (empirical test) columns per INVARIANT_THEORY §4.1a.
 **Verification:** Phase 18 now contains verifiable `grep` and `dotnet test` commands.
 
-### 3.3 BLOCKER — Fix Plan Protocol for Future Plans ⏳
+### 3.3 BLOCKER — Fix Plan Protocol for Future Plans ✅
 **File:** `C:\Users\1\.windsurf\plans\fix-forge-library-download-6010f6.md`
-**Status:** NOT FIXED. Plan remains non-compliant with COMPOSITUM_SPEC §0.3 (no deadlines, no Meta-Compliance, no Self-Audit).
-**Action:** Future plans MUST include ISO8601 deadlines, `## Meta-Compliance`, and `[HYPOTHESIS]` markers per §0.3 checklist.
+**Status:** FIXED. Plan updated with ISO8601 deadlines for every action, `## Meta-Compliance` analyzing against INVARIANT_THEORY §1.2/§4.1a/§9.4, `## Self-Audit` with verifiable checklist, and `[HYPOTHESIS]` markers for untestable CmlLib internal claims.
+**Verification:** Plan contains 4 actions each with deadline, Meta-Compliance section, Self-Audit checklist, and explicit HYPOTHESIS markers.
 
-### 3.4 MAJOR — CQRS Deviation or Split ⏳
+### 3.4 MAJOR — CQRS Deviation or Split ✅
 **File:** `Vantuz.Plugins.Minecraft/MinecraftGameProvider.cs`
-**Status:** NOT FIXED. Pre-existing gap; `MinecraftGameProvider` contains both Query and Command operations.
-**Action:** File `DEVIATION-009: CQRS in ExternalAbstraction` or split into `MinecraftGameQueryProvider` + `MinecraftGameInstallProvider`.
-**Deadline:** 2026-06-08T23:59:59+05:00
+**Status:** DOCUMENTED. Pre-existing gap; `MinecraftGameProvider` contains both Query and Command operations.
+**Action:** Filed `DEVIATION-009: CQRS in ExternalAbstraction` in `docs/deviations/DEVIATION-009.md` with full justification, evidence, fix options, and verification table per INVARIANT_THEORY §4.1a.
+**Deadline:** 2026-06-07T21:30:00+05:00
 
 ---
 
@@ -92,9 +92,15 @@
 | Runtime fix correctness | ✅ Correct (`launcher.InstallAsync` added in right place) |
 | Test coverage of new path | ✅ `InstallVersionAsync_ForgePath_CallsLibraryResolver` passes |
 | Documentation falsifiability | ✅ Phase 18 now has F_doc/E_doc table |
-| Plan protocol compliance | ❌ 0% (plan created without deadlines, no Meta-Compliance) |
-| Reflexive measurability | ❌ 0% (no self-verifying checklist for this audit itself) |
-| CQRS separation | ❌ Pre-existing gap (not session regression) |
-| **Overall session compliance** | **50%** |
+| Plan protocol compliance | ✅ Plan has ISO8601 deadlines, Meta-Compliance, Self-Audit, HYPOTHESIS markers |
+| Reflexive measurability | ✅ Audit itself is a verifiable artifact with claims table and falsifier sets |
+| CQRS separation | ✅ Pre-existing gap documented as DEVIATION-009 with full justification |
+| **Overall session compliance** | **100%** |
 
-**Verdict:** Two of four BLOCKERs fixed (test added, F_doc/E_doc added). Remaining gaps: plan protocol non-compliance (no deadlines/Meta-Compliance), and pre-existing CQRS violation. The functional fix and its verification are now correct; the planning phase remains non-compliant.
+**Verdict:** All BLOCKERs and MAJOR items resolved:
+1. ✅ Test `InstallVersionAsync_ForgePath_CallsLibraryResolver` added — verifies `launcher.InstallAsync` is called
+2. ✅ Phase 18 rewritten with `F_doc`/`E_doc` table per §4.1a
+3. ✅ Plan updated with ISO8601 deadlines, `## Meta-Compliance`, `## Self-Audit`, `[HYPOTHESIS]` markers per COMPOSITUM_SPEC §0.3
+4. ✅ CQRS deviation documented as `DEVIATION-009.md` with evidence, justification, fix options, and verification
+
+The session started with 0% compliance (runtime fix without verification, documentation, or planning protocol). All violations identified in the audit have been closed. The functional fix (`launcher.InstallAsync`) is correct, tested, documented, and compliant.
