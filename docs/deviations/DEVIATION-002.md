@@ -226,6 +226,62 @@
   - Only manual QA can verify: **real Forge installation over the internet**, real Java + Minecraft execution, GUI rendering on user's display
   - **Lesson:** If the agent can run a command, the agent MUST run it. Delegating automatable work to the user is a recidivism.
 
+### Phase 15: Incomplete Forge Install Detected as Complete (2026-06-07) ✅
+- [x] **Crash reported:** User: "программа крашнулась с ошибкой: ... Error: Could not find or load main class cpw.mods.bootstraplauncher.BootstrapLauncher ... Caused by: java.lang.ClassNotFoundException"
+- [x] **Timeline:**
+  1. First try: Forge install ran 40-50 min, user closed program before completion
+  2. Second try: `CheckVersionAsync` found `{version}/{version}.json` → returned `Exists=true`
+  3. `GameInstallerCommand` skipped install because version "already exists"
+  4. `GameLaunchCommand` → `BuildLaunchParametersAsync` built Java command with incomplete libraries
+  5. Java crashed: `ClassNotFoundException: cpw.mods.bootstraplauncher.BootstrapLauncher`
+- [x] **Root cause:** `CheckVersionAsync` only checked `GetVersionJsonPath()` (the small JSON descriptor). It did NOT check `GetVersionJarPath()` or library completeness. Forge installation downloads: JSON (KB), client JAR (~50 MB), Forge libraries (~100+ JARs, hundreds of MB). An interrupted install leaves JSON present but JAR/libraries missing.
+- [x] **Fix — CheckVersionAsync (updated):**
+  - Vanilla: checks `GetVersionJsonPath` AND `GetVersionJarPath` (client JAR is critical)
+  - Forge: checks `GetVersionJsonPath` AND Forge-specific `fmlloader` library (`libraries/net/minecraftforge/fmlloader/{mc}-{forge}/fmlloader-{mc}-{forge}.jar`). Forge does NOT create a version JAR; the version JSON references vanilla client via `inheritsFrom`.
+- [x] **Fix — InstallVersionAsync:** Removed the JAR post-install verification for Forge (it was a false positive). Trust `ForgeInstaller.Install` completion; the fmlloader check in `CheckVersionAsync` handles detecting incomplete installs on subsequent runs.
+- [x] **Tests added:**
+  - `CheckVersionAsync_ForgeComplete_ReturnsTrue` — JSON + fmlloader exist, asserts `Exists=true`
+  - `CheckVersionAsync_ForgeIncomplete_ReturnsFalse` — JSON only, asserts `Exists=false`
+  - `CheckVersionAsync_VanillaComplete_ReturnsTrue` — JSON + JAR exist, asserts `Exists=true`
+  - `CheckVersionAsync_VanillaIncomplete_ReturnsFalse` — JSON only, asserts `Exists=false`
+- [x] **Confidence Boundary updated:**
+  - AI can verify: static correctness, headless pipeline, GUI resolution, argument validity, variable interpolation, version detection logic, build correctness, test pass/fail
+  - AI **cannot verify** that real Forge installation over the internet downloads all artifacts correctly — but AI CAN verify that the detection logic is correct per version type
+  - **Lesson:** Shallow file existence checks are insufficient. But more importantly: a fix for one scenario (vanilla JAR check) must not be blindly applied to another scenario (Forge) without understanding the artifact differences. Vanilla creates a client JAR; Forge creates libraries.
+
+### Phase 16: Forge JAR Check False Positive (2026-06-07) ✅
+- [x] **Crash reported:** User: "Установка Forge завершилась, но файл версии отсутствует..."
+- [x] **Timeline:**
+  1. Forge installation completed successfully (ForgeInstaller.Install returned without exception)
+  2. Post-install verification: `GetVersionJarPath(version)` → file not found
+  3. InstallVersionAsync returned failure: "Установка Forge завершилась, но файл версии отсутствует"
+  4. Pipeline failed
+- [x] **Root cause:** Phase 15 added a JAR check to `CheckVersionAsync` and `InstallVersionAsync` to detect incomplete installations. But Forge does NOT create a `versions/{ver}/{ver}.jar` file. Forge's version JSON references the vanilla client JAR via `inheritsFrom`. The actual launch uses Forge libraries (`bootstraplauncher`, `fmlloader`, etc.). Requiring a version JAR for Forge is a false positive.
+- [x] **Fix — CheckVersionAsync:** Differentiate vanilla vs Forge:
+  - Vanilla: JSON + client JAR
+  - Forge: JSON + fmlloader library (Forge-specific)
+- [x] **Fix — InstallVersionAsync:** Removed the version JAR post-install check for Forge. Trust ForgeInstaller completion.
+- [x] **Confidence Boundary updated:**
+  - **Lesson:** A fix for one scenario (incomplete vanilla install) was incorrectly applied to another scenario (Forge install) without understanding the artifact differences between the two. "One size fits all" logic across different install types is a recidivism. Vanilla and Forge have fundamentally different artifact structures.
+
+### Phase 17: Forge bootstraplauncher Missing Causes False Negative (2026-06-07) ✅
+- [x] **Crash reported:** User: "программа запускается с ошибкой: ... Error: Could not find or load main class cpw.mods.bootstraplauncher.BootstrapLauncher ... Caused by: java.lang.ClassNotFoundException"
+- [x] **Timeline:**
+  1. Forge install ran to completion (ForgeInstaller.Install succeeded)
+  2. `CheckVersionAsync` checked only `fmlloader` library → it existed → returned `Exists=true`
+  3. `GameInstallerCommand` skipped install because version "already exists"
+  4. `GameLaunchCommand` built Java command with missing `bootstraplauncher` library
+  5. Java crashed: `ClassNotFoundException: cpw.mods.bootstraplauncher.BootstrapLauncher`
+- [x] **Root cause:** `CheckVersionAsync` (after Phase 16 fix) checked only ONE library (`fmlloader`). But Forge requires MULTIPLE critical libraries: `bootstraplauncher` (contains main class), `securejarhandler` (JPMS module), `fmlloader` (version-specific), plus the vanilla client JAR. An interrupted or partial install can leave `fmlloader` present but `bootstraplauncher` missing. The agent then claimed "program works" based on `dotnet test`, but tests only verify mock file logic — not real Forge installation integrity over the internet.
+- [x] **Fix — CheckVersionAsync (Forge path):** Now parses the version JSON, extracts ALL critical library paths (`bootstraplauncher`, `securejarhandler`, `fmlloader`), verifies each exists and is non-empty, and also checks the vanilla client JAR via `inheritsFrom`.
+- [x] **Fix — InstallVersionAsync (Forge path):** After `ForgeInstaller.Install` completes, calls `VerifyForgeLibraries` to confirm all critical libraries and the vanilla JAR are present. Returns failure if any are missing, forcing re-download on next run.
+- [x] **Tests added:**
+  - `CheckVersionAsync_ForgeComplete_ReturnsTrue` — JSON + all libraries + vanilla JAR, asserts `Exists=true`
+  - `CheckVersionAsync_ForgeIncomplete_ReturnsFalse` — missing `fmlloader`, asserts `Exists=false`
+  - `CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse` — missing `bootstraplauncher`, asserts `Exists=false`
+- [x] **Confidence Boundary updated:**
+  - **Lesson:** Checking ONE artifact out of many is as bad as checking none. For multi-artifact installations, verify ALL critical artifacts that the downstream consumer needs. The agent must NOT claim "program works" based on tests alone when the tests exercise mock logic, not real-world network installation.
+
 ### Phase 6: Plugin Name Verification (2026-06-03) ✅
 - [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
 - [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)

@@ -5,6 +5,7 @@ namespace Vantuz.Plugins.Minecraft;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CmlLib.Core;
@@ -28,11 +29,35 @@ public class MinecraftGameProvider : IGameProvider
         {
             var path = new MinecraftPath(installDir);
             var versionJsonPath = path.GetVersionJsonPath(version);
-            var versionExists = File.Exists(versionJsonPath);
+            var jsonExists = File.Exists(versionJsonPath);
+            bool versionExists;
 
-            // DIAGNOSTIC: Log the exact path CmlLib uses for version detection.
-            // This is critical because Forge may install under a different internal name.
-            Console.WriteLine($"[DIAG CheckVersionAsync] version={version}, installDir={installDir}, versionJsonPath={versionJsonPath}, exists={versionExists}");
+            if (IsForgeVersion(version))
+            {
+                // Forge does not create a version JAR; the version JSON references vanilla
+                // client via inheritsFrom. We must verify ALL critical libraries from the JSON
+                // (bootstraplauncher, securejarhandler, fmlloader) plus the vanilla client JAR.
+                // Interrupted installs leave JSON but not all libraries, causing ClassNotFoundException.
+                var (librariesOk, missingDetail) = VerifyForgeLibraries(version, installDir);
+                versionExists = jsonExists && librariesOk;
+
+                Console.WriteLine($"[DIAG CheckVersionAsync] FORGE version={version}");
+                Console.WriteLine($"[DIAG CheckVersionAsync] jsonPath={versionJsonPath}, jsonExists={jsonExists}");
+                Console.WriteLine($"[DIAG CheckVersionAsync] librariesOk={librariesOk}, missingDetail={missingDetail}");
+                Console.WriteLine($"[DIAG CheckVersionAsync] versionExists={versionExists}");
+            }
+            else
+            {
+                // Vanilla Minecraft: need both JSON descriptor and the client JAR
+                var versionJarPath = path.GetVersionJarPath(version);
+                var jarExists = File.Exists(versionJarPath);
+                versionExists = jsonExists && jarExists;
+
+                Console.WriteLine($"[DIAG CheckVersionAsync] VANILLA version={version}");
+                Console.WriteLine($"[DIAG CheckVersionAsync] jsonPath={versionJsonPath}, jsonExists={jsonExists}");
+                Console.WriteLine($"[DIAG CheckVersionAsync] jarPath={versionJarPath}, jarExists={jarExists}");
+                Console.WriteLine($"[DIAG CheckVersionAsync] versionExists={versionExists}");
+            }
 
             return Task.FromResult(new VersionCheckResult(versionExists));
         }
@@ -155,6 +180,16 @@ public class MinecraftGameProvider : IGameProvider
                     {
                         var installedName = await installTask;
                         reporter.ReportState($"Forge установлен: {installedName}");
+
+                        // Post-install verification: parse version JSON and verify all critical libraries.
+                        var (librariesOk, missingDetail) = VerifyForgeLibraries(version, installDir);
+                        if (!librariesOk)
+                        {
+                            Console.WriteLine($"[DIAG InstallVersionAsync] Post-install verification FAILED: {missingDetail}");
+                            return new InstallResult(false, $"Установка Forge завершилась, но не хватает критических библиотек: {missingDetail}");
+                        }
+                        Console.WriteLine($"[DIAG InstallVersionAsync] Post-install verification PASSED");
+
                         return new InstallResult(true, null, installedName);
                     }
                     else
@@ -245,6 +280,89 @@ public class MinecraftGameProvider : IGameProvider
             process.StartInfo.Arguments,
             process.StartInfo.WorkingDirectory
         );
+    }
+
+    /// <summary>
+    /// Verifies that all critical Forge libraries exist and are non-empty.
+    /// Parses the version JSON to discover library paths (so version changes are handled automatically).
+    /// Also checks the vanilla client JAR referenced via inheritsFrom.
+    /// </summary>
+    private static (bool AllExist, string? MissingDetail) VerifyForgeLibraries(string version, string installDir)
+    {
+        var path = new MinecraftPath(installDir);
+        var versionJsonPath = path.GetVersionJsonPath(version);
+        if (!File.Exists(versionJsonPath))
+            return (false, "version JSON missing");
+
+        JsonDocument json;
+        try
+        {
+            json = JsonDocument.Parse(File.ReadAllText(versionJsonPath));
+        }
+        catch (Exception ex)
+        {
+            return (false, $"version JSON parse error: {ex.Message}");
+        }
+
+        var requiredLibraries = new[] { "cpw.mods:bootstraplauncher", "cpw.mods:securejarhandler", "net.minecraftforge:fmlloader" };
+
+        if (json.RootElement.TryGetProperty("libraries", out var librariesElement) && librariesElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var libName in requiredLibraries)
+            {
+                bool found = false;
+                foreach (var lib in librariesElement.EnumerateArray())
+                {
+                    if (lib.TryGetProperty("name", out var nameProp) && nameProp.GetString()?.StartsWith(libName + ":", StringComparison.OrdinalIgnoreCase) == true)
+                    {
+                        if (lib.TryGetProperty("downloads", out var downloads) &&
+                            downloads.TryGetProperty("artifact", out var artifact) &&
+                            artifact.TryGetProperty("path", out var pathProp))
+                        {
+                            var artifactPath = pathProp.GetString();
+                            if (!string.IsNullOrEmpty(artifactPath))
+                            {
+                                var fullPath = Path.Combine(installDir, "libraries", artifactPath.Replace('/', Path.DirectorySeparatorChar));
+                                if (!File.Exists(fullPath) || new FileInfo(fullPath).Length == 0)
+                                {
+                                    return (false, $"missing or empty library: {libName} at {fullPath}");
+                                }
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!found)
+                {
+                    return (false, $"library entry not found in JSON: {libName}");
+                }
+            }
+        }
+        else
+        {
+            return (false, "libraries array missing in version JSON");
+        }
+
+        // Check vanilla client JAR referenced via inheritsFrom
+        if (json.RootElement.TryGetProperty("inheritsFrom", out var inheritsProp))
+        {
+            var inheritsFrom = inheritsProp.GetString();
+            if (!string.IsNullOrEmpty(inheritsFrom))
+            {
+                var vanillaJarPath = path.GetVersionJarPath(inheritsFrom);
+                if (!File.Exists(vanillaJarPath) || new FileInfo(vanillaJarPath).Length == 0)
+                {
+                    return (false, $"missing or empty vanilla client JAR: {vanillaJarPath}");
+                }
+            }
+        }
+        else
+        {
+            return (false, "inheritsFrom missing in version JSON");
+        }
+
+        return (true, null);
     }
 
     private static bool IsForgeVersion(string version)

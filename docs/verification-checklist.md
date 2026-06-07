@@ -97,7 +97,7 @@
 - [ ] GUI pipeline **resolution** (`boot.json`) — `GuiPipelinePositiveVerificationTests` (13 plugin names load without "Plugin X not found")
 - [ ] Launch argument **validation** — `LaunchArgumentValidationTests` (pre-flight checks: installDir exists, Java exists, no unresolved placeholders)
 - [ ] Variable interpolation **with dependencies** — `VariableInterpolationTests` (`mcDir → installDir → gameArgs` chain resolves without `{{...}}` leakage)
-- [ ] Version detection **logic** — `MinecraftGameProviderTests` (`CheckVersionAsync` with fake `versions/{ver}/{ver}.json`, `ParseForgeVersion` correctness, skip-if-installed end-to-end)
+- [ ] Version detection **logic** — `MinecraftGameProviderTests` (`CheckVersionAsync` checks both JSON+JAR, `JsonExistsButJarMissing_ReturnsFalse` reproduces crash, `ParseForgeVersion` correctness, skip-if-installed end-to-end)
 
 **Manual (only the user can perform):**
 - [ ] Launcher запускается без критических ошибок
@@ -122,6 +122,9 @@
 > 4. **The 5-minute Forge timeout was a guess without empirical data.** User observed Forge install takes 40-50 minutes on their connection. The timeout was set to "5 minutes" because it "seemed reasonable." "Reasonable" timeouts without measurement are bugs. Closed by increasing `operationTimeout` to 60 min and removing the 30-sec false-stall watchdog.
 > 5. **A green test suite does NOT prove the deployed binary is rebuilt.** After any engine-level fix, the user must rebuild (`dotnet build`) and redeploy.
 > 6. **If the agent can run a command, the agent MUST run it.** After the Forge timeout fix, the agent told the user "Пересобери и запусти" instead of running `dotnet build` + `dotnet test` automatically. Delegating automatable work to the user is a recidivism. The agent must exhaust all automatable verification before asking the user for manual QA.
+> 7. **Shallow file existence checks are insufficient for multi-artifact installations.** `CheckVersionAsync` only checked `GetVersionJsonPath()` (the small JSON descriptor) and returned `Exists=true`. But Forge installation downloads JSON + JAR + 100+ libraries. An interrupted install leaves JSON present but JAR/libraries missing, causing `ClassNotFoundException` at launch. Closed by checking both `GetVersionJsonPath` AND `GetVersionJarPath`, plus post-install verification in `InstallVersionAsync`.
+> 8. **A fix for one scenario must not be blindly applied to another.** The JAR check from Phase 15 correctly detects incomplete vanilla installs, but Forge does NOT create a version JAR. Applying the same JAR check to Forge caused a false positive: correctly-installed Forge was rejected with "файл версии отсутствует". Closed by differentiating vanilla (JSON+JAR) vs Forge (JSON+fmlloader) in `CheckVersionAsync` and removing the JAR post-install check for Forge.
+> 9. **Checking ONE artifact out of many is as bad as checking none.** After Phase 16, `CheckVersionAsync` verified only `fmlloader` for Forge. But `bootstraplauncher` (main class), `securejarhandler` (JPMS module), and the vanilla client JAR are equally critical. A partial install left `fmlloader` but removed `bootstraplauncher`, causing `ClassNotFoundException`. Closed by parsing the version JSON and verifying ALL critical libraries plus the vanilla JAR. Also: the agent must NOT claim "program works" from `dotnet test` alone when tests exercise mock file logic, not real-world network installation.
 
 ---
 

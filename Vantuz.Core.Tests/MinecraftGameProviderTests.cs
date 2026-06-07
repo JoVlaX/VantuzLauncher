@@ -38,25 +38,193 @@ public class MinecraftGameProviderTests
         Assert.Equal("43.2.0", forgeVersion);
     }
 
+    private static string MakeForgeJson(string id = "1.20.1-forge-47.3.0", string inheritsFrom = "1.20.1") =>
+        $"{{\"id\":\"{id}\",\"inheritsFrom\":\"{inheritsFrom}\",\"libraries\":[{{\"name\":\"cpw.mods:bootstraplauncher:1.1.2\",\"downloads\":{{\"artifact\":{{\"path\":\"cpw/mods/bootstraplauncher/1.1.2/bootstraplauncher-1.1.2.jar\"}}}}}},{{\"name\":\"cpw.mods:securejarhandler:2.1.10\",\"downloads\":{{\"artifact\":{{\"path\":\"cpw/mods/securejarhandler/2.1.10/securejarhandler-2.1.10.jar\"}}}}}},{{\"name\":\"net.minecraftforge:fmlloader:1.20.1-47.3.0\",\"downloads\":{{\"artifact\":{{\"path\":\"net/minecraftforge/fmlloader/1.20.1-47.3.0/fmlloader-1.20.1-47.3.0.jar\"}}}}}}]}}";
+
     /// <summary>
-    /// E_doc: When the version JSON exists in the .minecraft/versions folder, CheckVersionAsync returns Exists=true.
-    /// F_doc: CmlLib's MinecraftPath.GetVersionJsonPath must match the path we create.
+    /// E_doc: When Forge version JSON, all critical libraries, and vanilla client JAR exist,
+    /// CheckVersionAsync returns Exists=true.
+    /// F_doc: Forge does not create a version JAR; libraries from JSON + vanilla JAR are the proxy.
     /// </summary>
     [Fact]
-    public async Task CheckVersionAsync_ExistingVersion_ReturnsTrue()
+    public async Task CheckVersionAsync_ForgeComplete_ReturnsTrue()
     {
         string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
-        string versionsDir = Path.Combine(tempDir, ".minecraft", "versions", "1.20.1-forge-47.3.0");
+        string mcDir = Path.Combine(tempDir, ".minecraft");
+        string versionsDir = Path.Combine(mcDir, "versions", "1.20.1-forge-47.3.0");
         Directory.CreateDirectory(versionsDir);
         string versionJsonPath = Path.Combine(versionsDir, "1.20.1-forge-47.3.0.json");
-        await File.WriteAllTextAsync(versionJsonPath, "{\"id\":\"1.20.1-forge-47.3.0\"}");
+
+        // Create all critical libraries
+        string bootstrapDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "bootstraplauncher", "1.1.2");
+        Directory.CreateDirectory(bootstrapDir);
+        await File.WriteAllBytesAsync(Path.Combine(bootstrapDir, "bootstraplauncher-1.1.2.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string secureDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "securejarhandler", "2.1.10");
+        Directory.CreateDirectory(secureDir);
+        await File.WriteAllBytesAsync(Path.Combine(secureDir, "securejarhandler-2.1.10.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string fmlLoaderDir = Path.Combine(mcDir, "libraries", "net", "minecraftforge", "fmlloader", "1.20.1-47.3.0");
+        Directory.CreateDirectory(fmlLoaderDir);
+        await File.WriteAllBytesAsync(Path.Combine(fmlLoaderDir, "fmlloader-1.20.1-47.3.0.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        // Vanilla client JAR (inheritsFrom)
+        string vanillaDir = Path.Combine(mcDir, "versions", "1.20.1");
+        Directory.CreateDirectory(vanillaDir);
+        await File.WriteAllBytesAsync(Path.Combine(vanillaDir, "1.20.1.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        await File.WriteAllTextAsync(versionJsonPath, MakeForgeJson());
 
         try
         {
             var provider = new MinecraftGameProvider();
-            var result = await provider.CheckVersionAsync("1.20.1-forge-47.3.0", Path.Combine(tempDir, ".minecraft"), default);
+            var result = await provider.CheckVersionAsync("1.20.1-forge-47.3.0", mcDir, default);
 
             Assert.True(result.Exists, $"Expected Exists=true but got: {result.ErrorMessage}");
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// E_doc: When vanilla version JSON and JAR both exist,
+    /// CheckVersionAsync returns Exists=true.
+    /// F_doc: Vanilla Minecraft creates both JSON descriptor and client JAR.
+    /// </summary>
+    [Fact]
+    public async Task CheckVersionAsync_VanillaComplete_ReturnsTrue()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
+        string versionsDir = Path.Combine(tempDir, ".minecraft", "versions", "1.20.1");
+        Directory.CreateDirectory(versionsDir);
+        string versionJsonPath = Path.Combine(versionsDir, "1.20.1.json");
+        string versionJarPath = Path.Combine(versionsDir, "1.20.1.jar");
+        await File.WriteAllTextAsync(versionJsonPath, "{\"id\":\"1.20.1\"}");
+        await File.WriteAllBytesAsync(versionJarPath, new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        try
+        {
+            var provider = new MinecraftGameProvider();
+            var result = await provider.CheckVersionAsync("1.20.1", Path.Combine(tempDir, ".minecraft"), default);
+
+            Assert.True(result.Exists, $"Expected Exists=true but got: {result.ErrorMessage}");
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// E_doc: When Forge JSON exists but the critical fmlloader library is missing,
+    /// CheckVersionAsync returns Exists=false.
+    /// F_doc: This reproduces the 2026-06-07 crash where interrupted Forge install left JSON
+    /// but not libraries, causing ClassNotFoundException at launch.
+    /// </summary>
+    [Fact]
+    public async Task CheckVersionAsync_ForgeIncomplete_ReturnsFalse()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
+        string mcDir = Path.Combine(tempDir, ".minecraft");
+        string versionsDir = Path.Combine(mcDir, "versions", "1.20.1-forge-47.3.0");
+        Directory.CreateDirectory(versionsDir);
+        string versionJsonPath = Path.Combine(versionsDir, "1.20.1-forge-47.3.0.json");
+
+        // Create bootstraplauncher and securejarhandler, but NOT fmlloader
+        string bootstrapDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "bootstraplauncher", "1.1.2");
+        Directory.CreateDirectory(bootstrapDir);
+        await File.WriteAllBytesAsync(Path.Combine(bootstrapDir, "bootstraplauncher-1.1.2.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string secureDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "securejarhandler", "2.1.10");
+        Directory.CreateDirectory(secureDir);
+        await File.WriteAllBytesAsync(Path.Combine(secureDir, "securejarhandler-2.1.10.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        // Vanilla client JAR (inheritsFrom)
+        string vanillaDir = Path.Combine(mcDir, "versions", "1.20.1");
+        Directory.CreateDirectory(vanillaDir);
+        await File.WriteAllBytesAsync(Path.Combine(vanillaDir, "1.20.1.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        await File.WriteAllTextAsync(versionJsonPath, MakeForgeJson());
+
+        try
+        {
+            var provider = new MinecraftGameProvider();
+            var result = await provider.CheckVersionAsync("1.20.1-forge-47.3.0", mcDir, default);
+
+            Assert.False(result.Exists, "Expected Exists=false when fmlloader is missing");
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// E_doc: When Forge JSON and fmlloader exist but bootstraplauncher is missing,
+    /// CheckVersionAsync returns Exists=false.
+    /// F_doc: This reproduces the 2026-06-07 crash where fmlloader was present but
+    /// bootstraplauncher was absent, causing ClassNotFoundException at launch.
+    /// </summary>
+    [Fact]
+    public async Task CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
+        string mcDir = Path.Combine(tempDir, ".minecraft");
+        string versionsDir = Path.Combine(mcDir, "versions", "1.20.1-forge-47.3.0");
+        Directory.CreateDirectory(versionsDir);
+        string versionJsonPath = Path.Combine(versionsDir, "1.20.1-forge-47.3.0.json");
+
+        // Create fmlloader and securejarhandler, but NOT bootstraplauncher
+        string secureDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "securejarhandler", "2.1.10");
+        Directory.CreateDirectory(secureDir);
+        await File.WriteAllBytesAsync(Path.Combine(secureDir, "securejarhandler-2.1.10.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string fmlLoaderDir = Path.Combine(mcDir, "libraries", "net", "minecraftforge", "fmlloader", "1.20.1-47.3.0");
+        Directory.CreateDirectory(fmlLoaderDir);
+        await File.WriteAllBytesAsync(Path.Combine(fmlLoaderDir, "fmlloader-1.20.1-47.3.0.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        // Vanilla client JAR (inheritsFrom)
+        string vanillaDir = Path.Combine(mcDir, "versions", "1.20.1");
+        Directory.CreateDirectory(vanillaDir);
+        await File.WriteAllBytesAsync(Path.Combine(vanillaDir, "1.20.1.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        await File.WriteAllTextAsync(versionJsonPath, MakeForgeJson());
+
+        try
+        {
+            var provider = new MinecraftGameProvider();
+            var result = await provider.CheckVersionAsync("1.20.1-forge-47.3.0", mcDir, default);
+
+            Assert.False(result.Exists, "Expected Exists=false when bootstraplauncher is missing");
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// E_doc: When vanilla JSON exists but JAR is missing, CheckVersionAsync returns Exists=false.
+    /// F_doc: Interrupted vanilla download leaves JSON but not client JAR.
+    /// </summary>
+    [Fact]
+    public async Task CheckVersionAsync_VanillaIncomplete_ReturnsFalse()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
+        string versionsDir = Path.Combine(tempDir, ".minecraft", "versions", "1.20.1");
+        Directory.CreateDirectory(versionsDir);
+        string versionJsonPath = Path.Combine(versionsDir, "1.20.1.json");
+        await File.WriteAllTextAsync(versionJsonPath, "{\"id\":\"1.20.1\"}");
+        // Intentionally NOT creating the JAR
+
+        try
+        {
+            var provider = new MinecraftGameProvider();
+            var result = await provider.CheckVersionAsync("1.20.1", Path.Combine(tempDir, ".minecraft"), default);
+
+            Assert.False(result.Exists, "Expected Exists=false when JSON exists but JAR is missing");
         }
         finally
         {
@@ -89,17 +257,37 @@ public class MinecraftGameProviderTests
     }
 
     /// <summary>
-    /// E_doc: When Forge version JSON already exists, GameInstallerCommand skips install and returns success.
+    /// E_doc: When Forge version JSON and all critical libraries already exist,
+    /// GameInstallerCommand skips install and returns success.
     /// F_doc: This prevents unnecessary re-downloads and avoids the Forge installer timeout path entirely.
     /// </summary>
     [Fact]
     public async Task GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall()
     {
         string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
-        string versionsDir = Path.Combine(tempDir, ".minecraft", "versions", "1.20.1-forge-47.3.0");
+        string mcDir = Path.Combine(tempDir, ".minecraft");
+        string versionsDir = Path.Combine(mcDir, "versions", "1.20.1-forge-47.3.0");
         Directory.CreateDirectory(versionsDir);
         string versionJsonPath = Path.Combine(versionsDir, "1.20.1-forge-47.3.0.json");
-        await File.WriteAllTextAsync(versionJsonPath, "{\"id\":\"1.20.1-forge-47.3.0\"}");
+
+        // All critical libraries + vanilla JAR
+        string bootstrapDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "bootstraplauncher", "1.1.2");
+        Directory.CreateDirectory(bootstrapDir);
+        await File.WriteAllBytesAsync(Path.Combine(bootstrapDir, "bootstraplauncher-1.1.2.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string secureDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "securejarhandler", "2.1.10");
+        Directory.CreateDirectory(secureDir);
+        await File.WriteAllBytesAsync(Path.Combine(secureDir, "securejarhandler-2.1.10.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string fmlLoaderDir = Path.Combine(mcDir, "libraries", "net", "minecraftforge", "fmlloader", "1.20.1-47.3.0");
+        Directory.CreateDirectory(fmlLoaderDir);
+        await File.WriteAllBytesAsync(Path.Combine(fmlLoaderDir, "fmlloader-1.20.1-47.3.0.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string vanillaDir = Path.Combine(mcDir, "versions", "1.20.1");
+        Directory.CreateDirectory(vanillaDir);
+        await File.WriteAllBytesAsync(Path.Combine(vanillaDir, "1.20.1.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        await File.WriteAllTextAsync(versionJsonPath, MakeForgeJson());
 
         try
         {
