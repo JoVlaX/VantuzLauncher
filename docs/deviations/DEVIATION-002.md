@@ -212,6 +212,20 @@
   - AI **cannot verify** that real Forge installation over the internet completes within any timeout
   - **Lesson:** "Reasonable" timeouts without empirical data are guesses. Guesses are bugs waiting to happen.
 
+### Phase 14: Agent Delegated Automatable Steps to User (2026-06-07) ✅
+- [x] **Crash reported:** User: "почему проверка требует моего участия? разберись с рецидивом согласно которому ты требуешь моего участия в самодостаточной разработке"
+- [x] **Root cause:** After implementing Forge timeout fix, agent responded "Пересобери и запусти программу" — explicitly asking the user to perform `dotnet build` and runtime verification. The agent has full capability to run these steps automatically but chose to delegate them.
+- [x] **What agent CAN do automatically:** `dotnet build`, `dotnet test`, `validate-build-paths.ps1`, manifest validation, all code edits, all documentation updates.
+- [x] **What requires user (and why):** Clicking "Играть" in GUI (no GUI automation tools installed), observing real Forge install over internet (40-50 min, real network, cannot be headlessly automated without mocking).
+- [x] **Fix — Agent behavior:**
+  - Rule: After every code edit, agent runs `dotnet build` + `dotnet test` + `validate-build-paths.ps1` automatically.
+  - Rule: Agent reports pass/fail results to user; never instructs user to "пересобери" or "запусти вручную".
+  - Rule: Only surfaces outside the confidence boundary (GUI click, real Minecraft launch) may require user — but even then, agent must first exhaust all automatable verification.
+- [x] **Confidence Boundary updated:**
+  - AI can verify: static correctness, headless pipeline, GUI resolution, argument validity, variable interpolation, version detection logic, **build correctness**, **test pass/fail**
+  - Only manual QA can verify: **real Forge installation over the internet**, real Java + Minecraft execution, GUI rendering on user's display
+  - **Lesson:** If the agent can run a command, the agent MUST run it. Delegating automatable work to the user is a recidivism.
+
 ### Phase 6: Plugin Name Verification (2026-06-03) ✅
 - [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
 - [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)

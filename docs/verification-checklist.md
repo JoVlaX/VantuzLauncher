@@ -121,6 +121,7 @@
 > 3. `VariableInterpolationTests PASS` + all prior tests still missed a bug because the **real `ForgeInstaller.Install` path with network I/O** was only exercised at manual runtime. The mock-based `ForgeInstallTimeoutRecidivismTests` proved the command respects a timeout, but did NOT prove the installer works. Closed by `MinecraftGameProviderTests` (version detection) + `[DIAG ...]` runtime logging.
 > 4. **The 5-minute Forge timeout was a guess without empirical data.** User observed Forge install takes 40-50 minutes on their connection. The timeout was set to "5 minutes" because it "seemed reasonable." "Reasonable" timeouts without measurement are bugs. Closed by increasing `operationTimeout` to 60 min and removing the 30-sec false-stall watchdog.
 > 5. **A green test suite does NOT prove the deployed binary is rebuilt.** After any engine-level fix, the user must rebuild (`dotnet build`) and redeploy.
+> 6. **If the agent can run a command, the agent MUST run it.** After the Forge timeout fix, the agent told the user "Пересобери и запусти" instead of running `dotnet build` + `dotnet test` automatically. Delegating automatable work to the user is a recidivism. The agent must exhaust all automatable verification before asking the user for manual QA.
 
 ---
 
