@@ -14,6 +14,7 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// are present in launcher_trace.log.
 /// Per COMPOSITUM_SPECIFICATION.md §4.1: GUI is a Category (plugin) concern, not Product.
 /// </summary>
+[Collection("GUI Sequential")]
 public class GuiModeE2ETests : IDisposable
 {
     private readonly List<Process> _processes = new();

@@ -110,7 +110,7 @@ public interface IGameProvider : IAsyncDisposable
     /// <summary>
     /// Install/update the specified version
     /// </summary>
-    Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct);
+    Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct, TimeSpan? timeout = null);
     
     /// <summary>
     /// Build launch parameters for OS.Executor

@@ -38,7 +38,12 @@ public class MinecraftGameProvider : IGameProvider
         }
     }
 
-    public async Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct)
+    public async Task<InstallResult> InstallVersionAsync(
+        string version,
+        string installDir,
+        IStatusReporter reporter,
+        CancellationToken ct,
+        TimeSpan? timeout = null)
     {
         try
         {
@@ -48,8 +53,8 @@ public class MinecraftGameProvider : IGameProvider
             // Wire up progress reporting
             launcher.FileProgressChanged += (sender, args) =>
             {
-                var progress = args.TotalTasks > 0 
-                    ? (double)args.ProgressedTasks / args.TotalTasks * 100 
+                var progress = args.TotalTasks > 0
+                    ? (double)args.ProgressedTasks / args.TotalTasks * 100
                     : 0;
                 reporter.ReportProgress($"Downloading {args.Name}", progress);
             };
@@ -61,32 +66,98 @@ public class MinecraftGameProvider : IGameProvider
                 reporter.ReportState($"Обнаружена Forge-версия {version}. Установка Forge...");
                 var (mcVersion, forgeVersion) = ParseForgeVersion(version);
                 var forgeInstaller = new ForgeInstaller(launcher);
-                var installedName = await forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
+
+                var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                if (timeout.HasValue && timeout.Value > TimeSpan.Zero)
                 {
-                    FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+                    cts.CancelAfter(timeout.Value);
+                }
+                else
+                {
+                    cts.CancelAfter(TimeSpan.FromMinutes(5));
+                }
+
+                var startTime = DateTime.UtcNow;
+                var lastProgressTime = DateTime.UtcNow;
+
+                // Heartbeat + watchdog task
+                var heartbeatTask = Task.Run(async () =>
+                {
+                    while (!cts.Token.IsCancellationRequested)
                     {
-                        var progress = args.TotalTasks > 0
-                            ? args.ProgressedTasks / (double)args.TotalTasks * 100
-                            : 0;
-                        reporter.ReportProgress($"Установка Forge {forgeVersion}", progress);
-                    }),
-                    ByteProgress = new Progress<ByteProgress>(args =>
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(5), cts.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+
+                        var elapsed = DateTime.UtcNow - startTime;
+                        reporter.ReportState($"Установка Forge {forgeVersion} в процессе… прошло {elapsed:mm\\:ss}");
+
+                        var sinceLastProgress = DateTime.UtcNow - lastProgressTime;
+                        if (sinceLastProgress.TotalSeconds > 30)
+                        {
+                            reporter.ReportState($"[WARN] Forge installer produced no progress for {sinceLastProgress.TotalSeconds:F0}s — possible network stall");
+                        }
+                    }
+                }, cts.Token);
+
+                try
+                {
+                    var installTask = Task.Run(() => forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
                     {
-                        var progress = args.TotalBytes > 0
-                            ? args.ProgressedBytes / (double)args.TotalBytes * 100
-                            : 0;
-                        reporter.ReportProgress($"Скачивание Forge {forgeVersion}", progress);
-                    }),
-                    SkipIfAlreadyInstalled = true
-                });
-                reporter.ReportState($"Forge установлен: {installedName}");
-                return new InstallResult(true, null, installedName);
+                        FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+                        {
+                            lastProgressTime = DateTime.UtcNow;
+                            var progress = args.TotalTasks > 0
+                                ? args.ProgressedTasks / (double)args.TotalTasks * 100
+                                : 0;
+                            reporter.ReportProgress($"Установка Forge {forgeVersion}", progress);
+                        }),
+                        ByteProgress = new Progress<ByteProgress>(args =>
+                        {
+                            lastProgressTime = DateTime.UtcNow;
+                            var progress = args.TotalBytes > 0
+                                ? args.ProgressedBytes / (double)args.TotalBytes * 100
+                                : 0;
+                            reporter.ReportProgress($"Скачивание Forge {forgeVersion}", progress);
+                        }),
+                        SkipIfAlreadyInstalled = true
+                    }), cts.Token);
+
+                    var completedTask = await Task.WhenAny(installTask, heartbeatTask);
+                    if (completedTask == installTask)
+                    {
+                        var installedName = await installTask;
+                        reporter.ReportState($"Forge установлен: {installedName}");
+                        return new InstallResult(true, null, installedName);
+                    }
+                    else
+                    {
+                        // heartbeat completed only if cancelled
+                        throw new OperationCanceledException();
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    return new InstallResult(
+                        false,
+                        $"Forge installation timed out ({timeout?.TotalMinutes ?? 5:F0} min). Check your network connection and try again.");
+                }
+                finally
+                {
+                    cts.Cancel();
+                    try { await heartbeatTask; } catch { }
+                }
             }
             else
             {
                 await launcher.InstallAsync(version);
             }
-            
+
             return new InstallResult(true);
         }
         catch (Exception ex)

@@ -33,6 +33,15 @@ public class GameInstallerCommand : ICommandPlugin
 
             installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
+            TimeSpan timeout = TimeSpan.FromMinutes(5);
+            if (stepConfig.TryGetProperty("operationTimeout", out var otProp))
+            {
+                if (TimeSpan.TryParse(otProp.GetString(), out var parsedTimeout) && parsedTimeout > TimeSpan.Zero)
+                {
+                    timeout = parsedTimeout;
+                }
+            }
+
             // Check dryRun mode per INVARIANT_THEORY.md §1.2 Measurability - test must not mutate state
             bool dryRun = stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean();
             if (dryRun)
@@ -74,12 +83,17 @@ public class GameInstallerCommand : ICommandPlugin
                 return new CommandResult(false, $"Game provider '{providerName}' not found");
             }
 
+            // Enforce operation timeout via CancellationTokenSource so every provider respects it
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
+            cts.CancelAfter(timeout);
+
             // Install version
             var installResult = await gameProvider.InstallVersionAsync(
-                versionName, 
-                installDir, 
-                context.Reporter, 
-                context.CancellationToken
+                versionName,
+                installDir,
+                context.Reporter,
+                cts.Token,
+                timeout
             );
 
             if (!installResult.Success)
@@ -93,8 +107,12 @@ public class GameInstallerCommand : ICommandPlugin
             {
                 context.Set("installedVersion", installResult.InstalledVersionName);
             }
-            
+
             return new CommandResult(true);
+        }
+        catch (OperationCanceledException) when (!context.CancellationToken.IsCancellationRequested)
+        {
+            return new CommandResult(false, $"Installation timed out after {timeout.TotalMinutes:F0} minutes. Check your network connection and try again.");
         }
         catch (Exception ex)
         {

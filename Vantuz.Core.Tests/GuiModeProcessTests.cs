@@ -8,6 +8,7 @@ namespace Vantuz.Core.Tests;
 /// GUI-mode process lifecycle verification per AGENT_FAILURE_ANALYSIS.md §6.5 (R4, R5).
 /// Ensures double-clicking the EXE creates a window and closing it kills the process cleanly.
 /// </summary>
+[Collection("GUI Sequential")]
 public class GuiModeProcessTests : IDisposable
 {
     private static readonly string ExePath = Path.Combine(

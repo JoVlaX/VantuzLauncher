@@ -41,3 +41,4 @@ noverify*.txt
 dotnet_run_raw*.txt
 minidiag.log
 boot.template.json.bak
+*.dmp

@@ -28,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\Vantuz.Plugins.GUI.MinecraftLauncher.csproj" />
+    <ProjectReference Include="..\Vantuz.Plugins.Game\Vantuz.Plugins.Game.csproj" />
     <ProjectReference Include="..\Vantuz.Plugins.Minecraft\Vantuz.Plugins.Minecraft.csproj" />
     <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" />
     <ProjectReference Include="..\Vantuz.Host\Vantuz.Host.csproj" />

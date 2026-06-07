@@ -1,0 +1,76 @@
+using System;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Vantuz.Core;
+using Vantuz.Plugins.Game;
+using Xunit;
+
+namespace Vantuz.Plugins.GUI.Tests;
+
+/// <summary>
+/// Recidivism prevention: verifies that GameInstallerCommand fails fast with a clear timeout
+/// message when the Forge/network installer stalls, instead of hanging forever at 0%.
+/// Per INVARIANT_THEORY.md §1.2 and §17.
+/// </summary>
+public class ForgeInstallTimeoutRecidivismTests
+{
+    private class NullReporter : IStatusReporter
+    {
+        public void ReportProgress(string taskName, double percentage) { }
+        public void ReportState(string message) { }
+    }
+
+    private class MockSlowProvider : IGameProvider
+    {
+        public string ProviderName => "SlowForge";
+
+        public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
+            => Task.FromResult(new VersionCheckResult(false));
+
+        public async Task<InstallResult> InstallVersionAsync(
+            string version,
+            string installDir,
+            IStatusReporter reporter,
+            CancellationToken ct,
+            TimeSpan? timeout = null)
+        {
+            // Simulate a stalled network installer that ignores CancellationToken
+            await Task.Delay(TimeSpan.FromSeconds(10), ct);
+            return new InstallResult(true);
+        }
+
+        public Task<LaunchParameters> BuildLaunchParametersAsync(
+            string version,
+            string installDir,
+            LaunchOptions options,
+            CancellationToken ct)
+            => throw new NotImplementedException();
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    [Fact]
+    public async Task GameInstallerCommand_WithSlowProviderAndShortTimeout_ReturnsTimeoutError()
+    {
+        var context = new CommandContext(CancellationToken.None, new NullReporter());
+        context.Set("GameProvider.SlowForge", new MockSlowProvider());
+
+        var stepConfig = JsonDocument.Parse(@"{
+            ""provider"": ""SlowForge"",
+            ""version"": ""1.20.1-forge-47.3.0"",
+            ""installDir"": ""C:\\temp\\test"",
+            ""operationTimeout"": ""00:00:02""
+        }").RootElement;
+
+        var command = new GameInstallerCommand();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = await command.ExecuteAsync(context, stepConfig);
+        sw.Stop();
+
+        Assert.False(result.Success);
+        Assert.Contains("timed out", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.True(sw.Elapsed.TotalSeconds < 5,
+            $"Expected timeout within ~2 s, but elapsed {sw.Elapsed.TotalSeconds:F1} s. The command did not respect the timeout.");
+    }
+}

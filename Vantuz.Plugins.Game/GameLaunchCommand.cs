@@ -59,9 +59,29 @@ public class GameLaunchCommand : ICommandPlugin
             // Build extra options from stepConfig
             var extraOptions = new Dictionary<string, object>();
             if (stepConfig.TryGetProperty("authlibPath", out var alp))
-                extraOptions["authlibPath"] = Interpolate(alp.GetString() ?? "", context);
+            {
+                string authlibPathValue = Interpolate(alp.GetString() ?? "", context);
+                if (authlibPathValue.Contains("{{"))
+                {
+                    context.Reporter.ReportState($"[WARN] authlibPath contains unresolved variable: {authlibPathValue}");
+                }
+                else
+                {
+                    extraOptions["authlibPath"] = authlibPathValue;
+                }
+            }
             if (stepConfig.TryGetProperty("authlibUrl", out var au))
-                extraOptions["authlibUrl"] = Interpolate(au.GetString() ?? "", context);
+            {
+                string authlibUrlValue = Interpolate(au.GetString() ?? "", context);
+                if (!string.IsNullOrWhiteSpace(authlibUrlValue) && !authlibUrlValue.Contains("example.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    extraOptions["authlibUrl"] = authlibUrlValue;
+                }
+                else if (authlibUrlValue.Contains("example.com", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Reporter.ReportState("[WARN] authlibUrl contains placeholder domain 'example.com'. Skipping authlib injection.");
+                }
+            }
 
             context.Reporter.ReportState($"Генерация аргументов запуска {versionName}...");
 

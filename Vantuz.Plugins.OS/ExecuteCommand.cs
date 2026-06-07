@@ -29,6 +29,13 @@ public class ExecuteCommand : ICommandPlugin
         arguments = Interpolate(arguments, context); 
         workDir = Interpolate(workDir, context); 
 
+        context.Reporter.ReportState($"[ExecuteCommand] waitForExit={waitForExit}, fileName={fileName}, workDir={workDir}");
+
+        if (fileName.Contains("{{") || arguments.Contains("{{") || workDir.Contains("{{"))
+        {
+            context.Reporter.ReportState("[WARN] OS.ExecuteCommand arguments contain unresolved {{...}} placeholders after interpolation.");
+        }
+
         // Skip real process launch in dry-run / test mode per INVARIANT_THEORY.md §1.2
         if (stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean())
         {
@@ -49,35 +56,42 @@ public class ExecuteCommand : ICommandPlugin
             Arguments = arguments, 
             WorkingDirectory = workDir, 
             UseShellExecute = false, 
-            RedirectStandardOutput = true, 
-            RedirectStandardError = true, 
             CreateNoWindow = true 
         }; 
- 
-        using var process = new Process { StartInfo = startInfo };
+
+        if (waitForExit)
+        {
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+        }
+
+        var process = new Process { StartInfo = startInfo };
 
         var stderrBuilder = new System.Text.StringBuilder();
 
-        // Перенаправляем вывод процесса в наш UI через Reporter
-        process.OutputDataReceived += (sender, e) => {
-            if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[OUT] {e.Data}");
-        };
-        process.ErrorDataReceived += (sender, e) => {
-            if (!string.IsNullOrWhiteSpace(e.Data))
-            {
-                context.Reporter.ReportState($"[ERR] {e.Data}");
-                stderrBuilder.AppendLine(e.Data);
-            }
-        }; 
+        if (waitForExit)
+        {
+            // Перенаправляем вывод процесса в наш UI через Reporter
+            process.OutputDataReceived += (sender, e) => {
+                if (!string.IsNullOrWhiteSpace(e.Data)) context.Reporter.ReportState($"[OUT] {e.Data}");
+            };
+            process.ErrorDataReceived += (sender, e) => {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    context.Reporter.ReportState($"[ERR] {e.Data}");
+                    stderrBuilder.AppendLine(e.Data);
+                }
+            }; 
+        }
  
         try 
         { 
             process.Start(); 
-            process.BeginOutputReadLine(); 
-            process.BeginErrorReadLine(); 
- 
+
             if (waitForExit)
             {
+                process.BeginOutputReadLine(); 
+                process.BeginErrorReadLine(); 
                 await process.WaitForExitAsync(context.CancellationToken);
 
                 if (process.ExitCode != 0)
@@ -91,22 +105,37 @@ public class ExecuteCommand : ICommandPlugin
             }
             else
             {
-                // Если мы не ждем завершения (например, запуск самой игры),
-                // просто даем процессу немного времени на старт перед тем, как отпустить конвейер
-                await Task.Delay(2000, context.CancellationToken);
+                // Fire-and-forget: do not redirect streams and do not Dispose while child is alive.
+                // Give process a brief grace period to detect immediate crash.
+                try
+                {
+                    await Task.Delay(2000, context.CancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Pipeline shutting down, ignore
+                }
+
                 if (process.HasExited && process.ExitCode != 0)
                 {
-                    var stderr = stderrBuilder.ToString().Trim();
-                    var details = string.IsNullOrEmpty(stderr)
-                        ? $""
-                        : $"\nStderr:\n{stderr}";
-                    return new CommandResult(false, $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode}){details}");
+                    return new CommandResult(false, $"Процесс крашнулся при запуске (ExitCode: {process.ExitCode})");
                 }
             } 
         } 
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return new CommandResult(false, $"Ошибка запуска процесса: {ex.Message}");
+        }
+        finally
+        {
+            if (waitForExit)
+            {
+#pragma warning disable ARM010 // Local Process variable; Dispose required to release handles after WaitForExit.
+                process.Dispose();
+#pragma warning restore ARM010
+            }
+            // If waitForExit == false, we intentionally do NOT dispose the Process
+            // while the child may still be running. .NET finalizer will reclaim handles.
         }
 
         return new CommandResult(true); 
