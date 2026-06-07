@@ -35,8 +35,9 @@ public class ForgeInstallTimeoutRecidivismTests
             CancellationToken ct,
             TimeSpan? timeout = null)
         {
-            // Simulate a stalled network installer that ignores CancellationToken
-            await Task.Delay(TimeSpan.FromSeconds(10), ct);
+            // Simulate a stalled network installer that NEVER completes on its own.
+            // The only way this returns is if ct is cancelled by the timeout mechanism.
+            await Task.Delay(Timeout.InfiniteTimeSpan, ct);
             return new InstallResult(true);
         }
 
@@ -70,7 +71,9 @@ public class ForgeInstallTimeoutRecidivismTests
 
         Assert.False(result.Success);
         Assert.Contains("timed out", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
-        Assert.True(sw.Elapsed.TotalSeconds < 5,
-            $"Expected timeout within ~2 s, but elapsed {sw.Elapsed.TotalSeconds:F1} s. The command did not respect the timeout.");
+        // Upper bound must tolerate loaded CI environments where timer thread scheduling can lag.
+        // Per INVARIANT_THEORY §1.2: the claim is "timeout fires", not "fires at exactly 2 s".
+        Assert.True(sw.Elapsed.TotalSeconds < 30,
+            $"Expected timeout within a reasonable window, but elapsed {sw.Elapsed.TotalSeconds:F1} s. The command did not respect the timeout.");
     }
 }

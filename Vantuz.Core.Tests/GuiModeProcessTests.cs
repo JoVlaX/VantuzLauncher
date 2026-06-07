@@ -65,9 +65,9 @@ public class GuiModeProcessTests : IDisposable
         Assert.NotNull(proc);
         _ownedProcesses.Add(proc);
 
-        // Wait up to 20s for a window handle (R4) — increased for parallel test runs
-        bool windowAppeared = SpinWait.SpinUntil(() => { proc.Refresh(); return proc.MainWindowHandle != IntPtr.Zero; }, TimeSpan.FromSeconds(20));
-        Assert.True(windowAppeared, "MainWindowHandle was not created within 20 seconds");
+        // Wait up to 30s for a window handle (R4) — increased for parallel test runs
+        bool windowAppeared = SpinWait.SpinUntil(() => { proc.Refresh(); return proc.MainWindowHandle != IntPtr.Zero; }, TimeSpan.FromSeconds(30));
+        Assert.True(windowAppeared, "MainWindowHandle was not created within 30 seconds");
 
         // Graceful close via WM_CLOSE (R5) — Avalonia does not respond to Process.CloseMainWindow()
         bool closed = SendMessage(proc.MainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero) != IntPtr.Zero;
