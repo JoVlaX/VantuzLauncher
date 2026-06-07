@@ -26,6 +26,8 @@
 - [ ] `dotnet run --project VantuzLauncher.csproj` — проходит
 - [ ] Все plugin DLLs скопированы в `output/plugins`
 - [ ] `boot.json` хеши совпадают с актуальными DLL
+- [ ] **PipelineNames** — все `pluginName` в `boot*.json` разрешаются в plugin class name
+- [ ] **GuiPipeline** — GUI pipeline (13 шагов) загружается без "Plugin X not found"
 
 **Критично:** Регрессия CS0579 / plugin-copy-order возможна только при `dotnet run`, но не при `dotnet build`. Обе проверки обязательны.
 
@@ -88,11 +90,18 @@
 - [ ] Boot manifests — валидный JSON
 - [ ] Plugin DLLs скопированы в output
 
-### 5. Runtime Verification (вручную)
+### 5. Runtime Verification
+
+**Automated (headless / CI):**
+- [ ] Headless pipeline (`boot.headless.json`) — `HeadlessSmokeTests` + `PipelinePositiveVerificationTests`
+- [ ] GUI pipeline resolution (`boot.json`) — `GuiPipelinePositiveVerificationTests` (13 steps resolve without "Plugin X not found")
+
+**Manual (only the user can perform):**
 - [ ] Launcher запускается без критических ошибок
-- [ ] Pipeline инициализируется
-- [ ] GUI (если применимо) отображается
-- [ ] Основной сценарий работает
+- [ ] GUI отображается
+- [ ] Кнопка «Играть» инициирует pipeline без crash
+
+> **Confidence Boundary:** AI can verify static correctness (compilation, name resolution, hash integrity) and headless pipeline execution. It cannot execute GUI applications or perform interactive testing. The automated tests reduce the manual surface to "does the GUI button work?" — a single interactive check per release.
 
 ---
 
@@ -133,4 +142,4 @@
 
 ---
 
-*Последнее обновление: 2026-06-03*
+*Последнее обновление: 2026-06-07*

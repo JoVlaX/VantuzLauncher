@@ -16,32 +16,32 @@ public class GameInstallerCommand : ICommandPlugin
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
+        // Get configuration from stepConfig per Armatura:44-45
+        string providerName = stepConfig.TryGetProperty("provider", out var prov)
+            ? Interpolate(prov.GetString() ?? "", context)
+            : throw new InvalidOperationException("provider is missing in stepConfig");
+
+        string versionName = stepConfig.TryGetProperty("version", out var vn)
+            ? Interpolate(vn.GetString() ?? "", context)
+            : throw new InvalidOperationException("version is missing in stepConfig");
+
+        string installDir = stepConfig.TryGetProperty("installDir", out var id)
+            ? Interpolate(id.GetString() ?? "", context)
+            : throw new InvalidOperationException("installDir is missing in stepConfig");
+
+        installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
+
+        TimeSpan timeout = TimeSpan.FromMinutes(5);
+        if (stepConfig.TryGetProperty("operationTimeout", out var otProp))
+        {
+            if (TimeSpan.TryParse(otProp.GetString(), out var parsedTimeout) && parsedTimeout > TimeSpan.Zero)
+            {
+                timeout = parsedTimeout;
+            }
+        }
+
         try
         {
-            // Get configuration from stepConfig per Armatura:44-45
-            string providerName = stepConfig.TryGetProperty("provider", out var prov)
-                ? Interpolate(prov.GetString() ?? "", context)
-                : throw new InvalidOperationException("provider is missing in stepConfig");
-
-            string versionName = stepConfig.TryGetProperty("version", out var vn)
-                ? Interpolate(vn.GetString() ?? "", context)
-                : throw new InvalidOperationException("version is missing in stepConfig");
-
-            string installDir = stepConfig.TryGetProperty("installDir", out var id)
-                ? Interpolate(id.GetString() ?? "", context)
-                : throw new InvalidOperationException("installDir is missing in stepConfig");
-
-            installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
-
-            TimeSpan timeout = TimeSpan.FromMinutes(5);
-            if (stepConfig.TryGetProperty("operationTimeout", out var otProp))
-            {
-                if (TimeSpan.TryParse(otProp.GetString(), out var parsedTimeout) && parsedTimeout > TimeSpan.Zero)
-                {
-                    timeout = parsedTimeout;
-                }
-            }
-
             // Check dryRun mode per INVARIANT_THEORY.md §1.2 Measurability - test must not mutate state
             bool dryRun = stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean();
             if (dryRun)

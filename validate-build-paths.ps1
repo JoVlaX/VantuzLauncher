@@ -26,6 +26,12 @@
 .PARAMETER AssertBootJsonIntegrity
     Only validate boot.json hashes match actual plugin DLLs.
 
+.PARAMETER AssertPipelineNames
+    Only validate that every boot.json pipeline pluginName resolves to a discovered plugin class.
+
+.PARAMETER AssertGuiPipeline
+    Only validate GUI pipeline via dotnet test (GuiPipelinePositiveVerificationTests).
+
 .EXAMPLE
     .\validate-build-paths.ps1
 
@@ -40,7 +46,8 @@ param(
     [switch]$AssertTestResult,
     [switch]$AssertPluginsCopied,
     [switch]$AssertBootJsonIntegrity,
-    [switch]$AssertPipelineNames
+    [switch]$AssertPipelineNames,
+    [switch]$AssertGuiPipeline
 )
 
 # ============================================
@@ -75,7 +82,7 @@ $colors = @{
 }
 
 # Default to AssertAll if no specific flag given
-if (-not ($AssertCleanBuild -or $AssertDotNetRun -or $AssertTestResult -or $AssertPluginsCopied -or $AssertBootJsonIntegrity -or $AssertPipelineNames)) {
+if (-not ($AssertCleanBuild -or $AssertDotNetRun -or $AssertTestResult -or $AssertPluginsCopied -or $AssertBootJsonIntegrity -or $AssertPipelineNames -or $AssertGuiPipeline)) {
     $AssertAll = $true
 }
 
@@ -229,6 +236,28 @@ function Invoke-PipelineNamesCheck {
     return @{ Passed = $true; Message = "All pipeline pluginNames verified in all manifests against plugin DLLs" }
 }
 
+function Invoke-GuiPipelineCheck {
+    Write-Host "`n[Assert-GuiPipeline] Running GUI pipeline resolution tests..." -ForegroundColor $colors.Info
+
+    $testProj = Join-Path $scriptDir "Vantuz.Core.Tests\Vantuz.Core.Tests.csproj"
+    if (-not (Test-Path $testProj)) {
+        return @{ Passed = $false; Message = "Vantuz.Core.Tests.csproj not found at $testProj" }
+    }
+
+    # Build test project first (ensures boot.json and plugins exist)
+    & dotnet build $testProj --verbosity quiet 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        return @{ Passed = $false; Message = "Failed to build Vantuz.Core.Tests" }
+    }
+
+    & dotnet test $testProj --filter "FullyQualifiedName~GuiPipelinePositiveVerificationTests" --no-build --verbosity quiet 2>&1 | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+    if ($LASTEXITCODE -ne 0) {
+        return @{ Passed = $false; Message = "GUI pipeline resolution tests failed (see output above)" }
+    }
+
+    return @{ Passed = $true; Message = "GUI pipeline resolution tests passed (13 steps resolve, no 'Plugin not found' crash)" }
+}
+
 function Invoke-BootJsonIntegrityCheck {
     Write-Host "`n[Assert-BootJsonIntegrity] Checking boot.json hashes..." -ForegroundColor $colors.Info
 
@@ -309,6 +338,12 @@ if ($AssertBootJsonIntegrity -or $AssertAll) {
 if ($AssertPipelineNames -or $AssertAll) {
     $r = Invoke-PipelineNamesCheck
     $results += [PSCustomObject]@{ Assertion = "PipelineNames"; Passed = $r.Passed; Message = $r.Message }
+    if (-not $r.Passed) { $allPassed = $false }
+}
+
+if ($AssertGuiPipeline -or $AssertAll) {
+    $r = Invoke-GuiPipelineCheck
+    $results += [PSCustomObject]@{ Assertion = "GuiPipeline"; Passed = $r.Passed; Message = $r.Message }
     if (-not $r.Passed) { $allPassed = $false }
 }
 

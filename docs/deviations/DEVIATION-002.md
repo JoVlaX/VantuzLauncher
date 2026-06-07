@@ -96,6 +96,25 @@
 - [x] Update `validate-build-paths.ps1` `Assert-PipelineNames` to use `verify-dir`
 - [x] Per-manifest reporting: each manifest verified independently with name count
 
+### Phase 8: Runtime Crash Retrospective (2026-06-03–06-07) ✅
+- [x] **Root cause identified:** `Plugin Net.ApiReaderQuery not found` — `boot.json pipeline[].pluginName` drifted from plugin class `Name` property (`Net.ApiReader`)
+- [x] **Systemic audit:** 11 plugins had similar drift (`Net.Update`→`Net.UpdateCommand`, `OS.Execute`→`OS.ExecuteCommand`, etc.)
+- [x] **Fix:** Aligned all plugin `Name` properties with `boot.json` pipeline references
+- [x] **Secondary fix:** `GameInstallerCommand.cs:115` — `timeout` variable used in `catch` block but declared inside `try` scope (CS0103). Moved declaration before `try`
+- [x] **Why validation missed it:** `dotnet build` doesn't verify string semantics; `boot.headless.json` uses smaller pipeline that didn't include `Net.ApiReaderQuery`; no build-time cross-reference existed between pipeline names and plugin class names
+- [x] **Prevention:** `ARM-BUILD-020` `VerifyPluginNames` MSBuild target now fails the build if any pipeline `pluginName` doesn't resolve to a discovered plugin class
+- [x] **Validation:** `validate-build-paths.ps1 -AssertAll` now includes `Assert-PipelineNames` covering both `boot.json` (GUI) and `boot.headless.json` (headless)
+
+### Phase 9: GUI Pipeline Automated Verification (2026-06-07) ✅
+- [x] **Problem identified:** AI cannot execute `VantuzLauncher.exe` or click "Играть". Confidence in "GUI works" was based on headless tests (5 steps) that never touched the GUI pipeline (13 steps).
+- [x] **Solution:** `GuiPipelinePositiveVerificationTests.cs` — headless test that loads `boot.json`, instantiates `VantuzEngine`, and via reflection invokes `BuildQuantumPipeline` to prove all 13 plugin names resolve to loaded `QuantizedNode` instances.
+- [x] **Secondary test:** `GuiPipeline_ExecutesWithoutPluginNotFoundCrash` — runs `RunAsync` with a 3-second cancellation to prove the engine starts the pipeline and does NOT crash with "Plugin X not found".
+- [x] **Integration:** `validate-build-paths.ps1 -AssertGuiPipeline` runs `dotnet test --filter GuiPipelinePositiveVerificationTests` and reports in the validation summary.
+- [x] **Confidence Boundary documented:**
+  - AI can verify: static correctness (compilation, name resolution, hash integrity), headless pipeline execution (5 steps), GUI pipeline resolution (13 steps via reflection)
+  - Only user can verify: interactive GUI button-click behavior
+  - Manual surface reduced to a single interactive check per release.
+
 ### Phase 6: Plugin Name Verification (2026-06-03) ✅
 - [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
 - [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)
