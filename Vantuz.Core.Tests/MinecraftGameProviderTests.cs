@@ -314,6 +314,67 @@ public class MinecraftGameProviderTests
         }
     }
 
+    /// <summary>
+    /// E_doc: When Forge is not yet installed, InstallVersionAsync calls ForgeInstaller.Install
+    /// then calls launcher.InstallAsync to download libraries, then VerifyForgeLibraries.
+    /// F_doc: This is the critical path that was missing in Phases 16-17, causing missing libraries.
+    /// </summary>
+    [Fact]
+    public async Task InstallVersionAsync_ForgePath_CallsLibraryResolver()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_mc_test_{Guid.NewGuid():N}");
+        string mcDir = Path.Combine(tempDir, ".minecraft");
+        string versionsDir = Path.Combine(mcDir, "versions", "1.20.1-forge-47.3.0");
+        Directory.CreateDirectory(versionsDir);
+        string versionJsonPath = Path.Combine(versionsDir, "1.20.1-forge-47.3.0.json");
+
+        // Create all critical libraries + vanilla JAR so VerifyForgeLibraries passes
+        string bootstrapDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "bootstraplauncher", "1.1.2");
+        Directory.CreateDirectory(bootstrapDir);
+        await File.WriteAllBytesAsync(Path.Combine(bootstrapDir, "bootstraplauncher-1.1.2.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string secureDir = Path.Combine(mcDir, "libraries", "cpw", "mods", "securejarhandler", "2.1.10");
+        Directory.CreateDirectory(secureDir);
+        await File.WriteAllBytesAsync(Path.Combine(secureDir, "securejarhandler-2.1.10.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string fmlLoaderDir = Path.Combine(mcDir, "libraries", "net", "minecraftforge", "fmlloader", "1.20.1-47.3.0");
+        Directory.CreateDirectory(fmlLoaderDir);
+        await File.WriteAllBytesAsync(Path.Combine(fmlLoaderDir, "fmlloader-1.20.1-47.3.0.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        string vanillaDir = Path.Combine(mcDir, "versions", "1.20.1");
+        Directory.CreateDirectory(vanillaDir);
+        await File.WriteAllBytesAsync(Path.Combine(vanillaDir, "1.20.1.jar"), new byte[] { 0x50, 0x4B, 0x03, 0x04 });
+
+        await File.WriteAllTextAsync(versionJsonPath, MakeForgeJson());
+
+        var provider = new MinecraftGameProvider();
+        string? libraryInstallerVersion = null;
+
+        // Fake ForgeInstaller: returns the version name without doing network I/O
+        provider.ForgeInstallOverride = (mcVersion, forgeVersion, options) => Task.FromResult("1.20.1-forge-47.3.0");
+
+        // Fake LibraryInstaller: records the call and returns immediately
+        provider.LibraryInstaller = (launcher, installedName) =>
+        {
+            libraryInstallerVersion = installedName;
+            return Task.CompletedTask;
+        };
+
+        try
+        {
+            var reporter = new ListReporter();
+            var result = await provider.InstallVersionAsync("1.20.1-forge-47.3.0", mcDir, reporter, default, TimeSpan.FromSeconds(30));
+
+            Assert.True(result.Success, $"Expected Success=true but got: {result.ErrorMessage}");
+            Assert.NotNull(libraryInstallerVersion);
+            Assert.Equal("1.20.1-forge-47.3.0", libraryInstallerVersion);
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+    }
+
     private class ListReporter : IStatusReporter
     {
         public List<string> Logs { get; } = new();

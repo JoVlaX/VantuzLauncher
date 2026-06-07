@@ -291,6 +291,14 @@
   4. `InstallVersionAsync` returned failure, pipeline failed
 - [x] **Root cause:** `ForgeInstaller.Install` (from CmlLib) creates the version JSON and downloads the Forge-specific `fmlloader` library, but does NOT download the remaining libraries referenced in the JSON (`bootstraplauncher`, `securejarhandler`, dozens of others). The vanilla path correctly calls `launcher.InstallAsync(version)` which resolves and downloads all libraries. The Forge path was missing this step entirely. The agent assumed "ForgeInstaller completed = all artifacts present."
 - [x] **Fix — InstallVersionAsync (Forge path):** After `ForgeInstaller.Install` returns, call `await launcher.InstallAsync(installedName)` to run CmlLib's library resolver, which downloads ALL artifacts declared in the version JSON. Only after this completes do we run `VerifyForgeLibraries`.
+- [x] **Claims with Falsifier Sets (per INVARIANT_THEORY §4.1a):**
+
+| Claim | F_doc (what falsifies?) | E_doc (how to verify?) |
+|-------|-------------------------|------------------------|
+| "ForgeInstaller.Install does NOT download all libraries" | CmlLib source shows `Install` only creates JSON + downloads fmlloader JAR | `grep -n 'launcher.InstallAsync' MinecraftGameProvider.cs` confirms call exists at line 190 |
+| "launcher.InstallAsync downloads remaining artifacts" | CmlLib documentation / source for `MinecraftLauncher.InstallAsync` | `dotnet test --filter "InstallVersionAsync_ForgePath_CallsLibraryResolver"` asserts `LibraryInstaller` hook is invoked |
+| "VerifyForgeLibraries checks all critical libraries" | Delete `bootstraplauncher` JAR and run `CheckVersionAsync` → returns `Exists=false` | `dotnet test --filter "CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse"` passes |
+
 - [x] **Confidence Boundary updated:**
   - **Lesson:** Installer completion ≠ all artifacts present. The downstream launch consumer's requirements must be verified. `ForgeInstaller.Install` and `launcher.InstallAsync` are two distinct steps with distinct responsibilities; omitting either creates an incomplete installation.
 

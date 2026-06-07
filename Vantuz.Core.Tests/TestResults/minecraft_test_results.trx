@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="8494788f-a313-4deb-af30-4821688c1144" name="1@DESKTOP-NTADQTR 2026-06-07 20:46:28" runUser="DESKTOP-NTADQTR\1" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-06-07T20:46:28.1191562+05:00" queuing="2026-06-07T20:46:28.1191569+05:00" start="2026-06-07T20:46:23.0439240+05:00" finish="2026-06-07T20:46:31.6316446+05:00" />
+  <TestSettings name="default" id="961f5287-9361-40ea-860e-ce17734ac1d3">
+    <Deployment runDeploymentRoot="1_DESKTOP-NTADQTR_2026-06-07_20_46_28" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="00fde148-18c2-4cba-be16-e43a7e1fe184" testId="8b3bf037-cef9-fafc-a3a4-5384c3a08276" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple" computerName="DESKTOP-NTADQTR" duration="00:00:00.0003128" startTime="2026-06-07T20:46:31.4270562+05:00" endTime="2026-06-07T20:46:31.4270564+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="00fde148-18c2-4cba-be16-e43a7e1fe184" />
+    <UnitTestResult executionId="e8ab5920-1569-4c1b-9b4c-933415786210" testId="5db4cf82-8321-f730-2893-cc3c45813804" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaComplete_ReturnsTrue" computerName="DESKTOP-NTADQTR" duration="00:00:00.0193303" startTime="2026-06-07T20:46:31.4265372+05:00" endTime="2026-06-07T20:46:31.4265377+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e8ab5920-1569-4c1b-9b4c-933415786210" />
+    <UnitTestResult executionId="b586f96a-06e1-4486-b955-0e776721f1f5" testId="750abeff-0014-b470-5d16-6f124c7e2219" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.0307266" startTime="2026-06-07T20:46:26.8694968+05:00" endTime="2026-06-07T20:46:26.8694973+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b586f96a-06e1-4486-b955-0e776721f1f5" />
+    <UnitTestResult executionId="16954b9e-4894-4bec-8975-6810f58dff2f" testId="b176c4ce-c811-cce4-ac28-b5b7914e0234" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall" computerName="DESKTOP-NTADQTR" duration="00:00:00.0866387" startTime="2026-06-07T20:46:26.8316482+05:00" endTime="2026-06-07T20:46:26.8316487+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16954b9e-4894-4bec-8975-6810f58dff2f" />
+    <UnitTestResult executionId="b7c4f466-98eb-49f1-a2bf-29942973e6be" testId="832ece00-ee0a-69a6-edd0-a3ed2f24d9d0" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_StandardFormat_ReturnsCorrectTuple" computerName="DESKTOP-NTADQTR" duration="00:00:00.0026674" startTime="2026-06-07T20:46:26.8724228+05:00" endTime="2026-06-07T20:46:26.8724233+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b7c4f466-98eb-49f1-a2bf-29942973e6be" />
+    <UnitTestResult executionId="3c1b9c20-c2a3-48d3-b830-b9e1078dfd3e" testId="0f49cba4-113b-2eb7-96b2-923831f9ba8b" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaIncomplete_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.0118361" startTime="2026-06-07T20:46:26.7179883+05:00" endTime="2026-06-07T20:46:26.7179888+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3c1b9c20-c2a3-48d3-b830-b9e1078dfd3e" />
+    <UnitTestResult executionId="6c0692ba-3dbe-4ba5-893d-498ac18f226c" testId="4e15d8b7-2cb0-fbe2-3892-686544d81391" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver" computerName="DESKTOP-NTADQTR" duration="00:00:04.5077803" startTime="2026-06-07T20:46:31.4151245+05:00" endTime="2026-06-07T20:46:31.4151248+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6c0692ba-3dbe-4ba5-893d-498ac18f226c">
+      <Output>
+        <ErrorInfo>
+          <Message>Expected Success=true but got: Ошибка установки 1.20.1-forge-47.3.0: Object reference not set to an instance of an object.</Message>
+          <StackTrace>   at Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver() in c:\000\projects\compositum\Vantuz.Core.Tests\MinecraftGameProviderTests.cs:line 368&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c748e023-1f87-41fe-b697-65a3116464be" testId="32f63f73-7a95-9fa9-216d-6f69ff396a0e" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeIncomplete_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.0267634" startTime="2026-06-07T20:46:26.7448199+05:00" endTime="2026-06-07T20:46:26.7448204+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c748e023-1f87-41fe-b697-65a3116464be" />
+    <UnitTestResult executionId="09a10af1-af86-4bed-b640-80929029b290" testId="9c059e81-9071-1b78-15ed-b760acef5ff4" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeComplete_ReturnsTrue" computerName="DESKTOP-NTADQTR" duration="00:00:00.1954421" startTime="2026-06-07T20:46:26.7031030+05:00" endTime="2026-06-07T20:46:26.7031709+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="09a10af1-af86-4bed-b640-80929029b290" />
+    <UnitTestResult executionId="6203b0d1-1428-468e-830b-da619e7f463e" testId="82ecfb8e-1b87-c4ea-86dc-025e57f653c8" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_MissingVersion_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.0057290" startTime="2026-06-07T20:46:26.8385618+05:00" endTime="2026-06-07T20:46:26.8385653+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6203b0d1-1428-468e-830b-da619e7f463e" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="b176c4ce-c811-cce4-ac28-b5b7914e0234">
+      <Execution id="16954b9e-4894-4bec-8975-6810f58dff2f" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_StandardFormat_ReturnsCorrectTuple" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="832ece00-ee0a-69a6-edd0-a3ed2f24d9d0">
+      <Execution id="b7c4f466-98eb-49f1-a2bf-29942973e6be" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="ParseForgeVersion_StandardFormat_ReturnsCorrectTuple" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaIncomplete_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="0f49cba4-113b-2eb7-96b2-923831f9ba8b">
+      <Execution id="3c1b9c20-c2a3-48d3-b830-b9e1078dfd3e" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_VanillaIncomplete_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="750abeff-0014-b470-5d16-6f124c7e2219">
+      <Execution id="b586f96a-06e1-4486-b955-0e776721f1f5" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeComplete_ReturnsTrue" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="9c059e81-9071-1b78-15ed-b760acef5ff4">
+      <Execution id="09a10af1-af86-4bed-b640-80929029b290" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_ForgeComplete_ReturnsTrue" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="4e15d8b7-2cb0-fbe2-3892-686544d81391">
+      <Execution id="6c0692ba-3dbe-4ba5-893d-498ac18f226c" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="InstallVersionAsync_ForgePath_CallsLibraryResolver" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeIncomplete_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="32f63f73-7a95-9fa9-216d-6f69ff396a0e">
+      <Execution id="c748e023-1f87-41fe-b697-65a3116464be" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_ForgeIncomplete_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaComplete_ReturnsTrue" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="5db4cf82-8321-f730-2893-cc3c45813804">
+      <Execution id="e8ab5920-1569-4c1b-9b4c-933415786210" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_VanillaComplete_ReturnsTrue" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="8b3bf037-cef9-fafc-a3a4-5384c3a08276">
+      <Execution id="00fde148-18c2-4cba-be16-e43a7e1fe184" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_MissingVersion_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="82ecfb8e-1b87-c4ea-86dc-025e57f653c8">
+      <Execution id="6203b0d1-1428-468e-830b-da619e7f463e" />
+      <TestMethod codeBase="C:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_MissingVersion_ReturnsFalse" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="8b3bf037-cef9-fafc-a3a4-5384c3a08276" executionId="00fde148-18c2-4cba-be16-e43a7e1fe184" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5db4cf82-8321-f730-2893-cc3c45813804" executionId="e8ab5920-1569-4c1b-9b4c-933415786210" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="750abeff-0014-b470-5d16-6f124c7e2219" executionId="b586f96a-06e1-4486-b955-0e776721f1f5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b176c4ce-c811-cce4-ac28-b5b7914e0234" executionId="16954b9e-4894-4bec-8975-6810f58dff2f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="832ece00-ee0a-69a6-edd0-a3ed2f24d9d0" executionId="b7c4f466-98eb-49f1-a2bf-29942973e6be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f49cba4-113b-2eb7-96b2-923831f9ba8b" executionId="3c1b9c20-c2a3-48d3-b830-b9e1078dfd3e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e15d8b7-2cb0-fbe2-3892-686544d81391" executionId="6c0692ba-3dbe-4ba5-893d-498ac18f226c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="32f63f73-7a95-9fa9-216d-6f69ff396a0e" executionId="c748e023-1f87-41fe-b697-65a3116464be" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c059e81-9071-1b78-15ed-b760acef5ff4" executionId="09a10af1-af86-4bed-b640-80929029b290" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="82ecfb8e-1b87-c4ea-86dc-025e57f653c8" executionId="6203b0d1-1428-468e-830b-da619e7f463e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Список результатов" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Все загруженные результаты" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="10" executed="10" passed="9" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.7+8f2703126a (64-bit .NET 8.0.26)&#xD;
+[xUnit.net 00:00:00.49]   Discovering: Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:01.07]   Discovered:  Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:01.09]   Starting:    Vantuz.Core.Tests&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_cf8b90ded63543c5b682b7839a328621\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=True, missingDetail=&#xD;
+[DIAG CheckVersionAsync] versionExists=True&#xD;
+[DIAG CheckVersionAsync] VANILLA version=1.20.1&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_0770e41c591a4dce8e0cbeb503553b8b\.minecraft\versions\1.20.1\1.20.1.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] jarPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_0770e41c591a4dce8e0cbeb503553b8b\.minecraft\versions\1.20.1\1.20.1.jar, jarExists=False&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_2d8c390637d943509341c5897fc6fcbc\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=missing or empty library: net.minecraftforge:fmlloader at C:\Users\1\AppData\Local\Temp\vantuz_mc_test_2d8c390637d943509341c5897fc6fcbc\.minecraft\libraries\net\minecraftforge\fmlloader\1.20.1-47.3.0\fmlloader-1.20.1-47.3.0.jar&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_8cd01e9943f14efda99ae552ab61412a\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=True, missingDetail=&#xD;
+[DIAG CheckVersionAsync] versionExists=True&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_e86f87955ae14f259d8b5fe0649d9959\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=False&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=version JSON missing&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_0e95c3e21d374f1d97cff8f0b46efa22\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=missing or empty library: cpw.mods:bootstraplauncher at C:\Users\1\AppData\Local\Temp\vantuz_mc_test_0e95c3e21d374f1d97cff8f0b46efa22\.minecraft\libraries\cpw\mods\bootstraplauncher\1.1.2\bootstraplauncher-1.1.2.jar&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG InstallVersionAsync] Parsed: version=1.20.1-forge-47.3.0, mcVersion=1.20.1, forgeVersion=47.3.0, installDir=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_3eae450e50c94ab1a73f666cc19f2baf\.minecraft&#xD;
+[DIAG InstallVersionAsync] ForgeInstaller timeout=0 min, SkipIfAlreadyInstalled=true&#xD;
+[DIAG ForgeInstaller] Calling Install(mcVersion=1.20.1, forgeVersion=47.3.0)&#xD;
+[DIAG ForgeInstaller] Install completed, returned=System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.String,CmlLib.Core.Installer.Forge.ForgeInstaller+&lt;Install&gt;d__10]&#xD;
+[xUnit.net 00:00:06.37]       Expected Success=true but got: Ошибка установки 1.20.1-forge-47.3.0: Object reference not set to an instance of an object.&#xD;
+[xUnit.net 00:00:06.37]       Stack Trace:&#xD;
+[xUnit.net 00:00:06.37]         c:\000\projects\compositum\Vantuz.Core.Tests\MinecraftGameProviderTests.cs(368,0): at Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver()&#xD;
+[xUnit.net 00:00:06.38]         --- End of stack trace from previous location ---&#xD;
+[DIAG CheckVersionAsync] VANILLA version=1.20.1&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_90863b38b8324d7695121baade82f8a5\.minecraft\versions\1.20.1\1.20.1.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] jarPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_90863b38b8324d7695121baade82f8a5\.minecraft\versions\1.20.1\1.20.1.jar, jarExists=True&#xD;
+[DIAG CheckVersionAsync] versionExists=True&#xD;
+[xUnit.net 00:00:06.41]   Finished:    Vantuz.Core.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-NTADQTR" outcome="Error" timestamp="2026-06-07T20:46:31.4092404+05:00">
+        <Text>[xUnit.net 00:00:06.37]     Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

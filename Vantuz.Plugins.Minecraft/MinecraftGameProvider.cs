@@ -23,6 +23,12 @@ public class MinecraftGameProvider : IGameProvider
 {
     public string ProviderName => "Minecraft";
 
+    // Internal hooks for unit testing the Forge install path.
+    // Production code leaves these null; default behavior delegates to CmlLib.
+    internal Func<MinecraftLauncher, ForgeInstaller>? ForgeInstallerFactory { get; set; }
+    internal Func<MinecraftLauncher, string, Task>? LibraryInstaller { get; set; }
+    internal Func<string, string, ForgeInstallOptions, Task<string>>? ForgeInstallOverride { get; set; }
+
     public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
     {
         try
@@ -102,7 +108,7 @@ public class MinecraftGameProvider : IGameProvider
                 Console.WriteLine($"[DIAG InstallVersionAsync] Parsed: version={version}, mcVersion={mcVersion}, forgeVersion={forgeVersion}, installDir={absInstallDir}");
                 Console.WriteLine($"[DIAG InstallVersionAsync] ForgeInstaller timeout={(timeout?.TotalMinutes ?? 5):F0} min, SkipIfAlreadyInstalled=true");
 
-                var forgeInstaller = new ForgeInstaller(launcher);
+                var forgeInstaller = ForgeInstallerFactory?.Invoke(launcher) ?? new ForgeInstaller(launcher);
 
                 var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 if (timeout.HasValue && timeout.Value > TimeSpan.Zero)
@@ -138,12 +144,12 @@ public class MinecraftGameProvider : IGameProvider
 
                 try
                 {
-                    var installTask = Task.Run(() =>
+                    var installTask = Task.Run(async () =>
                     {
                         try
                         {
                             Console.WriteLine($"[DIAG ForgeInstaller] Calling Install(mcVersion={mcVersion}, forgeVersion={forgeVersion})");
-                            var installedName = forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
+                            var forgeOptions = new ForgeInstallOptions
                             {
                                 FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
                                 {
@@ -162,7 +168,10 @@ public class MinecraftGameProvider : IGameProvider
                                     reporter.ReportProgress($"Скачивание Forge {forgeVersion}", progress);
                                 }),
                                 SkipIfAlreadyInstalled = true
-                            });
+                            };
+                            var installedName = ForgeInstallOverride != null
+                                ? await ForgeInstallOverride(mcVersion, forgeVersion, forgeOptions)
+                                : await forgeInstaller.Install(mcVersion, forgeVersion, forgeOptions);
                             Console.WriteLine($"[DIAG ForgeInstaller] Install completed, returned={installedName}");
                             return installedName;
                         }
@@ -187,7 +196,10 @@ public class MinecraftGameProvider : IGameProvider
                         // (bootstraplauncher, securejarhandler, etc.) before launch.
                         reporter.ReportState($"Загрузка библиотек Forge для {installedName}...");
                         Console.WriteLine($"[DIAG InstallVersionAsync] Running launcher.InstallAsync({installedName}) to download libraries...");
-                        await launcher.InstallAsync(installedName);
+                        if (LibraryInstaller != null)
+                            await LibraryInstaller(launcher, installedName);
+                        else
+                            await launcher.InstallAsync(installedName);
                         Console.WriteLine($"[DIAG InstallVersionAsync] launcher.InstallAsync completed");
 
                         // Post-install verification: parse version JSON and verify all critical libraries.
