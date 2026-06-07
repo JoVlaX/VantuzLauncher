@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="e01b511d-60b2-4e0a-a41f-8f3d42a6d330" name="1@DESKTOP-NTADQTR 2026-06-07 12:13:34" runUser="DESKTOP-NTADQTR\1" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-06-07T12:13:34.6479174+05:00" queuing="2026-06-07T12:13:34.6479180+05:00" start="2026-06-07T12:13:32.6172816+05:00" finish="2026-06-07T12:13:34.8096567+05:00" />
+  <TestSettings name="default" id="caeba922-43dc-4184-bde8-a43f547351c4">
+    <Deployment runDeploymentRoot="1_DESKTOP-NTADQTR_2026-06-07_12_13_34" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="8972fcbb-03e1-4694-8263-2bec9e9dd3c6" testId="d3dac384-ae1f-5876-07f2-1bcf0e9f9683" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_DependentVariables_ResolvesInOrder" computerName="DESKTOP-NTADQTR" duration="00:00:00.0008585" startTime="2026-06-07T12:13:34.4521029+05:00" endTime="2026-06-07T12:13:34.4521033+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8972fcbb-03e1-4694-8263-2bec9e9dd3c6" />
+    <UnitTestResult executionId="61b8a668-c1f4-4a5e-bf1c-e379938e62b0" testId="8d9f625b-eca0-caaf-80b7-0208b4fb0a84" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_SpecialFolder_Resolves" computerName="DESKTOP-NTADQTR" duration="00:00:00.0019427" startTime="2026-06-07T12:13:34.4518901+05:00" endTime="2026-06-07T12:13:34.4518904+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="61b8a668-c1f4-4a5e-bf1c-e379938e62b0" />
+    <UnitTestResult executionId="5eb37dcf-e3be-4c15-b0d9-1d95194ff31e" testId="75cfac8b-3249-a70b-7150-059b815e7279" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_RealisticBootJson_NoUnresolvedPlaceholders" computerName="DESKTOP-NTADQTR" duration="00:00:00.0617804" startTime="2026-06-07T12:13:34.4417757+05:00" endTime="2026-06-07T12:13:34.4418418+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5eb37dcf-e3be-4c15-b0d9-1d95194ff31e" />
+    <UnitTestResult executionId="37a530f7-e9e1-4e71-b958-61c5416294e1" testId="8f30efbc-7e3d-ab47-0825-e02fd91dce70" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_PayloadOverridesVariable" computerName="DESKTOP-NTADQTR" duration="00:00:00.0003778" startTime="2026-06-07T12:13:34.4525745+05:00" endTime="2026-06-07T12:13:34.4525747+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="37a530f7-e9e1-4e71-b958-61c5416294e1" />
+    <UnitTestResult executionId="079f5cc8-01cb-426d-bdfc-fcd689e8aca6" testId="4852611b-0209-d6fb-14e1-c9b26927339e" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingInstallDir_ReturnsFailureWithClearMessage" computerName="DESKTOP-NTADQTR" duration="00:00:00.0017807" startTime="2026-06-07T12:13:34.4716785+05:00" endTime="2026-06-07T12:13:34.4716788+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="079f5cc8-01cb-426d-bdfc-fcd689e8aca6" />
+    <UnitTestResult executionId="2fcb4d86-58c1-49c1-ab7c-e44716c04c26" testId="2ede7db6-f9e3-8c2c-4030-c3ebeefecce1" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_ChainedDependencies_ResolvesTransitively" computerName="DESKTOP-NTADQTR" duration="00:00:00.0008419" startTime="2026-06-07T12:13:34.4522786+05:00" endTime="2026-06-07T12:13:34.4522788+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2fcb4d86-58c1-49c1-ab7c-e44716c04c26" />
+    <UnitTestResult executionId="2b28760e-f678-4a22-bdfc-06fd1ff9bb63" testId="eea26664-1b21-7fc4-cfb6-14b6b0a52392" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_UnresolvedPlaceholder_ReturnsFailureWithClearMessage" computerName="DESKTOP-NTADQTR" duration="00:00:00.0011471" startTime="2026-06-07T12:13:34.5866122+05:00" endTime="2026-06-07T12:13:34.5866127+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2b28760e-f678-4a22-bdfc-06fd1ff9bb63" />
+    <UnitTestResult executionId="227fa116-d955-437e-91b3-c47c77cb1677" testId="8ed1f628-546a-9be4-9711-360f50e39ac9" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_CircularDependency_DoesNotHang" computerName="DESKTOP-NTADQTR" duration="00:00:00.0008929" startTime="2026-06-07T12:13:34.4509185+05:00" endTime="2026-06-07T12:13:34.4509187+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="227fa116-d955-437e-91b3-c47c77cb1677" />
+    <UnitTestResult executionId="90091799-07d6-409a-9d06-a8c97d6b3730" testId="29e75204-ae1f-90d0-2658-3545ee5766ca" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingJava_ReturnsFailureWithClearMessage" computerName="DESKTOP-NTADQTR" duration="00:00:00.0059016" startTime="2026-06-07T12:13:34.6754271+05:00" endTime="2026-06-07T12:13:34.6754278+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="90091799-07d6-409a-9d06-a8c97d6b3730" />
+    <UnitTestResult executionId="68943ea0-3090-424f-b04d-d2e4580b7fef" testId="c51b34ef-4ac0-f70c-a4c5-b3f89b14361b" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders" computerName="DESKTOP-NTADQTR" duration="00:00:00.0825474" startTime="2026-06-07T12:13:34.6693568+05:00" endTime="2026-06-07T12:13:34.6693574+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="68943ea0-3090-424f-b04d-d2e4580b7fef" />
+    <UnitTestResult executionId="eb84dfd3-82f5-4ec4-80ba-d82f3ed554ea" testId="377fa45c-ab02-859b-ac30-5585751c9fce" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider" computerName="DESKTOP-NTADQTR" duration="00:00:00.0634365" startTime="2026-06-07T12:13:34.4710404+05:00" endTime="2026-06-07T12:13:34.4710409+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eb84dfd3-82f5-4ec4-80ba-d82f3ed554ea">
+      <Output>
+        <ErrorInfo>
+          <Message>Assert.DoesNotContain() Failure: Sub-string found&#xD;
+                                     ↓ (pos 91)&#xD;
+String: ···"sts\\bin\\Debug\\net8.0\\{{mcDir}}\\.minecraft"&#xD;
+Found:  "{{mcDir}}"</Message>
+          <StackTrace>   at Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider() in c:\000\projects\compositum\Vantuz.Core.Tests\LaunchArgumentValidationTests.cs:line 220&#xD;
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="b73407c6-3121-468c-915b-605e5003182a" testId="f8b02280-d58f-52cd-2ac9-ef5216be18cb" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_DummyExecutable_ReturnsSuccess" computerName="DESKTOP-NTADQTR" duration="00:00:00.1149472" startTime="2026-06-07T12:13:34.5826388+05:00" endTime="2026-06-07T12:13:34.5826394+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b73407c6-3121-468c-915b-605e5003182a" />
+    <UnitTestResult executionId="699b618c-7203-4490-bde6-209c13da6e98" testId="caedb91e-215d-ab53-d2d2-ea06de83613b" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_EnvironmentVariable_Resolves" computerName="DESKTOP-NTADQTR" duration="00:00:00.0004470" startTime="2026-06-07T12:13:34.4524309+05:00" endTime="2026-06-07T12:13:34.4524311+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="699b618c-7203-4490-bde6-209c13da6e98" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_RealisticBootJson_NoUnresolvedPlaceholders" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="75cfac8b-3249-a70b-7150-059b815e7279">
+      <Execution id="5eb37dcf-e3be-4c15-b0d9-1d95194ff31e" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_RealisticBootJson_NoUnresolvedPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="c51b34ef-4ac0-f70c-a4c5-b3f89b14361b">
+      <Execution id="68943ea0-3090-424f-b04d-d2e4580b7fef" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_UnresolvedPlaceholder_ReturnsFailureWithClearMessage" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="eea26664-1b21-7fc4-cfb6-14b6b0a52392">
+      <Execution id="2b28760e-f678-4a22-bdfc-06fd1ff9bb63" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="ExecuteCommand_UnresolvedPlaceholder_ReturnsFailureWithClearMessage" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="377fa45c-ab02-859b-ac30-5585751c9fce">
+      <Execution id="eb84dfd3-82f5-4ec4-80ba-d82f3ed554ea" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_DummyExecutable_ReturnsSuccess" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="f8b02280-d58f-52cd-2ac9-ef5216be18cb">
+      <Execution id="b73407c6-3121-468c-915b-605e5003182a" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="ExecuteCommand_DummyExecutable_ReturnsSuccess" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_PayloadOverridesVariable" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="8f30efbc-7e3d-ab47-0825-e02fd91dce70">
+      <Execution id="37a530f7-e9e1-4e71-b958-61c5416294e1" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_PayloadOverridesVariable" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_SpecialFolder_Resolves" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="8d9f625b-eca0-caaf-80b7-0208b4fb0a84">
+      <Execution id="61b8a668-c1f4-4a5e-bf1c-e379938e62b0" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_SpecialFolder_Resolves" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_CircularDependency_DoesNotHang" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="8ed1f628-546a-9be4-9711-360f50e39ac9">
+      <Execution id="227fa116-d955-437e-91b3-c47c77cb1677" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_CircularDependency_DoesNotHang" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_EnvironmentVariable_Resolves" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="caedb91e-215d-ab53-d2d2-ea06de83613b">
+      <Execution id="699b618c-7203-4490-bde6-209c13da6e98" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_EnvironmentVariable_Resolves" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_ChainedDependencies_ResolvesTransitively" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="2ede7db6-f9e3-8c2c-4030-c3ebeefecce1">
+      <Execution id="2fcb4d86-58c1-49c1-ab7c-e44716c04c26" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_ChainedDependencies_ResolvesTransitively" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_DependentVariables_ResolvesInOrder" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="d3dac384-ae1f-5876-07f2-1bcf0e9f9683">
+      <Execution id="8972fcbb-03e1-4694-8263-2bec9e9dd3c6" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_DependentVariables_ResolvesInOrder" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingJava_ReturnsFailureWithClearMessage" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="29e75204-ae1f-90d0-2658-3545ee5766ca">
+      <Execution id="90091799-07d6-409a-9d06-a8c97d6b3730" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_MissingJava_ReturnsFailureWithClearMessage" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingInstallDir_ReturnsFailureWithClearMessage" storage="c:\000\projects\compositum\vantuz.core.tests\bin\debug\net8.0\vantuz.core.tests.dll" id="4852611b-0209-d6fb-14e1-c9b26927339e">
+      <Execution id="079f5cc8-01cb-426d-bdfc-fcd689e8aca6" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Debug\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_MissingInstallDir_ReturnsFailureWithClearMessage" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="d3dac384-ae1f-5876-07f2-1bcf0e9f9683" executionId="8972fcbb-03e1-4694-8263-2bec9e9dd3c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8d9f625b-eca0-caaf-80b7-0208b4fb0a84" executionId="61b8a668-c1f4-4a5e-bf1c-e379938e62b0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="75cfac8b-3249-a70b-7150-059b815e7279" executionId="5eb37dcf-e3be-4c15-b0d9-1d95194ff31e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f30efbc-7e3d-ab47-0825-e02fd91dce70" executionId="37a530f7-e9e1-4e71-b958-61c5416294e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4852611b-0209-d6fb-14e1-c9b26927339e" executionId="079f5cc8-01cb-426d-bdfc-fcd689e8aca6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2ede7db6-f9e3-8c2c-4030-c3ebeefecce1" executionId="2fcb4d86-58c1-49c1-ab7c-e44716c04c26" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eea26664-1b21-7fc4-cfb6-14b6b0a52392" executionId="2b28760e-f678-4a22-bdfc-06fd1ff9bb63" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8ed1f628-546a-9be4-9711-360f50e39ac9" executionId="227fa116-d955-437e-91b3-c47c77cb1677" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="29e75204-ae1f-90d0-2658-3545ee5766ca" executionId="90091799-07d6-409a-9d06-a8c97d6b3730" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c51b34ef-4ac0-f70c-a4c5-b3f89b14361b" executionId="68943ea0-3090-424f-b04d-d2e4580b7fef" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="377fa45c-ab02-859b-ac30-5585751c9fce" executionId="eb84dfd3-82f5-4ec4-80ba-d82f3ed554ea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f8b02280-d58f-52cd-2ac9-ef5216be18cb" executionId="b73407c6-3121-468c-915b-605e5003182a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="caedb91e-215d-ab53-d2d2-ea06de83613b" executionId="699b618c-7203-4490-bde6-209c13da6e98" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Список результатов" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Все загруженные результаты" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="13" executed="13" passed="12" failed="1" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v2.5.7+8f2703126a (64-bit .NET 8.0.26)&#xD;
+[xUnit.net 00:00:00.20]   Discovering: Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:00.32]   Discovered:  Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:00.34]   Starting:    Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:00.55]       Assert.DoesNotContain() Failure: Sub-string found&#xD;
+[xUnit.net 00:00:00.55]                                            ↓ (pos 91)&#xD;
+[xUnit.net 00:00:00.55]       String: ···"sts\\bin\\Debug\\net8.0\\{{mcDir}}\\.minecraft"&#xD;
+[xUnit.net 00:00:00.55]       Found:  "{{mcDir}}"&#xD;
+[xUnit.net 00:00:00.56]       Stack Trace:&#xD;
+[xUnit.net 00:00:00.56]         c:\000\projects\compositum\Vantuz.Core.Tests\LaunchArgumentValidationTests.cs(220,0): at Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider()&#xD;
+[xUnit.net 00:00:00.56]         --- End of stack trace from previous location ---&#xD;
+[xUnit.net 00:00:00.78]   Finished:    Vantuz.Core.Tests&#xD;
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="DESKTOP-NTADQTR" outcome="Error" timestamp="2026-06-07T12:13:34.4838922+05:00">
+        <Text>[xUnit.net 00:00:00.55]     Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

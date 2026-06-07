@@ -122,6 +122,104 @@ public class LaunchArgumentValidationTests
         Assert.True(result.Success);
     }
 
+    /// <summary>
+    /// E_doc: Full chain GameLaunchCommand → OS.ExecuteCommand works when variables are properly resolved.
+    /// F_doc: Reproduces the 2026-06-07 crash where unresolved {{mcDir}} leaked into gameArgs.
+    /// </summary>
+    [Fact]
+    public async Task GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders()
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), $"vantuz_chain_{Guid.NewGuid():N}");
+        string installDir = Path.Combine(tempDir, ".minecraft");
+        string fakeJava = Path.Combine(tempDir, "java.exe");
+        Directory.CreateDirectory(installDir);
+
+        // Use cmd.exe as fake java (Windows) or /bin/sh (Unix)
+        if (OperatingSystem.IsWindows())
+        {
+            File.Copy(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe"), fakeJava);
+        }
+        else
+        {
+            fakeJava = "/bin/sh";
+        }
+
+        try
+        {
+            var reporter = new ListReporter();
+            var context = new CommandContext(System.Threading.CancellationToken.None, reporter);
+
+            // Register mock provider that returns args containing installDir
+            context.Set("GameProvider.Minecraft", new MockGameProvider());
+            context.Set("javaPath", fakeJava);
+
+            var stepConfig = JsonDocument.Parse($@"{{
+                ""provider"": ""Minecraft"",
+                ""version"": ""1.20.1-test"",
+                ""installDir"": ""{installDir.Replace("\\", "\\\\")}""
+            }}").RootElement;
+
+            var launchCommand = new GameLaunchCommand();
+            var launchResult = await launchCommand.ExecuteAsync(context, stepConfig);
+
+            // With mock provider and existing paths, should succeed
+            Assert.True(launchResult.Success, $"GameLaunchCommand failed: {launchResult.ErrorMessage}");
+
+            // Critical: gameArgs must NOT contain any unresolved {{...}} placeholders
+            string? gameArgs = context.Get<string>("gameArgs");
+            Assert.NotNull(gameArgs);
+            Assert.DoesNotContain("{{", gameArgs);
+            Assert.DoesNotContain("}}", gameArgs);
+
+            // Verify the chain can reach ExecuteCommand with resolved values
+            string? gameCommand = context.Get<string>("gameCommand");
+            Assert.NotNull(gameCommand);
+            Assert.DoesNotContain("{{", gameCommand);
+
+            // Run ExecuteCommand with the generated values
+            var execStepConfig = JsonDocument.Parse($@"{{
+                ""fileName"": ""{gameCommand.Replace("\\", "\\\\")}"",
+                ""arguments"": ""/c exit 0"",
+                ""workDir"": ""{installDir.Replace("\\", "\\\\")}"",
+                ""waitForExit"": true
+            }}").RootElement;
+
+            var execCommand = new ExecuteCommand();
+            var execResult = await execCommand.ExecuteAsync(context, execStepConfig);
+            Assert.True(execResult.Success, $"ExecuteCommand failed: {execResult.ErrorMessage}");
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, true); } catch { }
+        }
+    }
+
+    /// <summary>
+    /// E_doc: When installDir contains unresolved {{mcDir}}, pre-flight check catches it.
+    /// F_doc: Pre-flight check added in Phase 10 should fail fast instead of leaking placeholders downstream.
+    /// </summary>
+    [Fact]
+    public async Task GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider()
+    {
+        var reporter = new ListReporter();
+        var context = new CommandContext(System.Threading.CancellationToken.None, reporter);
+
+        // Simulate the old bug: installDir was "{{mcDir}}\\.minecraft" (unresolved)
+        var stepConfig = JsonDocument.Parse(@"{
+            ""provider"": ""Minecraft"",
+            ""version"": ""1.20.1-test"",
+            ""installDir"": ""{{mcDir}}\\.minecraft""
+        }").RootElement;
+
+        var command = new GameLaunchCommand();
+        var result = await command.ExecuteAsync(context, stepConfig);
+
+        Assert.False(result.Success);
+        Assert.Contains("Install directory not found", result.ErrorMessage);
+        // Path.GetFullPath preserves {{mcDir}} as a literal path component when resolving relative path
+        // The key assertion: pre-flight check FAILS before reaching the provider / OS.ExecuteCommand
+    }
+
     private class ListReporter : IStatusReporter
     {
         public List<string> Logs { get; } = new();
@@ -129,4 +227,29 @@ public class LaunchArgumentValidationTests
         public void ReportProgress(string taskName, double percentage) => Logs.Add($"[{taskName}] {percentage:F1}%");
     }
 
+    private class MockGameProvider : IGameProvider
+    {
+        public string ProviderName => "MockProvider";
+
+        public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
+            => Task.FromResult(new VersionCheckResult(Exists: true));
+
+        public Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct, TimeSpan? timeout = null)
+            => Task.FromResult(new InstallResult(Success: true));
+
+        public Task<LaunchParameters> BuildLaunchParametersAsync(
+            string version,
+            string installDir,
+            LaunchOptions options,
+            CancellationToken ct)
+        {
+            return Task.FromResult(new LaunchParameters(
+                ExecutablePath: options.JavaPath ?? "java",
+                Arguments: $"-Xmx{options.RamMb}m -DinstallDir={installDir}",
+                WorkingDirectory: installDir
+            ));
+        }
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
 }

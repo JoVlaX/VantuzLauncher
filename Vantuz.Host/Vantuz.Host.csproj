@@ -9,5 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Vantuz.Core\Vantuz.Core.csproj" />
     <Analyzer Include="..\Armatura.Core.Sdk\bin\$(Configuration)\netstandard2.0\Armatura.Core.Sdk.dll" />
+    <InternalsVisibleTo Include="Vantuz.Core.Tests" />
   </ItemGroup>
 </Project>

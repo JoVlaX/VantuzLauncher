@@ -30,10 +30,15 @@ public class MinecraftGameProvider : IGameProvider
             var versionJsonPath = path.GetVersionJsonPath(version);
             var versionExists = File.Exists(versionJsonPath);
 
+            // DIAGNOSTIC: Log the exact path CmlLib uses for version detection.
+            // This is critical because Forge may install under a different internal name.
+            Console.WriteLine($"[DIAG CheckVersionAsync] version={version}, installDir={installDir}, versionJsonPath={versionJsonPath}, exists={versionExists}");
+
             return Task.FromResult(new VersionCheckResult(versionExists));
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[DIAG CheckVersionAsync] EXCEPTION: {ex}");
             return Task.FromResult(new VersionCheckResult(false, ex.Message));
         }
     }
@@ -65,6 +70,13 @@ public class MinecraftGameProvider : IGameProvider
             {
                 reporter.ReportState($"Обнаружена Forge-версия {version}. Установка Forge...");
                 var (mcVersion, forgeVersion) = ParseForgeVersion(version);
+
+                // DIAGNOSTIC: Log parsed components and install dir before calling ForgeInstaller.
+                // These values determine whether CmlLib can locate existing Forge or needs to re-download.
+                var absInstallDir = Path.GetFullPath(installDir);
+                Console.WriteLine($"[DIAG InstallVersionAsync] Parsed: version={version}, mcVersion={mcVersion}, forgeVersion={forgeVersion}, installDir={absInstallDir}");
+                Console.WriteLine($"[DIAG InstallVersionAsync] ForgeInstaller timeout={(timeout?.TotalMinutes ?? 5):F0} min, SkipIfAlreadyInstalled=true");
+
                 var forgeInstaller = new ForgeInstaller(launcher);
 
                 var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -96,37 +108,47 @@ public class MinecraftGameProvider : IGameProvider
 
                         var elapsed = DateTime.UtcNow - startTime;
                         reporter.ReportState($"Установка Forge {forgeVersion} в процессе… прошло {elapsed:mm\\:ss}");
-
-                        var sinceLastProgress = DateTime.UtcNow - lastProgressTime;
-                        if (sinceLastProgress.TotalSeconds > 30)
-                        {
-                            reporter.ReportState($"[WARN] Forge installer produced no progress for {sinceLastProgress.TotalSeconds:F0}s — possible network stall");
-                        }
                     }
                 }, cts.Token);
 
                 try
                 {
-                    var installTask = Task.Run(() => forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
+                    var installTask = Task.Run(() =>
                     {
-                        FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+                        try
                         {
-                            lastProgressTime = DateTime.UtcNow;
-                            var progress = args.TotalTasks > 0
-                                ? args.ProgressedTasks / (double)args.TotalTasks * 100
-                                : 0;
-                            reporter.ReportProgress($"Установка Forge {forgeVersion}", progress);
-                        }),
-                        ByteProgress = new Progress<ByteProgress>(args =>
+                            Console.WriteLine($"[DIAG ForgeInstaller] Calling Install(mcVersion={mcVersion}, forgeVersion={forgeVersion})");
+                            var installedName = forgeInstaller.Install(mcVersion, forgeVersion, new ForgeInstallOptions
+                            {
+                                FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
+                                {
+                                    lastProgressTime = DateTime.UtcNow;
+                                    var progress = args.TotalTasks > 0
+                                        ? args.ProgressedTasks / (double)args.TotalTasks * 100
+                                        : 0;
+                                    reporter.ReportProgress($"Установка Forge {forgeVersion}", progress);
+                                }),
+                                ByteProgress = new Progress<ByteProgress>(args =>
+                                {
+                                    lastProgressTime = DateTime.UtcNow;
+                                    var progress = args.TotalBytes > 0
+                                        ? args.ProgressedBytes / (double)args.TotalBytes * 100
+                                        : 0;
+                                    reporter.ReportProgress($"Скачивание Forge {forgeVersion}", progress);
+                                }),
+                                SkipIfAlreadyInstalled = true
+                            });
+                            Console.WriteLine($"[DIAG ForgeInstaller] Install completed, returned={installedName}");
+                            return installedName;
+                        }
+                        catch (Exception ex)
                         {
-                            lastProgressTime = DateTime.UtcNow;
-                            var progress = args.TotalBytes > 0
-                                ? args.ProgressedBytes / (double)args.TotalBytes * 100
-                                : 0;
-                            reporter.ReportProgress($"Скачивание Forge {forgeVersion}", progress);
-                        }),
-                        SkipIfAlreadyInstalled = true
-                    }), cts.Token);
+                            Console.WriteLine($"[DIAG ForgeInstaller] EXCEPTION during Install: {ex.GetType().Name}: {ex.Message}");
+                            if (ex.InnerException != null)
+                                Console.WriteLine($"[DIAG ForgeInstaller] INNER EXCEPTION: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
+                            throw;
+                        }
+                    }, cts.Token);
 
                     var completedTask = await Task.WhenAny(installTask, heartbeatTask);
                     if (completedTask == installTask)
@@ -234,7 +256,7 @@ public class MinecraftGameProvider : IGameProvider
     /// Parses a combined Forge version string like "1.20.1-forge-47.3.0"
     /// into ("1.20.1", "47.3.0").
     /// </summary>
-    private static (string McVersion, string ForgeVersion) ParseForgeVersion(string version)
+    internal static (string McVersion, string ForgeVersion) ParseForgeVersion(string version)
     {
         // Expected format: {mcVersion}-forge-{forgeVersion}
         var idx = version.IndexOf("-forge-", StringComparison.OrdinalIgnoreCase);

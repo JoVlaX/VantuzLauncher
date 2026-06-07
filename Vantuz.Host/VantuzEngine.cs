@@ -137,7 +137,7 @@ public class VantuzEngine
     /// Поддерживает ${env:VAR} и ${special:Folder} для Nomadic конфигурации.
     /// Согласно Armatura:42 (Explicit Input Payloads) и :65 (No hardcoded paths).
     /// </summary>
-    private static Dictionary<string, string> InterpolateVariables(
+    internal static Dictionary<string, string> InterpolateVariables(
         Dictionary<string, string> variables,
         Dictionary<string, object> payload)
     {
@@ -160,6 +160,17 @@ public class VantuzEngine
                 if (value.Contains(placeholder))
                 {
                     string replacement = payloadKvp.Value?.ToString() ?? string.Empty;
+                    value = value.Replace(placeholder, replacement);
+                }
+            }
+
+            // 4. Заменяем placeholder-ы на уже интерполированные переменные (зависимости вида A → B)
+            foreach (var resultKvp in result)
+            {
+                string placeholder = "{{" + resultKvp.Key + "}}";
+                if (value.Contains(placeholder))
+                {
+                    string replacement = resultKvp.Value?.ToString() ?? string.Empty;
                     value = value.Replace(placeholder, replacement);
                 }
             }

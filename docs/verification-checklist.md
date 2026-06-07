@@ -96,6 +96,8 @@
 - [ ] Headless pipeline (`boot.headless.json`) — `HeadlessSmokeTests` + `PipelinePositiveVerificationTests`
 - [ ] GUI pipeline **resolution** (`boot.json`) — `GuiPipelinePositiveVerificationTests` (13 plugin names load without "Plugin X not found")
 - [ ] Launch argument **validation** — `LaunchArgumentValidationTests` (pre-flight checks: installDir exists, Java exists, no unresolved placeholders)
+- [ ] Variable interpolation **with dependencies** — `VariableInterpolationTests` (`mcDir → installDir → gameArgs` chain resolves without `{{...}}` leakage)
+- [ ] Version detection **logic** — `MinecraftGameProviderTests` (`CheckVersionAsync` with fake `versions/{ver}/{ver}.json`, `ParseForgeVersion` correctness, skip-if-installed end-to-end)
 
 **Manual (only the user can perform):**
 - [ ] Launcher запускается без критических ошибок
@@ -107,10 +109,18 @@
 > - AI can verify **headless pipeline execution** (5 steps, `dryRun=true`)
 > - AI can verify **GUI pipeline resolution** (13 plugin names → loaded nodes)
 > - AI can verify **launch argument pre-flight** (paths exist, placeholders resolved)
+> - AI can verify **variable interpolation with dependencies** (`mcDir → installDir`, `${special:Folder}` → `{{key}}`)
+> - AI can verify **version detection logic** (`CheckVersionAsync`, `ParseForgeVersion`, skip-if-installed)
 > - AI **cannot verify** that the actual Java/Minecraft process launches successfully in the user's environment
+> - AI **cannot verify** that real Forge installation over the internet completes within the timeout
 > - Green `GuiPipeline` test does NOT prove the Java process launches — it only proves plugin names resolve. The manual surface is reduced to "does the real game launch?"
 >
-> **Recidivism lesson:** A previous `GuiPipeline PASS` was incorrectly interpreted as "GUI pipeline works end-to-end" while the actual crash occurred at `OS.ExecuteCommand` during Java process launch. The test timeout (3 sec) cancelled the pipeline before reaching step 12-13. This gap is now closed by `LaunchArgumentValidationTests` and explicit documentation.
+> **Recidivism lessons:**
+> 1. A `GuiPipeline PASS` was incorrectly interpreted as "GUI pipeline works end-to-end" while the actual crash occurred at `OS.ExecuteCommand`. The test timeout (3 sec) cancelled the pipeline before reaching step 12-13. Closed by `LaunchArgumentValidationTests`.
+> 2. `LaunchArgumentValidationTests PASS` + `GuiPipeline PASS` still missed a bug because `InterpolateVariables` was never tested with dependent variables (`mcDir → installDir`). The literal `{{mcDir}}` leaked into Java arguments. Closed by `VariableInterpolationTests`.
+> 3. `VariableInterpolationTests PASS` + all prior tests still missed a bug because the **real `ForgeInstaller.Install` path with network I/O** was only exercised at manual runtime. The mock-based `ForgeInstallTimeoutRecidivismTests` proved the command respects a timeout, but did NOT prove the installer works. Closed by `MinecraftGameProviderTests` (version detection) + `[DIAG ...]` runtime logging.
+> 4. **The 5-minute Forge timeout was a guess without empirical data.** User observed Forge install takes 40-50 minutes on their connection. The timeout was set to "5 minutes" because it "seemed reasonable." "Reasonable" timeouts without measurement are bugs. Closed by increasing `operationTimeout` to 60 min and removing the 30-sec false-stall watchdog.
+> 5. **A green test suite does NOT prove the deployed binary is rebuilt.** After any engine-level fix, the user must rebuild (`dotnet build`) and redeploy.
 
 ---
 

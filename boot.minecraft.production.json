@@ -7,7 +7,8 @@
     "gameVersion": "1.20.1-forge-47.3.0",
     "mcDir": "${special:ApplicationData}\\.vantuzlauncher",
     "installDir": "{{mcDir}}\\.minecraft",
-    "operationTimeout": "00:05:00"
+    "operationTimeout": "01:00:00",
+    "_justification_timeout": "Forge first-time install empirically takes 40-50 min on user's connection (2026-06-07). 5 min was a guess without data."
   },
   "plugins": {
     "Vantuz.Plugins.GUI.MinecraftLauncher.dll": "",

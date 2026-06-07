@@ -137,6 +137,81 @@
   - `DummyExecutable_ReturnsSuccess` (proves `OS.ExecuteCommand` can launch a real process)
 - [x] **Confidence Boundary updated:** Green `GuiPipeline` test does NOT prove Java launches. Pre-flight checks and `LaunchArgumentValidationTests` close the gap between "names resolve" and "arguments are valid". Only manual QA can verify real Java/Minecraft execution.
 
+### Phase 11: Variable Interpolation Dependency — {{mcDir}} Leaks into Java Args (2026-06-07) ✅
+- [x] **Crash reported:** `[2026-06-07 11:51:53] Pipeline failed: OS.ExecuteCommand cannot launch: unresolved placeholders in arguments='...{{mcDir}}...'` after clicking "Играть".
+- [x] **Why tests missed it (again):**
+  - `LaunchArgumentValidationTests` and `VariableInterpolationTests` did not exist yet (added in this phase).
+  - `GuiPipelinePositiveVerificationTests` still only checks plugin name resolution, not variable interpolation.
+  - `GameLaunchCommand` pre-flight checks (added in Phase 10) checked `installDir` existence, but `installDir` was `"{{mcDir}}\\.minecraft"` — `Path.GetFullPath` resolved it relative to cwd as `...\\{{mcDir}}\\.minecraft`, which doesn't exist. So pre-flight SHOULD have caught it... but the user was running an un-rebuilt binary.
+- [x] **Root cause:** `VantuzEngine.InterpolateVariables` only searched `payload` for `{{key}}` replacements. When `installDir: "{{mcDir}}\\.minecraft"` was processed, `mcDir` was already in `result` (interpolated to `C:\Users\...\AppData\Roaming\.vantuzlauncher`) but NOT in `payload`. So `installDir` remained unresolved.
+- [x] **Fix — `InterpolateVariables` now resolves intra-variable dependencies:**
+  - After interpolating from `payload`, also search in `result` (already-interpolated variables)
+  - `mcDir` (in `result`) is now available when processing `installDir`
+- [x] **Fix — New tests:** `VariableInterpolationTests.cs`
+  - `DependentVariables_ResolvesInOrder` — `installDir` + `authlibPath` both reference `mcDir`
+  - `PayloadOverridesVariable` — runtime payload takes precedence over manifest
+  - `ChainedDependencies_ResolvesTransitively` — `base → level1 → level2 → gamePath`
+  - `CircularDependency_DoesNotHang` — defensive test for `A→B→A`
+  - `EnvironmentVariable_Resolves` — `${env:VAR}` expansion
+  - `SpecialFolder_Resolves` — `${special:Folder}` expansion
+  - `RealisticBootJson_NoUnresolvedPlaceholders` — exact reproduction of crash scenario
+- [x] **Fix — Integration test:** `LaunchArgumentValidationTests.GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders`
+  - Mock `IGameProvider` registered in context
+  - Fake `java.exe` (cmd.exe copy)
+  - Asserts `gameArgs` contains NO `{{...}}` after full chain
+  - Asserts `ExecuteCommand` succeeds with resolved values
+- [x] **Fix — Integration test:** `LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider`
+  - Verifies pre-flight check catches unresolved `installDir` before reaching provider
+- [x] **Confidence Boundary updated:**
+  - AI can verify: static correctness, headless pipeline, GUI resolution, argument validity, **variable interpolation with dependencies**
+  - Only manual QA can verify: real Java + Minecraft execution in user's environment
+  - **Lesson:** A green test suite doesn't prove the deployed binary is rebuilt. After any engine-level fix, the user must rebuild and redeploy.
+
+### Phase 12: Forge Installation Timeout — Real Network Path Untested (2026-06-07) ✅
+- [x] **Crash reported:** `[2026-06-07 12:58:03] Pipeline failed: Forge installation timed out (5 min). Check your network connection and try again.` after rebuilding with `{{mcDir}}` fix.
+- [x] **User context:** Working internet, fresh rebuilt binary.
+- [x] **Why tests missed it (third recidivism in one session):**
+  - `ForgeInstallTimeoutRecidivismTests` uses a **mock** `IGameProvider` — it proves `GameInstallerCommand` respects a timeout, but does NOT exercise the real `MinecraftGameProvider` + `CmlLib.ForgeInstaller` path.
+  - `GuiPipelinePositiveVerificationTests` cancels pipeline at GUI step before reaching `Game.InstallerCommand`.
+  - `LaunchArgumentValidationTests` + `VariableInterpolationTests` cover argument correctness but not Forge installation.
+  - **The real `ForgeInstaller.Install` call with network I/O has never been exercised in an automated test.**
+- [x] **Hypotheses (pending manual QA with diagnostics):**
+  - `CheckVersionAsync` false-negative: CmlLib may install Forge under a different internal name than `"1.20.1-forge-47.3.0"`, so `File.Exists(versionJsonPath)` returns `false` every time, triggering re-install.
+  - `ParseForgeVersion` drift: `"1.20.1-forge-47.3.0"` → `mcVersion="1.20.1"`, `forgeVersion="47.3.0"`, but CmlLib may expect `"47.3.0"` vs `"1.20.1-47.3.0"`.
+  - `SkipIfAlreadyInstalled` ignored: `ForgeInstallOptions.SkipIfAlreadyInstalled = true` may not be honoured by the CmlLib installer.
+  - Real network stall: Maven/CurseForge may be slow; 5 min may be genuinely insufficient for a full Forge install on first run.
+  - CmlLib internal hang: `ForgeInstaller` may deadlock on download without producing progress events.
+- [x] **Fix — Diagnostics:** Added `[DIAG ...]` `Console.WriteLine` statements to `MinecraftGameProvider`:
+  - `CheckVersionAsync` logs `versionJsonPath` and `exists` result
+  - `InstallVersionAsync` logs parsed `mcVersion`, `forgeVersion`, absolute `installDir`
+  - `ForgeInstaller.Install` call wrapped in `try/catch` with full exception + inner exception logging
+- [x] **Fix — New tests:** `MinecraftGameProviderTests.cs`
+  - `ParseForgeVersion_StandardFormat_ReturnsCorrectTuple` — `"1.20.1-forge-47.3.0"` → `("1.20.1", "47.3.0")`
+  - `ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple` — fallback path
+  - `CheckVersionAsync_ExistingVersion_ReturnsTrue` — creates fake `versions/{version}/{version}.json`, asserts `Exists=true`
+  - `CheckVersionAsync_MissingVersion_ReturnsFalse` — empty dir, asserts `Exists=false`
+  - `GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall` — end-to-end: fake version JSON → `GameInstallerCommand` returns success with `InstallSkipped=true`
+- [x] **Confidence Boundary updated:**
+  - AI can verify: static correctness, headless pipeline, GUI resolution, argument validity, variable interpolation, **version detection logic (CheckVersionAsync + ParseForgeVersion)**
+  - Only manual QA can verify: **real Forge installation over the internet**, real Java + Minecraft execution
+  - **Lesson:** Mock-based timeout tests prove the command respects a timeout, but do NOT prove the real installer works. The gap between "command times out correctly" and "installer downloads successfully" is a network-dependent surface that cannot be headlessly automated without mocking the network.
+
+### Phase 13: Forge Timeout Was a Guess — 40-50 min Empirical Reality (2026-06-07) ✅
+- [x] **Crash reported:** `[2026-06-07] Pipeline failed: Forge installation timed out (5 min). Check your network connection and try again.`
+- [x] **User observation:** Forge installation progressed to 50%, then regressed to 0%, then climbed again. User closed after 40-50 minutes. Installation was still ongoing.
+- [x] **Root cause:** The 5-minute timeout was chosen without any empirical measurement of Forge installation duration. It was a "reasonable guess" that proved wrong by an order of magnitude.
+- [x] **Secondary issue:** The 30-second "no progress" watchdog falsely alarmed because CmlLib's `ForgeInstaller` legitimately shows progress regression (recalculating task counts, retrying downloads). The watchdog misinterpreted normal behavior as a network stall.
+- [x] **Fix — Timeout:**
+  - `boot.gui.json`: `operationTimeout` `"00:05:00"` → `"01:00:00"`
+  - `boot.minecraft.production.json`: `operationTimeout` `"00:05:00"` → `"01:00:00"`
+  - `_justification_timeout` added: "Forge first-time install empirically takes 40-50 min on user's connection (2026-06-07). 5 min was a guess without data."
+- [x] **Fix — Watchdog removal:** Removed the 30-second `[WARN] Forge installer produced no progress...` warning from `MinecraftGameProvider.cs` heartbeat. The heartbeat now only reports elapsed time without alarming language.
+- [x] **Confidence Boundary updated:**
+  - AI can verify: static correctness, headless pipeline, GUI resolution, argument validity, variable interpolation, version detection logic
+  - AI **cannot verify** network-dependent timeout values — these require empirical observation in the user's environment
+  - AI **cannot verify** that real Forge installation over the internet completes within any timeout
+  - **Lesson:** "Reasonable" timeouts without empirical data are guesses. Guesses are bugs waiting to happen.
+
 ### Phase 6: Plugin Name Verification (2026-06-03) ✅
 - [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
 - [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)
