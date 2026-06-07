@@ -181,6 +181,15 @@ public class MinecraftGameProvider : IGameProvider
                         var installedName = await installTask;
                         reporter.ReportState($"Forge установлен: {installedName}");
 
+                        // ForgeInstaller.Install creates the version JSON and downloads fmlloader,
+                        // but does NOT download all libraries referenced in the JSON. We must
+                        // run CmlLib's library resolver to fetch the remaining artifacts
+                        // (bootstraplauncher, securejarhandler, etc.) before launch.
+                        reporter.ReportState($"Загрузка библиотек Forge для {installedName}...");
+                        Console.WriteLine($"[DIAG InstallVersionAsync] Running launcher.InstallAsync({installedName}) to download libraries...");
+                        await launcher.InstallAsync(installedName);
+                        Console.WriteLine($"[DIAG InstallVersionAsync] launcher.InstallAsync completed");
+
                         // Post-install verification: parse version JSON and verify all critical libraries.
                         var (librariesOk, missingDetail) = VerifyForgeLibraries(version, installDir);
                         if (!librariesOk)

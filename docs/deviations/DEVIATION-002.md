@@ -282,6 +282,18 @@
 - [x] **Confidence Boundary updated:**
   - **Lesson:** Checking ONE artifact out of many is as bad as checking none. For multi-artifact installations, verify ALL critical artifacts that the downstream consumer needs. The agent must NOT claim "program works" based on tests alone when the tests exercise mock logic, not real-world network installation.
 
+### Phase 18: ForgeInstaller.Install Does Not Download All Libraries (2026-06-07) ✅
+- [x] **Crash reported:** User: "Установка Forge завершилась, но не хватает критических библиотек: missing or empty library: cpw.mods:bootstraplauncher"
+- [x] **Timeline:**
+  1. Forge `ForgeInstaller.Install` completed successfully (no exception, returned version name)
+  2. `launcher.InstallAsync` was NOT called after ForgeInstaller — only for vanilla path
+  3. `VerifyForgeLibraries` checked for `bootstraplauncher` — file missing on disk
+  4. `InstallVersionAsync` returned failure, pipeline failed
+- [x] **Root cause:** `ForgeInstaller.Install` (from CmlLib) creates the version JSON and downloads the Forge-specific `fmlloader` library, but does NOT download the remaining libraries referenced in the JSON (`bootstraplauncher`, `securejarhandler`, dozens of others). The vanilla path correctly calls `launcher.InstallAsync(version)` which resolves and downloads all libraries. The Forge path was missing this step entirely. The agent assumed "ForgeInstaller completed = all artifacts present."
+- [x] **Fix — InstallVersionAsync (Forge path):** After `ForgeInstaller.Install` returns, call `await launcher.InstallAsync(installedName)` to run CmlLib's library resolver, which downloads ALL artifacts declared in the version JSON. Only after this completes do we run `VerifyForgeLibraries`.
+- [x] **Confidence Boundary updated:**
+  - **Lesson:** Installer completion ≠ all artifacts present. The downstream launch consumer's requirements must be verified. `ForgeInstaller.Install` and `launcher.InstallAsync` are two distinct steps with distinct responsibilities; omitting either creates an incomplete installation.
+
 ### Phase 6: Plugin Name Verification (2026-06-03) ✅
 - [x] Create `verify-plugin-names.ps1` for build-time pipeline-to-plugin cross-reference
 - [x] Integrate into MSBuild via `VerifyPluginNames` target (`ARM-BUILD-020`)
