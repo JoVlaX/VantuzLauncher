@@ -8,6 +8,8 @@ namespace Vantuz.Plugins.GUI.MinecraftLauncher;
 /// Portable Cryptography СЃ РґРёРЅР°РјРёС‡РµСЃРєРѕР№ СЃР»СѓС‡Р°Р№РЅРѕР№ СЃРѕР»СЊСЋ.
 /// Per INVARIANT_THEORY.md В§3.2 Nomadic Invariant: РёСЃРїРѕР»СЊР·СѓРµС‚ MachineName + UserName РєР°Рє РєР»СЋС‡.
 /// РЎРѕР»СЊ РіРµРЅРµСЂРёСЂСѓРµС‚СЃСЏ РґРёРЅР°РјРёС‡РµСЃРєРё Рё С…СЂР°РЅРёС‚СЃСЏ РІ РѕС‚РєСЂС‹С‚РѕРј РІРёРґРµ РІ Р·Р°РіРѕР»РѕРІРєРµ Р·Р°С€РёС„СЂРѕРІР°РЅРЅС‹С… РґР°РЅРЅС‹С….
+/// F_doc: {decryption produces corrupted output or throws CryptographicException}
+/// E_doc: Unit test round-trip Encrypt then Decrypt with random plaintext
 /// </summary>
 public static class CryptoHelper
 {

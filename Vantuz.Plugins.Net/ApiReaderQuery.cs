@@ -10,6 +10,8 @@ using Vantuz.Core;
 /// <summary>
 /// ARM005 CQRS Query: Чтение данных из API.
 /// Per Armatura:76-78 - только чтение, нет side effects.
+/// F_doc: {HTTP request returns non-2xx or payloadKey missing from response}
+/// E_doc: Unit test with HttpMessageHandler mock returning 404
 /// </summary>
 public class ApiReaderQuery : IQueryPlugin
 {

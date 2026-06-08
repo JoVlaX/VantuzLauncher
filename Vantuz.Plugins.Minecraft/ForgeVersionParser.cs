@@ -7,6 +7,8 @@ using System;
 /// <summary>
 /// Immutable record representing parsed Forge version.
 /// Per INVARIANT_THEORY.md §1.1 Determinism - parsing is deterministic.
+/// F_doc: {parsing empty string or non-semver input returns invalid version}
+/// E_doc: Unit test with null, empty, and malformed version strings
 /// </summary>
 public readonly record struct ForgeVersion(string MinecraftVersion, string ForgeVersionNumber)
 {

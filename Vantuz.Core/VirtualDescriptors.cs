@@ -116,12 +116,17 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Асинхронно сохраняет данные в файл
+    /// Асинхронно сохраняет данные в файл.
+    /// Per INVARIANT_THEORY §3.2 Nomadic Invariant: rejects absolute paths to enforce host portability.
+    /// F_doc: {absolute path passed to SaveToFileAsync}
+    /// E_doc: Unit test with Path.IsPathRooted validation
     /// </summary>
     public async Task SaveToFileAsync(string filePath, CancellationToken ct = default)
     {
         if (_disposed) throw new ObjectDisposedException(nameof(VirtualDescriptor));
         if (_data == null) throw new InvalidOperationException("No data available");
+        if (Path.IsPathRooted(filePath))
+            throw new ArgumentException("Absolute paths violate the Nomadic Invariant. Use relative paths or ${special:Folder} interpolation.", nameof(filePath));
 
         var dir = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);

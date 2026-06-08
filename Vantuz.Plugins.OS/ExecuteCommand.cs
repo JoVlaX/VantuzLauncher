@@ -11,6 +11,8 @@ using Vantuz.Core;
 /// <summary>
 /// ARM005 CQRS Command: Запуск исполняемых процессов.
 /// Per Armatura:76-78 - только запись/модификация состояния (запуск процесса).
+/// F_doc: {executable not found, process exits with non-zero code, or stdout contains error}
+/// E_doc: Unit test with mock Process verifying exit code and output capture
 /// </summary>
 public class ExecuteCommand : ICommandPlugin
 {

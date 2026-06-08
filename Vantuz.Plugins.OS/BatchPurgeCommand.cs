@@ -11,6 +11,8 @@ namespace Vantuz.Plugins.OS;
 /// <summary>
 /// ARM005 CQRS Command: Пакетная очистка файлов и пустых директорий.
 /// Per Armatura:76-78 - только запись/модификация состояния (удаление).
+/// F_doc: {purge target contains non-empty directory or file not matching pattern}
+/// E_doc: Unit test with mock file system verifying purge scope
 /// </summary>
 public class BatchPurgeCommand : ICommandPlugin
 {

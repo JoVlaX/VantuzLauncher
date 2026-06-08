@@ -11,6 +11,8 @@ namespace Vantuz.Plugins.OS;
 /// <summary>
 /// ARM005 CQRS Query: Анализ дельты между текущим и целевым состоянием.
 /// Per Armatura:76-78 - только чтение, нет side effects.
+/// F_doc: {delta analysis returns false positives for moved files or hash collisions}
+/// E_doc: Unit test with staged file tree comparing expected vs actual delta
 /// </summary>
 public class DeltaAnalyzerQuery : IQueryPlugin
 {

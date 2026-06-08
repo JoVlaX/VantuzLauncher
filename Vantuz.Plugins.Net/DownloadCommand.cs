@@ -1,4 +1,4 @@
-#pragma warning disable ARM010 // FileStream requires DAG host-managed disposal; TODO: refactor to DAG ref counting
+#pragma warning disable ARM010 // FileStream requires DAG host-managed disposal; TODO: refactor to DAG ref counting (deadline: 2026-12-01)
 
 using System;
 using System.Collections.Generic;

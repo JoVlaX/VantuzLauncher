@@ -10,6 +10,8 @@ namespace Vantuz.Plugins.OS;
 /// <summary>
 /// ARM005 CQRS Command: Локальное перемещение файлов (дедупликация).
 /// Per Armatura:76-78 - только запись/модификация состояния.
+/// F_doc: {source file missing or destination already exists with different hash}
+/// E_doc: Unit test verifying atomic move and rollback on failure
 /// </summary>
 public class LocalMoveCommand : ICommandPlugin
 {

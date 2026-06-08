@@ -10,6 +10,8 @@ using Vantuz.Core;
 /// <summary>
 /// ARM005 CQRS Command: Universal game launch command using IGameProvider.
 /// Per Armatura:126 - no external dependencies, works with any game.
+/// F_doc: {provider missing from context or launch process exits with non-zero code}
+/// E_doc: Unit test with mock IGameProvider returning failing LaunchParameters
 /// </summary>
 public class GameLaunchCommand : ICommandPlugin
 {

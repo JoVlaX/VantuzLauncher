@@ -6,6 +6,11 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Pipeline status reporter contract.
+/// F_doc: {reporter not receiving progress updates or state messages during pipeline execution}
+/// E_doc: Mock reporter assertion verifying ReportProgress/ReportState calls in test pipeline
+/// </summary>
 public interface IStatusReporter
 {
     void ReportProgress(string taskName, double percentage);
@@ -97,6 +102,9 @@ public record CommandResult(bool Success, string? ErrorMessage = null);
 
 /// <summary>
 /// Universal game provider contract. Implementations are game-specific (Minecraft, Terraria, etc.)
+/// F_doc: {provider mixing Query (CheckVersion) and Command (InstallVersion) in same interface}
+/// E_doc: Roslyn analyzer or manual review detecting R(c) ∩ W(c) ≠ ∅
+/// Deviation: DEVIATION-009 (ExternalAbstraction scope exemption, deadline 2026-08-07)
 /// </summary>
 public interface IGameProvider : IAsyncDisposable
 {
@@ -160,6 +168,8 @@ public record LaunchOptions(
 /// <summary>
 /// Credential provider interface for UI and headless modes.
 /// Per INVARIANT_THEORY.md: Shared contract to avoid AssemblyLoadContext isolation issues.
+/// F_doc: {ICredentialProvider implementation missing CollectAsync, ShowProgress, or UpdateStatus}
+/// E_doc: Interface implementation test via typeof(ICredentialProvider).GetMethods()
 /// </summary>
 public interface ICredentialProvider
 {

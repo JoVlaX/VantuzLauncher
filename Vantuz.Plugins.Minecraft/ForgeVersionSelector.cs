@@ -11,6 +11,8 @@ using Vantuz.Core;
 
 /// <summary>
 /// SRP: Single Responsibility - Select Forge version based on policy.
+/// F_doc: {selector returns null when no version satisfies policy constraints}
+/// E_doc: Unit test with version list and policy verifying deterministic selection
 /// Per INVARIANT_THEORY.md §2.2 CQRS - Command/Decision, no queries.
 /// Per INVARIANT_THEORY.md §11.1 Determinism - Temperature=0, unambiguous selection.
 /// Per INVARIANT_THEORY.md §11.4 Context Evolution - explicit fallback with logging.

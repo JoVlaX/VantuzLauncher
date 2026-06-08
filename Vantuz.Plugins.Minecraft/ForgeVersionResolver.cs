@@ -13,6 +13,8 @@ using Vantuz.Core;
 
 /// <summary>
 /// SRP: Single Responsibility - Query available Forge versions only.
+/// F_doc: {resolver returns empty list when network is unreachable or API changes format}
+/// E_doc: Unit test with mock IVersionService returning predefined version list
 /// Per INVARIANT_THEORY.md §2.2 CQRS - pure query, no side effects.
 /// Per INVARIANT_THEORY.md §11.3 Temporal Falsifiability - validates before execution.
 /// </summary>

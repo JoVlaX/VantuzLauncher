@@ -8,6 +8,8 @@ using System.IO;
 
 /// <summary>
 /// SRP: Single Responsibility - Variable interpolation for paths only.
+/// F_doc: {interpolation leaves unreplaced placeholders or produces absolute paths}
+/// E_doc: Unit test with placeholder dictionary verifying all {{key}} replaced
 /// Per INVARIANT_THEORY.md §498 Explicitness - no hidden logic, pure function.
 /// </summary>
 public static class PathInterpolator
