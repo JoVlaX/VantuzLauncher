@@ -58,7 +58,7 @@ public class GameInstallerCommand : ICommandPlugin
             {
                 // No validator ran, run check ourselves
                 context.Reporter.ReportState($"Проверка версии {versionName} перед установкой...");
-                var queryProvider = ResolveQueryProvider(context, providerName);
+                var queryProvider = ResolveReadProvider(context, providerName);
                 if (queryProvider == null)
                 {
                     return new CommandResult(false, $"Game query provider '{providerName}' not found");
@@ -124,7 +124,7 @@ public class GameInstallerCommand : ICommandPlugin
     /// Resolves IGameQueryProvider from context mutations.
     /// Per INVARIANT_THEORY.md §2.2: Query facet for version checking.
     /// </summary>
-    private static IGameQueryProvider? ResolveQueryProvider(CommandContext context, string providerName)
+    private static IGameQueryProvider? ResolveReadProvider(CommandContext context, string providerName)
     {
         var queryKey = $"GameQueryProvider.{providerName}";
         var legacyKey = $"GameProvider.{providerName}";

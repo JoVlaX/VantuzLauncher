@@ -6,9 +6,10 @@ parent_version: 1.1
 
 # Deviation Protocol 009: CQRS Violation in ExternalAbstraction (MinecraftGameProvider)
 
-**Status:** Active — Justified deviation with documented scope  
+**Status:** Resolved 2026-06-08  
 **Created:** 2026-06-07T21:15:00+05:00  
 **Deadline:** 2026-08-07T23:59:59+05:00  
+**Closed:** 2026-06-08T20:20:00+05:00  
 **Owner:** Agent Cascade  
 
 ---
@@ -18,8 +19,8 @@ parent_version: 1.1
 | Aspect | Details |
 |--------|---------|
 | **Rule Violated** | INVARIANT_THEORY.md §2.2 CQRS Separation Invariant |
-| **Location** | `Vantuz.Plugins.Minecraft/MinecraftGameProvider.cs` |
-| **Nature** | ExternalAbstraction (IGameProvider) implements both Query and Command operations in single class |
+| **Location** | `Vantuz.Plugins.Minecraft/MinecraftGameProvider.cs` (deleted) → `MinecraftGameQueryProvider.cs` + `MinecraftGameCommandProvider.cs` |
+| **Nature** | ExternalAbstraction implemented both Query and Command in single class; resolved by splitting into two classes |
 
 ## INVARIANT_THEORY §2.2 Text
 
@@ -70,30 +71,33 @@ ARM007 applies to ExternalAbstractions. However, §2.2 CQRS applies to ALL compo
 
 4. **No side-effect leakage:** `CheckVersionAsync` and `BuildLaunchParametersAsync` are pure reads; `InstallVersionAsync` is a pure write. The component does not interleave reads and writes within a single method.
 
-## Fix Options
+## Resolution Applied
 
-### Option A: Split Provider (preferred, post-deadline)
+**Option A: Split Provider** — implemented 2026-06-08.
 
 Split `MinecraftGameProvider` into:
-- `MinecraftGameQueryProvider` — `CheckVersionAsync`, `BuildLaunchParametersAsync`
-- `MinecraftGameInstallProvider` — `InstallVersionAsync`
+- `MinecraftGameQueryProvider` (lines ~20–215) — `CheckVersionAsync`, `BuildLaunchParametersAsync`, shared helpers `VerifyForgeLibraries`, `IsForgeVersion`, `ParseForgeVersion`
+- `MinecraftGameCommandProvider` (lines ~20–220) — `InstallVersionAsync`
 
-Update `IGameProvider` to expose two interfaces:
-- `IGameQueryProvider` — Query operations
-- `IGameInstallProvider` — Command operations
+Updated `IGameProvider` in `Vantuz.Core/Contracts.cs` to expose `IGameQueryProvider` and `IGameCommandProvider`.
 
-Pipeline commands use the appropriate provider.
+Updated consumers:
+- `GameInstallerCommand` → uses `IGameCommandProvider`
+- `GameLaunchCommand` → uses `IGameQueryProvider`
+- `MinecraftProviderCommand` → registers both facets separately
 
-### Option B: Accept as Justified Deviation
+Deleted `MinecraftGameProvider.cs`.
 
-Document that `IGameProvider` contract requires unified interface and CQRS violation is contained to this single ExternalAbstraction. No pipeline plugin violates CQRS.
+Post-build verification (`ARM-BUILD-022`) passes with zero violations.
 
 ## Verification
 
 | Claim | F_doc | E_doc |
 |-------|-------|-------|
-| "MinecraftGameProvider contains both Query and Command" | Any method contains both read and write operations | `grep -n 'public Task.*Async' MinecraftGameProvider.cs` shows `CheckVersionAsync`, `InstallVersionAsync`, `BuildLaunchParametersAsync` |
-| "IGameProvider interface requires all three operations" | Interface splits into Query/Install parts | `grep -n 'interface IGameProvider' Vantuz.Core/IGameProvider.cs` shows single interface with all methods |
+| "MinecraftGameQueryProvider contains only Query operations" | Any method writes to filesystem or mutates state | `grep -n 'public Task.*Async' MinecraftGameQueryProvider.cs` shows only `CheckVersionAsync`, `BuildLaunchParametersAsync` |
+| "MinecraftGameCommandProvider contains only Command operations" | Any method reads from filesystem without mutation | `grep -n 'public Task.*Async' MinecraftGameCommandProvider.cs` shows only `InstallVersionAsync` |
+| "IGameProvider is composed of IGameQueryProvider + IGameCommandProvider" | `IGameProvider` is a single monolithic interface | `grep -n 'interface IGameProvider' Vantuz.Core/Contracts.cs` shows composite of two facets |
+| "Builder ARM-BUILD-022 reports zero CQRS violations" | Builder `verify-dir` reports CQRS violation for Minecraft plugin | `dotnet build` exits 0 with zero verification errors |
 
 ## Confidence Boundary
 

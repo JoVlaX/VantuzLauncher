@@ -12,22 +12,25 @@ using Vantuz.Core;
 public class MinecraftProviderCommand : ICommandPlugin
 {
     public string Name => "Game.MinecraftProvider";
-    
-    private readonly MinecraftGameProvider _provider = new();
+
+    private readonly MinecraftGameQueryProvider _queryProvider = new();
+    private readonly MinecraftGameCommandProvider _commandProvider = new();
 
     /// <summary>
-    /// Registers the IGameProvider instance for use by Game.* plugins.
-    /// Per INVARIANT_THEORY.md §2.2: registers under both Query and Command facets.
+    /// Registers the Minecraft game providers for use by Game.* plugins.
+    /// Per INVARIANT_THEORY.md §2.2: registers Query and Command facets separately.
     /// </summary>
     public Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
-        // Register provider under composite key for backward compat, and facet keys for CQRS purity
-        context.Set($"GameProvider.{_provider.ProviderName}", _provider);
-        context.Set($"GameQueryProvider.{_provider.ProviderName}", _provider);
-        context.Set($"GameCommandProvider.{_provider.ProviderName}", _provider);
-        context.Reporter.ReportState($"Провайдер {_provider.ProviderName} зарегистрирован.");
+        context.Set($"GameQueryProvider.{_queryProvider.ProviderName}", _queryProvider);
+        context.Set($"GameCommandProvider.{_commandProvider.ProviderName}", _commandProvider);
+        context.Reporter.ReportState($"Провайдер {_queryProvider.ProviderName} зарегистрирован (Query + Command).");
         return Task.FromResult(new CommandResult(true));
     }
 
-    public ValueTask DisposeAsync() => _provider.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await _queryProvider.DisposeAsync();
+        await _commandProvider.DisposeAsync();
+    }
 }
