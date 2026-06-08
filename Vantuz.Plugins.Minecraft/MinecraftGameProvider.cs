@@ -164,7 +164,7 @@ public class MinecraftGameProvider : IGameProvider
                                 : await forgeInstaller.Install(mcVersion, forgeVersion, forgeOptions);
                             return installedName;
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             throw;
                         }
@@ -296,15 +296,17 @@ public class MinecraftGameProvider : IGameProvider
         if (!File.Exists(versionJsonPath))
             return (false, "version JSON missing");
 
-        using JsonDocument json;
+        string jsonText;
         try
         {
-            json = JsonDocument.Parse(File.ReadAllText(versionJsonPath));
+            jsonText = File.ReadAllText(versionJsonPath);
         }
-        catch (Exception ex)
+        catch (Exception readEx)
         {
-            return (false, $"version JSON parse error: {ex.Message}");
+            return (false, $"version JSON read error: {readEx.Message}");
         }
+
+        using var json = JsonDocument.Parse(jsonText);
 
         var requiredLibraries = new[] { "cpw.mods:bootstraplauncher", "cpw.mods:securejarhandler", "net.minecraftforge:fmlloader" };
 

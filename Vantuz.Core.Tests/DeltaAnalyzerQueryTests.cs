@@ -24,8 +24,8 @@ public class DeltaAnalyzerQueryTests
     public async Task ExecuteAsync_EmptyTargetState_ReturnsEmptyQueues()
     {
         var reporter = new ListReporter();
-        var context = new QueryContext(CancellationToken.None, reporter);
-        context.Set("mcDir", Path.GetTempPath());
+        var payload = new Dictionary<string, object> { ["mcDir"] = Path.GetTempPath() };
+        var context = new QueryContext(payload, CancellationToken.None, reporter);
 
         var stepConfig = JsonDocument.Parse("{}").RootElement;
         var query = new DeltaAnalyzerQuery();
@@ -66,9 +66,8 @@ public class DeltaAnalyzerQueryTests
             };
 
             var reporter = new ListReporter();
-            var context = new QueryContext(CancellationToken.None, reporter);
-            context.Set("mcDir", tempDir);
-            context.Set("TargetState", targetState);
+            var payload = new Dictionary<string, object> { ["mcDir"] = tempDir, ["TargetState"] = targetState };
+            var context = new QueryContext(payload, CancellationToken.None, reporter);
 
             var stepConfig = JsonDocument.Parse("{}").RootElement;
             var query = new DeltaAnalyzerQuery();
@@ -94,7 +93,7 @@ public class DeltaAnalyzerQueryTests
     public async Task ExecuteAsync_MissingMcDir_ThrowsInvalidOperationException()
     {
         var reporter = new ListReporter();
-        var context = new QueryContext(CancellationToken.None, reporter);
+        var context = new QueryContext(new Dictionary<string, object>(), CancellationToken.None, reporter);
         // Intentionally NOT setting mcDir
 
         var stepConfig = JsonDocument.Parse("{}").RootElement;

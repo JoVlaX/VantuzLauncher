@@ -1,6 +1,7 @@
 namespace Vantuz.Core.Tests;
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ public class ApiReaderQueryTests
     public async Task ExecuteAsync_MissingUrl_ThrowsInvalidOperationException()
     {
         var reporter = new ListReporter();
-        var context = new QueryContext(CancellationToken.None, reporter);
+        var context = new QueryContext(new Dictionary<string, object>(), CancellationToken.None, reporter);
         var stepConfig = JsonDocument.Parse(@"{ ""payloadKey"": ""test"" }").RootElement;
 
         var query = new ApiReaderQuery();
@@ -37,7 +38,7 @@ public class ApiReaderQueryTests
     public async Task ExecuteAsync_MissingPayloadKey_ThrowsInvalidOperationException()
     {
         var reporter = new ListReporter();
-        var context = new QueryContext(CancellationToken.None, reporter);
+        var context = new QueryContext(new Dictionary<string, object>(), CancellationToken.None, reporter);
         var stepConfig = JsonDocument.Parse(@"{ ""url"": ""http://localhost"" }").RootElement;
 
         var query = new ApiReaderQuery();

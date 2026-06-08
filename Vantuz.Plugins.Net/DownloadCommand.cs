@@ -158,7 +158,7 @@ public class DownloadCommand : ICommandPlugin
                         if (File.Exists(item.finalPath)) File.Delete(item.finalPath);
                         if (File.Exists(item.backupPath)) File.Move(item.backupPath, item.finalPath);
                     }
-                    catch (Exception ex) { Console.WriteLine($"[DownloadCommand] WARN: rollback failed for {item.finalPath}: {ex.Message}"); }
+                    catch (Exception rollbackEx) { Console.WriteLine($"[DownloadCommand] WARN: rollback failed for {item.finalPath}: {rollbackEx.Message}"); }
                 }
                 return new CommandResult(false, "Ошибка I/O блокировки, состояние восстановлено");
             }
