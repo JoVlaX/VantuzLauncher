@@ -47,10 +47,7 @@ public class MinecraftGameProvider : IGameProvider
                 var (librariesOk, missingDetail) = VerifyForgeLibraries(version, installDir);
                 versionExists = jsonExists && librariesOk;
 
-                Console.WriteLine($"[DIAG CheckVersionAsync] FORGE version={version}");
-                Console.WriteLine($"[DIAG CheckVersionAsync] jsonPath={versionJsonPath}, jsonExists={jsonExists}");
-                Console.WriteLine($"[DIAG CheckVersionAsync] librariesOk={librariesOk}, missingDetail={missingDetail}");
-                Console.WriteLine($"[DIAG CheckVersionAsync] versionExists={versionExists}");
+                // Forge version check completed; versionExists determined by JSON + library verification
             }
             else
             {
@@ -59,17 +56,13 @@ public class MinecraftGameProvider : IGameProvider
                 var jarExists = File.Exists(versionJarPath);
                 versionExists = jsonExists && jarExists;
 
-                Console.WriteLine($"[DIAG CheckVersionAsync] VANILLA version={version}");
-                Console.WriteLine($"[DIAG CheckVersionAsync] jsonPath={versionJsonPath}, jsonExists={jsonExists}");
-                Console.WriteLine($"[DIAG CheckVersionAsync] jarPath={versionJarPath}, jarExists={jarExists}");
-                Console.WriteLine($"[DIAG CheckVersionAsync] versionExists={versionExists}");
+                // Vanilla version check completed; versionExists determined by JSON + JAR existence
             }
 
             return Task.FromResult(new VersionCheckResult(versionExists));
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[DIAG CheckVersionAsync] EXCEPTION: {ex}");
             return Task.FromResult(new VersionCheckResult(false, ex.Message));
         }
     }
@@ -105,8 +98,6 @@ public class MinecraftGameProvider : IGameProvider
                 // DIAGNOSTIC: Log parsed components and install dir before calling ForgeInstaller.
                 // These values determine whether CmlLib can locate existing Forge or needs to re-download.
                 var absInstallDir = Path.GetFullPath(installDir);
-                Console.WriteLine($"[DIAG InstallVersionAsync] Parsed: version={version}, mcVersion={mcVersion}, forgeVersion={forgeVersion}, installDir={absInstallDir}");
-                Console.WriteLine($"[DIAG InstallVersionAsync] ForgeInstaller timeout={(timeout?.TotalMinutes ?? 5):F0} min, SkipIfAlreadyInstalled=true");
 
                 var forgeInstaller = ForgeInstallerFactory?.Invoke(launcher) ?? new ForgeInstaller(launcher);
 
@@ -148,7 +139,6 @@ public class MinecraftGameProvider : IGameProvider
                     {
                         try
                         {
-                            Console.WriteLine($"[DIAG ForgeInstaller] Calling Install(mcVersion={mcVersion}, forgeVersion={forgeVersion})");
                             var forgeOptions = new ForgeInstallOptions
                             {
                                 FileProgress = new Progress<InstallerProgressChangedEventArgs>(args =>
@@ -172,14 +162,10 @@ public class MinecraftGameProvider : IGameProvider
                             var installedName = ForgeInstallOverride != null
                                 ? await ForgeInstallOverride(mcVersion, forgeVersion, forgeOptions)
                                 : await forgeInstaller.Install(mcVersion, forgeVersion, forgeOptions);
-                            Console.WriteLine($"[DIAG ForgeInstaller] Install completed, returned={installedName}");
                             return installedName;
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine($"[DIAG ForgeInstaller] EXCEPTION during Install: {ex.GetType().Name}: {ex.Message}");
-                            if (ex.InnerException != null)
-                                Console.WriteLine($"[DIAG ForgeInstaller] INNER EXCEPTION: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
                             throw;
                         }
                     }, cts.Token);
@@ -195,22 +181,17 @@ public class MinecraftGameProvider : IGameProvider
                         // run CmlLib's library resolver to fetch the remaining artifacts
                         // (bootstraplauncher, securejarhandler, etc.) before launch.
                         reporter.ReportState($"Загрузка библиотек Forge для {installedName}...");
-                        Console.WriteLine($"[DIAG InstallVersionAsync] Running launcher.InstallAsync({installedName}) to download libraries...");
                         if (LibraryInstaller != null)
                             await LibraryInstaller(launcher, installedName);
                         else
                             await launcher.InstallAsync(installedName);
-                        Console.WriteLine($"[DIAG InstallVersionAsync] launcher.InstallAsync completed");
 
                         // Post-install verification: parse version JSON and verify all critical libraries.
                         var (librariesOk, missingDetail) = VerifyForgeLibraries(version, installDir);
                         if (!librariesOk)
                         {
-                            Console.WriteLine($"[DIAG InstallVersionAsync] Post-install verification FAILED: {missingDetail}");
                             return new InstallResult(false, $"Установка Forge завершилась, но не хватает критических библиотек: {missingDetail}");
                         }
-                        Console.WriteLine($"[DIAG InstallVersionAsync] Post-install verification PASSED");
-
                         return new InstallResult(true, null, installedName);
                     }
                     else
