@@ -32,6 +32,8 @@ If traditional tools are musical instruments, Compositum is the conductor's syst
 
 Compositum is the first concrete realization of the **Armatura Invariant Theory** (`docs/theory/INVARIANT_THEORY.md`). All architectural decisions, constraints, and verification procedures derive from this theoretical foundation.
 
+**Parent Version:** `v1.1`
+
 **Subordination Principle:**
 
 Every component, plugin, and extension within Compositum must strictly satisfy the invariants defined in INVARIANT_THEORY. There are no exceptions without explicit, documented, and time-bounded deviation protocols.

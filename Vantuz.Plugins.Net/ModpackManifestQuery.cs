@@ -46,7 +46,7 @@ public class ModpackManifestQuery : IQueryPlugin
 
         try
         {
-            var handler = new HttpClientHandler();
+            using var handler = new HttpClientHandler();
             if (ignoreSslErrors)
             {
                 handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true;

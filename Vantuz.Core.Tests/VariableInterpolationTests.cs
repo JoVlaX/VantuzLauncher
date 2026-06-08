@@ -117,7 +117,7 @@ public class VariableInterpolationTests
     [Fact]
     public void InterpolateVariables_EnvironmentVariable_Resolves()
     {
-        var userProfile = Environment.GetEnvironmentVariable("USERPROFILE") ?? "C:\\Users\\Default";
+        var userProfile = Environment.GetEnvironmentVariable("USERPROFILE") ?? Environment.GetEnvironmentVariable("HOME") ?? Path.GetTempPath();
         var variables = new Dictionary<string, string>
         {
             ["mcDir"] = "${env:USERPROFILE}\\.vantuzlauncher"

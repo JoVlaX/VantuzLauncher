@@ -1,3 +1,9 @@
+---
+version: 1.0
+parent: INVARIANT_THEORY.md
+parent_version: 1.1
+---
+
 # Deviation Protocol 007: NomadicVerifier / Transdomain Primitive Static Verification Missing
 
 **Status:** Resolved 2026-06-03  

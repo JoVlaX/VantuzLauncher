@@ -1,0 +1,342 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="abd50304-1330-48bf-b19f-1544ff6fd4fa" name="1@DESKTOP-NTADQTR 2026-06-08 09:51:58" runUser="DESKTOP-NTADQTR\1" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-06-08T09:51:58.2907213+05:00" queuing="2026-06-08T09:51:58.2907217+05:00" start="2026-06-08T09:51:52.9163469+05:00" finish="2026-06-08T09:52:55.1650869+05:00" />
+  <TestSettings name="default" id="89eec518-9b32-4064-8c8c-bf08a6fe6b70">
+    <Deployment runDeploymentRoot="1_DESKTOP-NTADQTR_2026-06-08_09_51_58" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="d0047e3d-e385-410d-8da9-c8638185c92d" testId="17064349-f04a-07ea-f999-43fea8de6e1c" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_NoUnresolvedPlaceholders(fileName: &quot;boot.minecraft.production.json&quot;)" computerName="DESKTOP-NTADQTR" duration="00:00:00.0015770" startTime="2026-06-08T09:51:58.2337834+05:00" endTime="2026-06-08T09:51:58.2337836+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d0047e3d-e385-410d-8da9-c8638185c92d" />
+    <UnitTestResult executionId="e0410bb8-14ea-4694-bf86-3affce4dc9a0" testId="de27a3a4-5585-1811-f69a-d74b7b44037f" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_NoUnresolvedPlaceholders(fileName: &quot;boot.headless.json&quot;)" computerName="DESKTOP-NTADQTR" duration="00:00:00.0009733" startTime="2026-06-08T09:51:58.2339055+05:00" endTime="2026-06-08T09:51:58.2339057+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e0410bb8-14ea-4694-bf86-3affce4dc9a0" />
+    <UnitTestResult executionId="79ab7dde-7fb2-4c46-a5f0-4d7dab105560" testId="b176c4ce-c811-cce4-ac28-b5b7914e0234" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall" computerName="DESKTOP-NTADQTR" duration="00:00:00.3292555" startTime="2026-06-08T09:52:15.2231756+05:00" endTime="2026-06-08T09:52:15.2231772+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="79ab7dde-7fb2-4c46-a5f0-4d7dab105560" />
+    <UnitTestResult executionId="83b3a6e4-dc95-4d4e-ac78-97ee0370f305" testId="d3dac384-ae1f-5876-07f2-1bcf0e9f9683" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_DependentVariables_ResolvesInOrder" computerName="DESKTOP-NTADQTR" duration="00:00:00.0008002" startTime="2026-06-08T09:51:58.2327395+05:00" endTime="2026-06-08T09:51:58.2327397+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="83b3a6e4-dc95-4d4e-ac78-97ee0370f305" />
+    <UnitTestResult executionId="c4f0d43b-f202-4ab0-b42e-294048674cc9" testId="9d82f38f-4f42-5efe-d3a7-983c7c7ee93b" testName="Vantuz.Core.Tests.CommandResultTests.Success_Constructor_SetsProperties" computerName="DESKTOP-NTADQTR" duration="00:00:00.0071547" startTime="2026-06-08T09:51:58.0204620+05:00" endTime="2026-06-08T09:51:58.0205285+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c4f0d43b-f202-4ab0-b42e-294048674cc9" />
+    <UnitTestResult executionId="761c2560-9b60-4445-ba22-129b8ed8a902" testId="8ed1f628-546a-9be4-9711-360f50e39ac9" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_CircularDependency_DoesNotHang" computerName="DESKTOP-NTADQTR" duration="00:00:00.0004347" startTime="2026-06-08T09:51:58.2075984+05:00" endTime="2026-06-08T09:51:58.2075986+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="761c2560-9b60-4445-ba22-129b8ed8a902" />
+    <UnitTestResult executionId="597f09d8-15ec-46d4-91a2-99b56875743d" testId="832ece00-ee0a-69a6-edd0-a3ed2f24d9d0" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_StandardFormat_ReturnsCorrectTuple" computerName="DESKTOP-NTADQTR" duration="00:00:00.0008280" startTime="2026-06-08T09:52:15.7731083+05:00" endTime="2026-06-08T09:52:15.7731087+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="597f09d8-15ec-46d4-91a2-99b56875743d" />
+    <UnitTestResult executionId="7f019e70-cec4-441f-a5f7-a2b3949b8192" testId="29e75204-ae1f-90d0-2658-3545ee5766ca" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingJava_ReturnsFailureWithClearMessage" computerName="DESKTOP-NTADQTR" duration="00:00:00.0063704" startTime="2026-06-08T09:52:16.6036167+05:00" endTime="2026-06-08T09:52:16.6036171+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7f019e70-cec4-441f-a5f7-a2b3949b8192" />
+    <UnitTestResult executionId="bbf48f69-203d-481b-ab1a-47b2337bf447" testId="17bbd0b6-9b48-5d98-6178-af45a2de6271" testName="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests.GuiPipeline_ExecutesWithoutPluginNotFoundCrash" computerName="DESKTOP-NTADQTR" duration="00:00:16.0523199" startTime="2026-06-08T09:52:14.2308580+05:00" endTime="2026-06-08T09:52:14.2308583+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bbf48f69-203d-481b-ab1a-47b2337bf447" />
+    <UnitTestResult executionId="e301249c-b90b-46d9-b3a9-406706c3dacc" testId="9c059e81-9071-1b78-15ed-b760acef5ff4" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeComplete_ReturnsTrue" computerName="DESKTOP-NTADQTR" duration="00:00:14.0198941" startTime="2026-06-08T09:52:14.6869160+05:00" endTime="2026-06-08T09:52:14.6869164+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e301249c-b90b-46d9-b3a9-406706c3dacc" />
+    <UnitTestResult executionId="2f07dec6-1b22-4a8a-9774-df156689f65c" testId="32f63f73-7a95-9fa9-216d-6f69ff396a0e" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeIncomplete_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.1386757" startTime="2026-06-08T09:52:14.8949420+05:00" endTime="2026-06-08T09:52:14.8949424+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2f07dec6-1b22-4a8a-9774-df156689f65c" />
+    <UnitTestResult executionId="3bb06a63-7b55-4227-9d07-1aa53281018b" testId="27b965b8-38b6-bee5-51a3-ca4d6d05fb1a" testName="Vantuz.Core.Tests.CommandResultTests.Failure_Constructor_SetsProperties" computerName="DESKTOP-NTADQTR" duration="00:00:00.0018434" startTime="2026-06-08T09:51:58.1477301+05:00" endTime="2026-06-08T09:51:58.1477303+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3bb06a63-7b55-4227-9d07-1aa53281018b" />
+    <UnitTestResult executionId="1b4010fb-e9f0-4d51-9a7e-473632415484" testId="f8367f7a-9cce-e548-cd48-ef95c0e76341" testName="Vantuz.Core.Tests.GuiModeProcessTests.GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog" computerName="DESKTOP-NTADQTR" duration="00:00:22.3356170" startTime="2026-06-08T09:52:50.5731084+05:00" endTime="2026-06-08T09:52:50.5731088+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1b4010fb-e9f0-4d51-9a7e-473632415484" />
+    <UnitTestResult executionId="75426e9c-d272-417f-a9af-f2620862543e" testId="5218aab3-91e5-4d02-6f4b-36bb8169aaad" testName="Vantuz.Core.Tests.GuiModeFunctionalTests.GuiManifest_GameVersion_IsValidForgeFormat" computerName="DESKTOP-NTADQTR" duration="00:00:00.0787866" startTime="2026-06-08T09:52:00.6664561+05:00" endTime="2026-06-08T09:52:00.6664568+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="75426e9c-d272-417f-a9af-f2620862543e" />
+    <UnitTestResult executionId="d5cbc966-ff9f-421a-872d-e57fc3d93116" testId="60f71c30-2701-977b-d59a-5eb8477cee78" testName="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests.BootGuiJson_StepsMatchExpectedSet" computerName="DESKTOP-NTADQTR" duration="00:00:00.2292887" startTime="2026-06-08T09:51:58.1781837+05:00" endTime="2026-06-08T09:51:58.1781843+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d5cbc966-ff9f-421a-872d-e57fc3d93116" />
+    <UnitTestResult executionId="3ef38457-dd7e-40c3-a563-f09ea1f44e05" testId="750abeff-0014-b470-5d16-6f124c7e2219" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.5428722" startTime="2026-06-08T09:52:15.7720005+05:00" endTime="2026-06-08T09:52:15.7720011+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3ef38457-dd7e-40c3-a563-f09ea1f44e05" />
+    <UnitTestResult executionId="0217d149-cf92-41d8-9979-cd1ffbd30518" testId="184bf7b2-dc0f-4b9c-0917-ff393766eaa3" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.BootHeadlessJson_StepsMatchExpectedSet" computerName="DESKTOP-NTADQTR" duration="00:00:00.0027999" startTime="2026-06-08T09:51:58.2340459+05:00" endTime="2026-06-08T09:51:58.2340461+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0217d149-cf92-41d8-9979-cd1ffbd30518" />
+    <UnitTestResult executionId="7a7ce5c4-0c69-44ef-8e40-f2b5843c251a" testId="3ab3a265-65e5-6c60-d4c2-773914ebd1ce" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers" computerName="DESKTOP-NTADQTR" duration="00:00:15.9848230" startTime="2026-06-08T09:52:14.2304459+05:00" endTime="2026-06-08T09:52:14.2304466+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a7ce5c4-0c69-44ef-8e40-f2b5843c251a" />
+    <UnitTestResult executionId="8f4ff1e3-2926-4fe7-80e8-f023312af8dc" testId="6610700f-012b-0b62-cefd-986d8f87c629" testName="Vantuz.Core.Tests.GuiModeProcessTests.GuiMode_ProcessStarts_WindowAppearsWithin10Seconds" computerName="DESKTOP-NTADQTR" duration="00:00:30.2951704" startTime="2026-06-08T09:52:28.2387061+05:00" endTime="2026-06-08T09:52:28.2387064+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8f4ff1e3-2926-4fe7-80e8-f023312af8dc" />
+    <UnitTestResult executionId="0e26980d-2058-4065-a2ea-c81d4b573d71" testId="4852611b-0209-d6fb-14e1-c9b26927339e" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingInstallDir_ReturnsFailureWithClearMessage" computerName="DESKTOP-NTADQTR" duration="00:00:00.0019496" startTime="2026-06-08T09:52:00.1879658+05:00" endTime="2026-06-08T09:52:00.1879662+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0e26980d-2058-4065-a2ea-c81d4b573d71" />
+    <UnitTestResult executionId="14d00e81-6b57-4a4e-b932-080a193d0400" testId="75cfac8b-3249-a70b-7150-059b815e7279" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_RealisticBootJson_NoUnresolvedPlaceholders" computerName="DESKTOP-NTADQTR" duration="00:00:00.2366959" startTime="2026-06-08T09:51:58.2066774+05:00" endTime="2026-06-08T09:51:58.2066780+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="14d00e81-6b57-4a4e-b932-080a193d0400" />
+    <UnitTestResult executionId="f452cbe2-3f03-4d74-a228-ffb7f81034f0" testId="2ede7db6-f9e3-8c2c-4030-c3ebeefecce1" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_ChainedDependencies_ResolvesTransitively" computerName="DESKTOP-NTADQTR" duration="00:00:00.0004212" startTime="2026-06-08T09:51:58.2331314+05:00" endTime="2026-06-08T09:51:58.2331316+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f452cbe2-3f03-4d74-a228-ffb7f81034f0" />
+    <UnitTestResult executionId="e8ec2630-7eea-4b1a-a81e-9c66e3c621e2" testId="5db4cf82-8321-f730-2893-cc3c45813804" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaComplete_ReturnsTrue" computerName="DESKTOP-NTADQTR" duration="00:00:00.1216634" startTime="2026-06-08T09:52:16.6091039+05:00" endTime="2026-06-08T09:52:16.6091043+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e8ec2630-7eea-4b1a-a81e-9c66e3c621e2" />
+    <UnitTestResult executionId="eda0d1f8-617e-49bf-bdfe-4171a319f5d7" testId="8d9f625b-eca0-caaf-80b7-0208b4fb0a84" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_SpecialFolder_Resolves" computerName="DESKTOP-NTADQTR" duration="00:00:00.0003947" startTime="2026-06-08T09:51:58.2084278+05:00" endTime="2026-06-08T09:51:58.2084284+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="eda0d1f8-617e-49bf-bdfe-4171a319f5d7" />
+    <UnitTestResult executionId="22f47f19-9ba7-4c9e-a2bc-64b46708df1c" testId="82ecfb8e-1b87-c4ea-86dc-025e57f653c8" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_MissingVersion_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.0054587" startTime="2026-06-08T09:52:15.2288980+05:00" endTime="2026-06-08T09:52:15.2288985+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="22f47f19-9ba7-4c9e-a2bc-64b46708df1c" />
+    <UnitTestResult executionId="a2f4fffa-f877-4de9-99a2-a995aacbd8cc" testId="8f30efbc-7e3d-ab47-0825-e02fd91dce70" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_PayloadOverridesVariable" computerName="DESKTOP-NTADQTR" duration="00:00:00.0003464" startTime="2026-06-08T09:51:58.2334398+05:00" endTime="2026-06-08T09:51:58.2334400+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a2f4fffa-f877-4de9-99a2-a995aacbd8cc" />
+    <UnitTestResult executionId="3fb5a89e-c2b2-4a84-9d56-46fdfc2d4784" testId="377fa45c-ab02-859b-ac30-5585751c9fce" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider" computerName="DESKTOP-NTADQTR" duration="00:00:00.1311853" startTime="2026-06-08T09:52:00.1857323+05:00" endTime="2026-06-08T09:52:00.1857328+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3fb5a89e-c2b2-4a84-9d56-46fdfc2d4784" />
+    <UnitTestResult executionId="8006eeff-39e6-440a-a8e0-b3c5bc43ea30" testId="266b97bd-0a78-5b99-c908-e3c9177da4de" testName="Vantuz.Core.Tests.HeadlessSmokeTests.HeadlessSmokeTest_ExitsWithoutCriticalError" computerName="DESKTOP-NTADQTR" duration="00:00:16.5329256" startTime="2026-06-08T09:52:14.7017087+05:00" endTime="2026-06-08T09:52:14.7017092+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8006eeff-39e6-440a-a8e0-b3c5bc43ea30" />
+    <UnitTestResult executionId="4531dba5-9b70-4911-be65-e15b3e7120a0" testId="5b2a8097-f07c-36bd-324a-bdc2320e5f2d" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_NoUnresolvedPlaceholders(fileName: &quot;boot.gui.json&quot;)" computerName="DESKTOP-NTADQTR" duration="00:00:00.0053368" startTime="2026-06-08T09:51:58.2336479+05:00" endTime="2026-06-08T09:51:58.2336481+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4531dba5-9b70-4911-be65-e15b3e7120a0" />
+    <UnitTestResult executionId="192f0a5c-7e1c-425b-ab04-93e4717d0290" testId="caedb91e-215d-ab53-d2d2-ea06de83613b" testName="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_EnvironmentVariable_Resolves" computerName="DESKTOP-NTADQTR" duration="00:00:00.0003816" startTime="2026-06-08T09:51:58.2332899+05:00" endTime="2026-06-08T09:51:58.2332900+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="192f0a5c-7e1c-425b-ab04-93e4717d0290" />
+    <UnitTestResult executionId="655de77e-fdeb-401b-927e-223a2de604c7" testId="c51b34ef-4ac0-f70c-a4c5-b3f89b14361b" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders" computerName="DESKTOP-NTADQTR" duration="00:00:03.6855621" startTime="2026-06-08T09:52:16.5969961+05:00" endTime="2026-06-08T09:52:16.5969965+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="655de77e-fdeb-401b-927e-223a2de604c7" />
+    <UnitTestResult executionId="fc1ea934-91f9-4103-82e0-bdfa2b7a7d5e" testId="d358d99b-fd27-69b4-d693-f6f14e3eeb19" testName="Vantuz.Core.Tests.GuiModeFunctionalTests.Program_Loads_GuiManifest_NotTemplate" computerName="DESKTOP-NTADQTR" duration="00:00:00.0288804" startTime="2026-06-08T09:52:00.5795215+05:00" endTime="2026-06-08T09:52:00.5795221+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fc1ea934-91f9-4103-82e0-bdfa2b7a7d5e" />
+    <UnitTestResult executionId="c499edac-c3ee-4d3a-b05c-ad04cc650e0f" testId="3a83f0e2-c1cd-83c4-b0f6-7c8beacdc660" testName="Vantuz.Core.Tests.GuiModeFunctionalTests.AllManifests_HaveConsistentGameProvider" computerName="DESKTOP-NTADQTR" duration="00:00:00.0033838" startTime="2026-06-08T09:52:00.5874411+05:00" endTime="2026-06-08T09:52:00.5874420+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c499edac-c3ee-4d3a-b05c-ad04cc650e0f" />
+    <UnitTestResult executionId="a3ebb2e5-ff12-42fc-922e-513ea3bc447c" testId="8b3bf037-cef9-fafc-a3a4-5384c3a08276" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple" computerName="DESKTOP-NTADQTR" duration="00:00:00.0002165" startTime="2026-06-08T09:52:16.6095107+05:00" endTime="2026-06-08T09:52:16.6095108+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a3ebb2e5-ff12-42fc-922e-513ea3bc447c" />
+    <UnitTestResult executionId="1fc6b92e-c078-48f9-a14f-6de6f90e6626" testId="f8b02280-d58f-52cd-2ac9-ef5216be18cb" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_DummyExecutable_ReturnsSuccess" computerName="DESKTOP-NTADQTR" duration="00:00:12.7102758" startTime="2026-06-08T09:52:12.9061530+05:00" endTime="2026-06-08T09:52:12.9061535+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1fc6b92e-c078-48f9-a14f-6de6f90e6626" />
+    <UnitTestResult executionId="7ada9e81-375a-4b00-b01f-e498e1c00e17" testId="ab5c9426-00bd-ded5-bb10-dd52f314a81c" testName="Vantuz.Core.Tests.GuiModeFunctionalTests.GeneratedBootJson_MatchesGuiManifest_GameVersion" computerName="DESKTOP-NTADQTR" duration="00:00:00.0031896" startTime="2026-06-08T09:52:00.5834039+05:00" endTime="2026-06-08T09:52:00.5834048+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7ada9e81-375a-4b00-b01f-e498e1c00e17" />
+    <UnitTestResult executionId="07af27ca-35da-43e4-a06b-1664a2839644" testId="ce42e30e-97b2-6b7a-7fbe-110c861c48a4" testName="Vantuz.Core.Tests.HeadlessSmokeTests.BootJson_ParsesWithoutNullReference" computerName="DESKTOP-NTADQTR" duration="00:00:00.2274191" startTime="2026-06-08T09:51:58.1696560+05:00" endTime="2026-06-08T09:51:58.1696565+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="07af27ca-35da-43e4-a06b-1664a2839644" />
+    <UnitTestResult executionId="15f196ea-809c-42d8-a217-f41b42c62831" testId="0f49cba4-113b-2eb7-96b2-923831f9ba8b" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaIncomplete_ReturnsFalse" computerName="DESKTOP-NTADQTR" duration="00:00:00.0674465" startTime="2026-06-08T09:52:14.7548051+05:00" endTime="2026-06-08T09:52:14.7548058+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="15f196ea-809c-42d8-a217-f41b42c62831" />
+    <UnitTestResult executionId="9a2bace7-cdad-4709-b513-6a32f80c0b21" testId="29af152b-9368-65cd-1274-6d4f24ccf49a" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_LaunchCommand_IsFollowedByExecuteCommand(fileName: &quot;boot.minecraft.production.json&quot;)" computerName="DESKTOP-NTADQTR" duration="00:00:00.0010977" startTime="2026-06-08T09:51:58.2386683+05:00" endTime="2026-06-08T09:51:58.2386685+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9a2bace7-cdad-4709-b513-6a32f80c0b21" />
+    <UnitTestResult executionId="10819ab5-c64a-4d64-ae36-e57b1443d789" testId="5417a48c-7dc4-7e65-5dde-45f31da74186" testName="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests.GuiPipeline_ResolvesAllPlugins" computerName="DESKTOP-NTADQTR" duration="00:00:06.6020969" startTime="2026-06-08T09:52:20.8317293+05:00" endTime="2026-06-08T09:52:20.8317298+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="10819ab5-c64a-4d64-ae36-e57b1443d789" />
+    <UnitTestResult executionId="7cc8df47-d447-43c8-bc39-3cf247375c01" testId="c9ca4d7b-e0a1-0209-423b-deb7dda946f9" testName="Vantuz.Core.Tests.GuiModeProcessTests.GuiMode_ProcessKilled_NoZombieRemains" computerName="DESKTOP-NTADQTR" duration="00:00:04.3105876" startTime="2026-06-08T09:52:54.8840562+05:00" endTime="2026-06-08T09:52:54.8840567+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7cc8df47-d447-43c8-bc39-3cf247375c01" />
+    <UnitTestResult executionId="28af35f0-d674-44ca-9ed7-842363306909" testId="eea26664-1b21-7fc4-cfb6-14b6b0a52392" testName="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_UnresolvedPlaceholder_ReturnsFailureWithClearMessage" computerName="DESKTOP-NTADQTR" duration="00:00:00.0013741" startTime="2026-06-08T09:52:12.9113833+05:00" endTime="2026-06-08T09:52:12.9113838+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="28af35f0-d674-44ca-9ed7-842363306909" />
+    <UnitTestResult executionId="54e81c17-1706-423f-a5af-ae00ccb5bd9c" testId="4e15d8b7-2cb0-fbe2-3892-686544d81391" testName="Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver" computerName="DESKTOP-NTADQTR" duration="00:00:00.7138722" startTime="2026-06-08T09:52:16.4872314+05:00" endTime="2026-06-08T09:52:16.4872319+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="54e81c17-1706-423f-a5af-ae00ccb5bd9c" />
+    <UnitTestResult executionId="882cb613-ce25-407e-893f-7b20a120910a" testId="2fdd3774-7c85-360d-fa74-7441eadbcbf7" testName="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_LaunchCommand_IsFollowedByExecuteCommand(fileName: &quot;boot.gui.json&quot;)" computerName="DESKTOP-NTADQTR" duration="00:00:00.0024930" startTime="2026-06-08T09:51:58.2342073+05:00" endTime="2026-06-08T09:51:58.2342075+05:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="882cb613-ce25-407e-893f-7b20a120910a" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests.GuiPipeline_ResolvesAllPlugins" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="5417a48c-7dc4-7e65-5dde-45f31da74186">
+      <Execution id="10819ab5-c64a-4d64-ae36-e57b1443d789" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests" name="GuiPipeline_ResolvesAllPlugins" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_NoUnresolvedPlaceholders(fileName: &quot;boot.minecraft.production.json&quot;)" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="17064349-f04a-07ea-f999-43fea8de6e1c">
+      <Execution id="d0047e3d-e385-410d-8da9-c8638185c92d" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="Manifest_NoUnresolvedPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_MissingVersion_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="82ecfb8e-1b87-c4ea-86dc-025e57f653c8">
+      <Execution id="22f47f19-9ba7-4c9e-a2bc-64b46708df1c" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_MissingVersion_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.CommandResultTests.Success_Constructor_SetsProperties" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="9d82f38f-4f42-5efe-d3a7-983c7c7ee93b">
+      <Execution id="c4f0d43b-f202-4ab0-b42e-294048674cc9" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.CommandResultTests" name="Success_Constructor_SetsProperties" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_CircularDependency_DoesNotHang" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="8ed1f628-546a-9be4-9711-360f50e39ac9">
+      <Execution id="761c2560-9b60-4445-ba22-129b8ed8a902" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_CircularDependency_DoesNotHang" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_LaunchCommand_IsFollowedByExecuteCommand(fileName: &quot;boot.gui.json&quot;)" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="2fdd3774-7c85-360d-fa74-7441eadbcbf7">
+      <Execution id="882cb613-ce25-407e-893f-7b20a120910a" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="Manifest_LaunchCommand_IsFollowedByExecuteCommand" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_NoUnresolvedPlaceholders(fileName: &quot;boot.headless.json&quot;)" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="de27a3a4-5585-1811-f69a-d74b7b44037f">
+      <Execution id="e0410bb8-14ea-4694-bf86-3affce4dc9a0" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="Manifest_NoUnresolvedPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_NoUnresolvedPlaceholders(fileName: &quot;boot.gui.json&quot;)" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="5b2a8097-f07c-36bd-324a-bdc2320e5f2d">
+      <Execution id="4531dba5-9b70-4911-be65-e15b3e7120a0" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="Manifest_NoUnresolvedPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.BootHeadlessJson_StepsMatchExpectedSet" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="184bf7b2-dc0f-4b9c-0917-ff393766eaa3">
+      <Execution id="0217d149-cf92-41d8-9979-cd1ffbd30518" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="BootHeadlessJson_StepsMatchExpectedSet" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.InstallVersionAsync_ForgePath_CallsLibraryResolver" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="4e15d8b7-2cb0-fbe2-3892-686544d81391">
+      <Execution id="54e81c17-1706-423f-a5af-ae00ccb5bd9c" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="InstallVersionAsync_ForgePath_CallsLibraryResolver" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="b176c4ce-c811-cce4-ac28-b5b7914e0234">
+      <Execution id="79ab7dde-7fb2-4c46-a5f0-4d7dab105560" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="GameInstallerCommand_ForgeAlreadyInstalled_SkipsInstall" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_ChainedDependencies_ResolvesTransitively" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="2ede7db6-f9e3-8c2c-4030-c3ebeefecce1">
+      <Execution id="f452cbe2-3f03-4d74-a228-ffb7f81034f0" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_ChainedDependencies_ResolvesTransitively" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="750abeff-0014-b470-5d16-6f124c7e2219">
+      <Execution id="3ef38457-dd7e-40c3-a563-f09ea1f44e05" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_ForgeBootstrapLauncherMissing_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaIncomplete_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="0f49cba4-113b-2eb7-96b2-923831f9ba8b">
+      <Execution id="15f196ea-809c-42d8-a217-f41b42c62831" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_VanillaIncomplete_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_EnvironmentVariable_Resolves" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="caedb91e-215d-ab53-d2d2-ea06de83613b">
+      <Execution id="192f0a5c-7e1c-425b-ab04-93e4717d0290" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_EnvironmentVariable_Resolves" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_RealisticBootJson_NoUnresolvedPlaceholders" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="75cfac8b-3249-a70b-7150-059b815e7279">
+      <Execution id="14d00e81-6b57-4a4e-b932-080a193d0400" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_RealisticBootJson_NoUnresolvedPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_UnresolvedPlaceholder_ReturnsFailureWithClearMessage" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="eea26664-1b21-7fc4-cfb6-14b6b0a52392">
+      <Execution id="28af35f0-d674-44ca-9ed7-842363306909" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="ExecuteCommand_UnresolvedPlaceholder_ReturnsFailureWithClearMessage" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeProcessTests.GuiMode_ProcessStarts_WindowAppearsWithin10Seconds" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="6610700f-012b-0b62-cefd-986d8f87c629">
+      <Execution id="8f4ff1e3-2926-4fe7-80e8-f023312af8dc" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeProcessTests" name="GuiMode_ProcessStarts_WindowAppearsWithin10Seconds" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="c51b34ef-4ac0-f70c-a4c5-b3f89b14361b">
+      <Execution id="655de77e-fdeb-401b-927e-223a2de604c7" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_ResolvedInstallDir_GameArgsContainsNoPlaceholders" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_DependentVariables_ResolvesInOrder" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="d3dac384-ae1f-5876-07f2-1bcf0e9f9683">
+      <Execution id="83b3a6e4-dc95-4d4e-ac78-97ee0370f305" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_DependentVariables_ResolvesInOrder" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.HeadlessSmokeTests.HeadlessSmokeTest_ExitsWithoutCriticalError" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="266b97bd-0a78-5b99-c908-e3c9177da4de">
+      <Execution id="8006eeff-39e6-440a-a8e0-b3c5bc43ea30" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.HeadlessSmokeTests" name="HeadlessSmokeTest_ExitsWithoutCriticalError" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_VanillaComplete_ReturnsTrue" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="5db4cf82-8321-f730-2893-cc3c45813804">
+      <Execution id="e8ec2630-7eea-4b1a-a81e-9c66e3c621e2" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_VanillaComplete_ReturnsTrue" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_PayloadOverridesVariable" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="8f30efbc-7e3d-ab47-0825-e02fd91dce70">
+      <Execution id="a2f4fffa-f877-4de9-99a2-a995aacbd8cc" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_PayloadOverridesVariable" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeFunctionalTests.GuiManifest_GameVersion_IsValidForgeFormat" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="5218aab3-91e5-4d02-6f4b-36bb8169aaad">
+      <Execution id="75426e9c-d272-417f-a9af-f2620862543e" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeFunctionalTests" name="GuiManifest_GameVersion_IsValidForgeFormat" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests.BootGuiJson_StepsMatchExpectedSet" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="60f71c30-2701-977b-d59a-5eb8477cee78">
+      <Execution id="d5cbc966-ff9f-421a-872d-e57fc3d93116" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests" name="BootGuiJson_StepsMatchExpectedSet" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="8b3bf037-cef9-fafc-a3a4-5384c3a08276">
+      <Execution id="a3ebb2e5-ff12-42fc-922e-513ea3bc447c" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="ParseForgeVersion_FallbackSplit_ReturnsCorrectTuple" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Headless_RunsAllSteps_AndLogsPositiveMarkers" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="3ab3a265-65e5-6c60-d4c2-773914ebd1ce">
+      <Execution id="7a7ce5c4-0c69-44ef-8e40-f2b5843c251a" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="Headless_RunsAllSteps_AndLogsPositiveMarkers" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.VariableInterpolationTests.InterpolateVariables_SpecialFolder_Resolves" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="8d9f625b-eca0-caaf-80b7-0208b4fb0a84">
+      <Execution id="eda0d1f8-617e-49bf-bdfe-4171a319f5d7" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.VariableInterpolationTests" name="InterpolateVariables_SpecialFolder_Resolves" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests.GuiPipeline_ExecutesWithoutPluginNotFoundCrash" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="17bbd0b6-9b48-5d98-6178-af45a2de6271">
+      <Execution id="bbf48f69-203d-481b-ab1a-47b2337bf447" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiPipelinePositiveVerificationTests" name="GuiPipeline_ExecutesWithoutPluginNotFoundCrash" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.ExecuteCommand_DummyExecutable_ReturnsSuccess" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="f8b02280-d58f-52cd-2ac9-ef5216be18cb">
+      <Execution id="1fc6b92e-c078-48f9-a14f-6de6f90e6626" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="ExecuteCommand_DummyExecutable_ReturnsSuccess" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeProcessTests.GuiMode_ProcessKilled_NoZombieRemains" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="c9ca4d7b-e0a1-0209-423b-deb7dda946f9">
+      <Execution id="7cc8df47-d447-43c8-bc39-3cf247375c01" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeProcessTests" name="GuiMode_ProcessKilled_NoZombieRemains" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingInstallDir_ReturnsFailureWithClearMessage" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="4852611b-0209-d6fb-14e1-c9b26927339e">
+      <Execution id="0e26980d-2058-4065-a2ea-c81d4b573d71" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_MissingInstallDir_ReturnsFailureWithClearMessage" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_MissingJava_ReturnsFailureWithClearMessage" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="29e75204-ae1f-90d0-2658-3545ee5766ca">
+      <Execution id="7f019e70-cec4-441f-a5f7-a2b3949b8192" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_MissingJava_ReturnsFailureWithClearMessage" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.ParseForgeVersion_StandardFormat_ReturnsCorrectTuple" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="832ece00-ee0a-69a6-edd0-a3ed2f24d9d0">
+      <Execution id="597f09d8-15ec-46d4-91a2-99b56875743d" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="ParseForgeVersion_StandardFormat_ReturnsCorrectTuple" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeProcessTests.GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="f8367f7a-9cce-e548-cd48-ef95c0e76341">
+      <Execution id="1b4010fb-e9f0-4d51-9a7e-473632415484" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeProcessTests" name="GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeFunctionalTests.AllManifests_HaveConsistentGameProvider" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="3a83f0e2-c1cd-83c4-b0f6-7c8beacdc660">
+      <Execution id="c499edac-c3ee-4d3a-b05c-ad04cc650e0f" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeFunctionalTests" name="AllManifests_HaveConsistentGameProvider" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeComplete_ReturnsTrue" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="9c059e81-9071-1b78-15ed-b760acef5ff4">
+      <Execution id="e301249c-b90b-46d9-b3a9-406706c3dacc" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_ForgeComplete_ReturnsTrue" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.PipelinePositiveVerificationTests.Manifest_LaunchCommand_IsFollowedByExecuteCommand(fileName: &quot;boot.minecraft.production.json&quot;)" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="29af152b-9368-65cd-1274-6d4f24ccf49a">
+      <Execution id="9a2bace7-cdad-4709-b513-6a32f80c0b21" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.PipelinePositiveVerificationTests" name="Manifest_LaunchCommand_IsFollowedByExecuteCommand" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.HeadlessSmokeTests.BootJson_ParsesWithoutNullReference" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="ce42e30e-97b2-6b7a-7fbe-110c861c48a4">
+      <Execution id="07af27ca-35da-43e4-a06b-1664a2839644" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.HeadlessSmokeTests" name="BootJson_ParsesWithoutNullReference" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeFunctionalTests.Program_Loads_GuiManifest_NotTemplate" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="d358d99b-fd27-69b4-d693-f6f14e3eeb19">
+      <Execution id="fc1ea934-91f9-4103-82e0-bdfa2b7a7d5e" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeFunctionalTests" name="Program_Loads_GuiManifest_NotTemplate" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.GuiModeFunctionalTests.GeneratedBootJson_MatchesGuiManifest_GameVersion" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="ab5c9426-00bd-ded5-bb10-dd52f314a81c">
+      <Execution id="7ada9e81-375a-4b00-b01f-e498e1c00e17" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.GuiModeFunctionalTests" name="GeneratedBootJson_MatchesGuiManifest_GameVersion" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.LaunchArgumentValidationTests.GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="377fa45c-ab02-859b-ac30-5585751c9fce">
+      <Execution id="3fb5a89e-c2b2-4a84-9d56-46fdfc2d4784" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.LaunchArgumentValidationTests" name="GameLaunchCommand_UnresolvedInstallDir_FailsBeforeProvider" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.MinecraftGameProviderTests.CheckVersionAsync_ForgeIncomplete_ReturnsFalse" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="32f63f73-7a95-9fa9-216d-6f69ff396a0e">
+      <Execution id="2f07dec6-1b22-4a8a-9774-df156689f65c" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.MinecraftGameProviderTests" name="CheckVersionAsync_ForgeIncomplete_ReturnsFalse" />
+    </UnitTest>
+    <UnitTest name="Vantuz.Core.Tests.CommandResultTests.Failure_Constructor_SetsProperties" storage="c:\000\projects\compositum\vantuz.core.tests\bin\release\net8.0\vantuz.core.tests.dll" id="27b965b8-38b6-bee5-51a3-ca4d6d05fb1a">
+      <Execution id="3bb06a63-7b55-4227-9d07-1aa53281018b" />
+      <TestMethod codeBase="c:\000\projects\compositum\Vantuz.Core.Tests\bin\Release\net8.0\Vantuz.Core.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Vantuz.Core.Tests.CommandResultTests" name="Failure_Constructor_SetsProperties" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="17064349-f04a-07ea-f999-43fea8de6e1c" executionId="d0047e3d-e385-410d-8da9-c8638185c92d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="de27a3a4-5585-1811-f69a-d74b7b44037f" executionId="e0410bb8-14ea-4694-bf86-3affce4dc9a0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b176c4ce-c811-cce4-ac28-b5b7914e0234" executionId="79ab7dde-7fb2-4c46-a5f0-4d7dab105560" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d3dac384-ae1f-5876-07f2-1bcf0e9f9683" executionId="83b3a6e4-dc95-4d4e-ac78-97ee0370f305" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9d82f38f-4f42-5efe-d3a7-983c7c7ee93b" executionId="c4f0d43b-f202-4ab0-b42e-294048674cc9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8ed1f628-546a-9be4-9711-360f50e39ac9" executionId="761c2560-9b60-4445-ba22-129b8ed8a902" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="832ece00-ee0a-69a6-edd0-a3ed2f24d9d0" executionId="597f09d8-15ec-46d4-91a2-99b56875743d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="29e75204-ae1f-90d0-2658-3545ee5766ca" executionId="7f019e70-cec4-441f-a5f7-a2b3949b8192" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="17bbd0b6-9b48-5d98-6178-af45a2de6271" executionId="bbf48f69-203d-481b-ab1a-47b2337bf447" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9c059e81-9071-1b78-15ed-b760acef5ff4" executionId="e301249c-b90b-46d9-b3a9-406706c3dacc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="32f63f73-7a95-9fa9-216d-6f69ff396a0e" executionId="2f07dec6-1b22-4a8a-9774-df156689f65c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="27b965b8-38b6-bee5-51a3-ca4d6d05fb1a" executionId="3bb06a63-7b55-4227-9d07-1aa53281018b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f8367f7a-9cce-e548-cd48-ef95c0e76341" executionId="1b4010fb-e9f0-4d51-9a7e-473632415484" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5218aab3-91e5-4d02-6f4b-36bb8169aaad" executionId="75426e9c-d272-417f-a9af-f2620862543e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="60f71c30-2701-977b-d59a-5eb8477cee78" executionId="d5cbc966-ff9f-421a-872d-e57fc3d93116" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="750abeff-0014-b470-5d16-6f124c7e2219" executionId="3ef38457-dd7e-40c3-a563-f09ea1f44e05" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="184bf7b2-dc0f-4b9c-0917-ff393766eaa3" executionId="0217d149-cf92-41d8-9979-cd1ffbd30518" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3ab3a265-65e5-6c60-d4c2-773914ebd1ce" executionId="7a7ce5c4-0c69-44ef-8e40-f2b5843c251a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6610700f-012b-0b62-cefd-986d8f87c629" executionId="8f4ff1e3-2926-4fe7-80e8-f023312af8dc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4852611b-0209-d6fb-14e1-c9b26927339e" executionId="0e26980d-2058-4065-a2ea-c81d4b573d71" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="75cfac8b-3249-a70b-7150-059b815e7279" executionId="14d00e81-6b57-4a4e-b932-080a193d0400" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2ede7db6-f9e3-8c2c-4030-c3ebeefecce1" executionId="f452cbe2-3f03-4d74-a228-ffb7f81034f0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5db4cf82-8321-f730-2893-cc3c45813804" executionId="e8ec2630-7eea-4b1a-a81e-9c66e3c621e2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8d9f625b-eca0-caaf-80b7-0208b4fb0a84" executionId="eda0d1f8-617e-49bf-bdfe-4171a319f5d7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="82ecfb8e-1b87-c4ea-86dc-025e57f653c8" executionId="22f47f19-9ba7-4c9e-a2bc-64b46708df1c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8f30efbc-7e3d-ab47-0825-e02fd91dce70" executionId="a2f4fffa-f877-4de9-99a2-a995aacbd8cc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="377fa45c-ab02-859b-ac30-5585751c9fce" executionId="3fb5a89e-c2b2-4a84-9d56-46fdfc2d4784" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="266b97bd-0a78-5b99-c908-e3c9177da4de" executionId="8006eeff-39e6-440a-a8e0-b3c5bc43ea30" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5b2a8097-f07c-36bd-324a-bdc2320e5f2d" executionId="4531dba5-9b70-4911-be65-e15b3e7120a0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="caedb91e-215d-ab53-d2d2-ea06de83613b" executionId="192f0a5c-7e1c-425b-ab04-93e4717d0290" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c51b34ef-4ac0-f70c-a4c5-b3f89b14361b" executionId="655de77e-fdeb-401b-927e-223a2de604c7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d358d99b-fd27-69b4-d693-f6f14e3eeb19" executionId="fc1ea934-91f9-4103-82e0-bdfa2b7a7d5e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3a83f0e2-c1cd-83c4-b0f6-7c8beacdc660" executionId="c499edac-c3ee-4d3a-b05c-ad04cc650e0f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8b3bf037-cef9-fafc-a3a4-5384c3a08276" executionId="a3ebb2e5-ff12-42fc-922e-513ea3bc447c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f8b02280-d58f-52cd-2ac9-ef5216be18cb" executionId="1fc6b92e-c078-48f9-a14f-6de6f90e6626" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ab5c9426-00bd-ded5-bb10-dd52f314a81c" executionId="7ada9e81-375a-4b00-b01f-e498e1c00e17" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ce42e30e-97b2-6b7a-7fbe-110c861c48a4" executionId="07af27ca-35da-43e4-a06b-1664a2839644" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0f49cba4-113b-2eb7-96b2-923831f9ba8b" executionId="15f196ea-809c-42d8-a217-f41b42c62831" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="29af152b-9368-65cd-1274-6d4f24ccf49a" executionId="9a2bace7-cdad-4709-b513-6a32f80c0b21" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5417a48c-7dc4-7e65-5dde-45f31da74186" executionId="10819ab5-c64a-4d64-ae36-e57b1443d789" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="c9ca4d7b-e0a1-0209-423b-deb7dda946f9" executionId="7cc8df47-d447-43c8-bc39-3cf247375c01" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eea26664-1b21-7fc4-cfb6-14b6b0a52392" executionId="28af35f0-d674-44ca-9ed7-842363306909" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4e15d8b7-2cb0-fbe2-3892-686544d81391" executionId="54e81c17-1706-423f-a5af-ae00ccb5bd9c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2fdd3774-7c85-360d-fa74-7441eadbcbf7" executionId="882cb613-ce25-407e-893f-7b20a120910a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Список результатов" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Все загруженные результаты" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="44" executed="44" passed="44" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.7+8f2703126a (64-bit .NET 8.0.26)&#xD;
+[xUnit.net 00:00:00.45]   Discovering: Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:00.82]   Discovered:  Vantuz.Core.Tests&#xD;
+[xUnit.net 00:00:00.84]   Starting:    Vantuz.Core.Tests&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_positive_test_a3e6e744e78448f28fe59250437abb11\.vantuzlauncher\instances\1.20.1-forge\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=False&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=version JSON missing&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[04:52:14] [DEBUG] Pipeline has 16 steps: GUI.MinecraftLauncher, GUI.CredentialCollection, Auth.YggdrasilCommand, Net.ApiReaderQuery, Net.UpdateCommand, Game.MinecraftProvider, Game.VersionValidatorQuery, Game.InstallerCommand, Net.ModpackManifestQuery, OS.DeltaAnalyzerQuery, OS.LocalMoveCommand, Net.DownloadCommand, OS.BatchPurgeCommand, Net.DownloadCommand, Game.LaunchCommand, OS.ExecuteCommand&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_5717521bdb764624ba36fdcc7cd4186e\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=True, missingDetail=&#xD;
+[DIAG CheckVersionAsync] versionExists=True&#xD;
+[DIAG CheckVersionAsync] VANILLA version=1.20.1&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_1033baa578c14c408fc521e6e32830e5\.minecraft\versions\1.20.1\1.20.1.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] jarPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_1033baa578c14c408fc521e6e32830e5\.minecraft\versions\1.20.1\1.20.1.jar, jarExists=False&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_08a70ca3f32b45099b98cc4050bab7a6\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=missing or empty library: net.minecraftforge:fmlloader at C:\Users\1\AppData\Local\Temp\vantuz_mc_test_08a70ca3f32b45099b98cc4050bab7a6\.minecraft\libraries\net\minecraftforge\fmlloader\1.20.1-47.3.0\fmlloader-1.20.1-47.3.0.jar&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_60a1ec319d88404fa6ef0bf525909e6a\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=True, missingDetail=&#xD;
+[DIAG CheckVersionAsync] versionExists=True&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_1c1fa0f3b5214067a589c72fec44eeaf\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=False&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=version JSON missing&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG CheckVersionAsync] FORGE version=1.20.1-forge-47.3.0&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_49b10c51977341ab912c1d49ee5532b7\.minecraft\versions\1.20.1-forge-47.3.0\1.20.1-forge-47.3.0.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] librariesOk=False, missingDetail=missing or empty library: cpw.mods:bootstraplauncher at C:\Users\1\AppData\Local\Temp\vantuz_mc_test_49b10c51977341ab912c1d49ee5532b7\.minecraft\libraries\cpw\mods\bootstraplauncher\1.1.2\bootstraplauncher-1.1.2.jar&#xD;
+[DIAG CheckVersionAsync] versionExists=False&#xD;
+[DIAG InstallVersionAsync] Parsed: version=1.20.1-forge-47.3.0, mcVersion=1.20.1, forgeVersion=47.3.0, installDir=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_4f4f062afc6d4ff98f219d6a77835897\.minecraft&#xD;
+[DIAG InstallVersionAsync] ForgeInstaller timeout=0 min, SkipIfAlreadyInstalled=true&#xD;
+[DIAG ForgeInstaller] Calling Install(mcVersion=1.20.1, forgeVersion=47.3.0)&#xD;
+[DIAG ForgeInstaller] Install completed, returned=1.20.1-forge-47.3.0&#xD;
+[DIAG InstallVersionAsync] Running launcher.InstallAsync(1.20.1-forge-47.3.0) to download libraries...&#xD;
+[DIAG InstallVersionAsync] launcher.InstallAsync completed&#xD;
+[DIAG InstallVersionAsync] Post-install verification PASSED&#xD;
+[DIAG CheckVersionAsync] VANILLA version=1.20.1&#xD;
+[DIAG CheckVersionAsync] jsonPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_902d647d02b240bc9e404c6fea8bf9e0\.minecraft\versions\1.20.1\1.20.1.json, jsonExists=True&#xD;
+[DIAG CheckVersionAsync] jarPath=C:\Users\1\AppData\Local\Temp\vantuz_mc_test_902d647d02b240bc9e404c6fea8bf9e0\.minecraft\versions\1.20.1\1.20.1.jar, jarExists=True&#xD;
+[DIAG CheckVersionAsync] versionExists=True&#xD;
+[04:52:27] [GUI] Minecraft Launcher initialized (standalone mode)&#xD;
+[04:52:27] [GUI] Minecraft Launcher initialized and running&#xD;
+[04:52:27] [STEP] GUI.MinecraftLauncher completed&#xD;
+[2026-06-08 09:52:27] Pipeline failed: Credential collection cancelled by user.&#xD;
+[04:52:32] [DEBUG] Pipeline has 16 steps: GUI.MinecraftLauncher, GUI.CredentialCollection, Auth.YggdrasilCommand, Net.ApiReaderQuery, Net.UpdateCommand, Game.MinecraftProvider, Game.VersionValidatorQuery, Game.InstallerCommand, Net.ModpackManifestQuery, OS.DeltaAnalyzerQuery, OS.LocalMoveCommand, Net.DownloadCommand, OS.BatchPurgeCommand, Net.DownloadCommand, Game.LaunchCommand, OS.ExecuteCommand&#xD;
+[04:52:40] [GUI] Minecraft Launcher initialized (standalone mode)&#xD;
+[04:52:40] [GUI] Minecraft Launcher initialized and running&#xD;
+[04:52:40] [STEP] GUI.MinecraftLauncher completed&#xD;
+[2026-06-08 09:52:45] Pipeline failed: Credential collection cancelled by user.&#xD;
+[04:52:53] [DEBUG] Pipeline has 16 steps: GUI.MinecraftLauncher, GUI.CredentialCollection, Auth.YggdrasilCommand, Net.ApiReaderQuery, Net.UpdateCommand, Game.MinecraftProvider, Game.VersionValidatorQuery, Game.InstallerCommand, Net.ModpackManifestQuery, OS.DeltaAnalyzerQuery, OS.LocalMoveCommand, Net.DownloadCommand, OS.BatchPurgeCommand, Net.DownloadCommand, Game.LaunchCommand, OS.ExecuteCommand&#xD;
+[xUnit.net 00:00:58.21]   Finished:    Vantuz.Core.Tests&#xD;
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

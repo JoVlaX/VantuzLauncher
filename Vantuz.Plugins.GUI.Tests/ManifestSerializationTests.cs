@@ -63,7 +63,7 @@ public class ManifestSerializationTests
         };
 
         string manifestJson = JsonSerializer.Serialize(modifiedManifest, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText("C:\\temp\\debug_manifest.json", manifestJson);
+        File.WriteAllText(Path.Combine(Path.GetTempPath(), "debug_manifest.json"), manifestJson);
 
         int count = manifestJson.Split("Net.DownloadCommand").Length - 1;
         Assert.True(count >= 2,

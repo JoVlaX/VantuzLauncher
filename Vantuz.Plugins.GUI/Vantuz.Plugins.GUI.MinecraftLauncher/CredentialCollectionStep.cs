@@ -15,7 +15,7 @@ public class CredentialCollectionStep : ICommandPlugin
 
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         if (context.Get<CancellationToken>("cancellation_token") is CancellationToken parentToken)
         {
             parentToken.Register(() => cts.Cancel());

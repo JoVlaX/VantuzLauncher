@@ -1,3 +1,9 @@
+---
+version: 1.0
+parent: INVARIANT_THEORY.md
+parent_version: 1.1
+---
+
 # DEVIATION-004: Auto-Fix Placeholder — Measurability Gap
 
 **Status:** Resolved 2026-06-03  

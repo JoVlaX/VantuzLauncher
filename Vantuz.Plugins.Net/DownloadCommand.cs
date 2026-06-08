@@ -1,4 +1,4 @@
-#pragma warning disable ARM010 // TODO: Refactor FileStream to host-managed resource
+#pragma warning disable ARM010 // FileStream requires DAG host-managed disposal; TODO: refactor to DAG ref counting
 
 using System;
 using System.Collections.Generic;
@@ -191,3 +191,4 @@ public class DownloadCommand : ICommandPlugin
 }
 
 #pragma warning restore ARM010
+

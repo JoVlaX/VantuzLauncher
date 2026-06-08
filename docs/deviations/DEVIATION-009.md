@@ -1,3 +1,9 @@
+---
+version: 1.0
+parent: INVARIANT_THEORY.md
+parent_version: 1.1
+---
+
 # Deviation Protocol 009: CQRS Violation in ExternalAbstraction (MinecraftGameProvider)
 
 **Status:** Active — Justified deviation with documented scope  

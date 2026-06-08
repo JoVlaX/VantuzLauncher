@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,12 +58,8 @@ public class ForgeInstallTimeoutRecidivismTests
         var context = new CommandContext(CancellationToken.None, new NullReporter());
         context.Set("GameProvider.SlowForge", new MockSlowProvider());
 
-        var stepConfig = JsonDocument.Parse(@"{
-            ""provider"": ""SlowForge"",
-            ""version"": ""1.20.1-forge-47.3.0"",
-            ""installDir"": ""C:\\temp\\test"",
-            ""operationTimeout"": ""00:00:02""
-        }").RootElement;
+        var installDir = Path.Combine(Path.GetTempPath(), "test").Replace("\\", "\\\\");
+        var stepConfig = JsonDocument.Parse($"{{\n            \"provider\": \"SlowForge\",\n            \"version\": \"1.20.1-forge-47.3.0\",\n            \"installDir\": \"{installDir}\",\n            \"operationTimeout\": \"00:00:02\"\n        }}").RootElement;
 
         var command = new GameInstallerCommand();
         var sw = System.Diagnostics.Stopwatch.StartNew();

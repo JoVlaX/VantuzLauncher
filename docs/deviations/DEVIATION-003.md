@@ -1,3 +1,9 @@
+---
+version: 1.0
+parent: INVARIANT_THEORY.md
+parent_version: 1.1
+---
+
 # DEVIATION-003: WPF XAML Resource Loading in Hosted Mode
 
 **Status:** Resolved 2026-06-03  
