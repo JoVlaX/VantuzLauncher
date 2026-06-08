@@ -8,10 +8,11 @@ using Vantuz.Core;
 
 namespace Vantuz.Host 
 { 
-    public class PluginLoader 
+    public class PluginLoader : IDisposable
     { 
         // УДЕРЖАНИЕ (Rooting) - защита от сборщика мусора 
         private readonly List<AssemblyLoadContext> _activeContexts = new(); 
+        private readonly List<string> _shadowDirs = new();
         private readonly string[] _sharedAssemblies; 
 
         public PluginLoader(string[] sharedAssemblies) 
@@ -169,7 +170,8 @@ namespace Vantuz.Host
             } 
  
             string shadowDir = Path.Combine(baseShadowDir, Guid.NewGuid().ToString()); 
-            Directory.CreateDirectory(shadowDir); 
+            Directory.CreateDirectory(shadowDir);
+            _shadowDirs.Add(shadowDir); 
             
             // Рекурсивное копирование всех файлов и папок (включая runtimes и .deps.json)
             // Исключаем shared assemblies - они загружаются в default context
@@ -187,6 +189,33 @@ namespace Vantuz.Host
                 System.IO.File.Copy(newPath, newPath.Replace(originalDir, shadowDir), true); 
             } 
             return shadowDir; 
-        } 
+        }
+
+        /// <summary>
+        /// ARM003 Resource Lifecycle: cleans up all shadow directories created during plugin loading.
+        /// Per INVARIANT_THEORY §3.1 — ephemeral directories must not outlive the loader.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (var dir in _shadowDirs)
+            {
+                try
+                {
+                    if (Directory.Exists(dir))
+                        Directory.Delete(dir, true);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[PluginLoader] WARN: failed to delete shadow dir {dir} during Dispose: {ex.Message}");
+                }
+            }
+            _shadowDirs.Clear();
+
+            foreach (var ctx in _activeContexts)
+            {
+                try { ctx.Unload(); } catch { /* best effort */ }
+            }
+            _activeContexts.Clear();
+        }
     } 
 } 

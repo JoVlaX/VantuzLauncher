@@ -6,6 +6,12 @@ using System.Runtime.Loader;
 
 namespace Vantuz.Host 
 { 
+    /// <summary>
+    /// ARM001 AssemblyLoadContext для изоляции плагинов.
+    /// Per Armatura:76-78 — collectible ALC ensures unloadability.
+    /// F_doc: {resolver fails to resolve dependency, causing FileNotFoundException at runtime}
+    /// E_doc: Unit test with missing dependency dll asserts graceful fallback to default context
+    /// </summary>
     public class PluginLoadContext : System.Runtime.Loader.AssemblyLoadContext 
     { 
         private System.Runtime.Loader.AssemblyDependencyResolver _resolver; 
