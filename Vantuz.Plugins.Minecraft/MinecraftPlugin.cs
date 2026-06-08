@@ -17,11 +17,14 @@ public class MinecraftProviderCommand : ICommandPlugin
 
     /// <summary>
     /// Registers the IGameProvider instance for use by Game.* plugins.
+    /// Per INVARIANT_THEORY.md §2.2: registers under both Query and Command facets.
     /// </summary>
     public Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
-        // Register provider for universal game plugins to resolve
+        // Register provider under composite key for backward compat, and facet keys for CQRS purity
         context.Set($"GameProvider.{_provider.ProviderName}", _provider);
+        context.Set($"GameQueryProvider.{_provider.ProviderName}", _provider);
+        context.Set($"GameCommandProvider.{_provider.ProviderName}", _provider);
         context.Reporter.ReportState($"Провайдер {_provider.ProviderName} зарегистрирован.");
         return Task.FromResult(new CommandResult(true));
     }

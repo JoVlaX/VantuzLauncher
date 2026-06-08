@@ -147,13 +147,15 @@ public class GameLaunchCommand : ICommandPlugin
     }
 
     /// <summary>
-    /// Resolves IGameProvider from context mutations.
-    /// Providers register themselves with key "GameProvider.{ProviderName}"
+    /// Resolves IGameQueryProvider from context mutations.
+    /// Per INVARIANT_THEORY.md §2.2: Launch only needs the Query facet (BuildLaunchParameters).
     /// </summary>
-    private static IGameProvider? ResolveProvider(CommandContext context, string providerName)
+    private static IGameQueryProvider? ResolveProvider(CommandContext context, string providerName)
     {
-        var key = $"GameProvider.{providerName}";
-        return context.Get<IGameProvider>(key);
+        var queryKey = $"GameQueryProvider.{providerName}";
+        var legacyKey = $"GameProvider.{providerName}";
+        return context.Get<IGameQueryProvider>(queryKey)
+            ?? context.Get<IGameQueryProvider>(legacyKey);
     }
 
     private static string Interpolate(string text, CommandContext context)

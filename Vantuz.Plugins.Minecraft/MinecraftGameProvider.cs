@@ -110,7 +110,7 @@ public class MinecraftGameProvider : IGameProvider
 
                 var forgeInstaller = ForgeInstallerFactory?.Invoke(launcher) ?? new ForgeInstaller(launcher);
 
-                var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 if (timeout.HasValue && timeout.Value > TimeSpan.Zero)
                 {
                     cts.CancelAfter(timeout.Value);
@@ -315,7 +315,7 @@ public class MinecraftGameProvider : IGameProvider
         if (!File.Exists(versionJsonPath))
             return (false, "version JSON missing");
 
-        JsonDocument json;
+        using JsonDocument json;
         try
         {
             json = JsonDocument.Parse(File.ReadAllText(versionJsonPath));

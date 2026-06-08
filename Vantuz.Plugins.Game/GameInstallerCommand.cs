@@ -58,12 +58,12 @@ public class GameInstallerCommand : ICommandPlugin
             {
                 // No validator ran, run check ourselves
                 context.Reporter.ReportState($"Проверка версии {versionName} перед установкой...");
-                var provider = ResolveProvider(context, providerName);
-                if (provider == null)
+                var queryProvider = ResolveQueryProvider(context, providerName);
+                if (queryProvider == null)
                 {
-                    return new CommandResult(false, $"Game provider '{providerName}' not found");
+                    return new CommandResult(false, $"Game query provider '{providerName}' not found");
                 }
-                checkResult = await provider.CheckVersionAsync(versionName, installDir, context.CancellationToken);
+                checkResult = await queryProvider.CheckVersionAsync(versionName, installDir, context.CancellationToken);
             }
 
             // Skip if already exists
@@ -76,11 +76,11 @@ public class GameInstallerCommand : ICommandPlugin
 
             context.Reporter.ReportState($"Установка версии {versionName}...");
 
-            // Resolve provider
-            var gameProvider = ResolveProvider(context, providerName);
-            if (gameProvider == null)
+            // Resolve command provider
+            var commandProvider = ResolveCommandProvider(context, providerName);
+            if (commandProvider == null)
             {
-                return new CommandResult(false, $"Game provider '{providerName}' not found");
+                return new CommandResult(false, $"Game command provider '{providerName}' not found");
             }
 
             // Enforce operation timeout via CancellationTokenSource so every provider respects it
@@ -88,7 +88,7 @@ public class GameInstallerCommand : ICommandPlugin
             cts.CancelAfter(timeout);
 
             // Install version
-            var installResult = await gameProvider.InstallVersionAsync(
+            var installResult = await commandProvider.InstallVersionAsync(
                 versionName,
                 installDir,
                 context.Reporter,
@@ -121,13 +121,27 @@ public class GameInstallerCommand : ICommandPlugin
     }
 
     /// <summary>
-    /// Resolves IGameProvider from context mutations.
-    /// Providers register themselves with key "GameProvider.{ProviderName}"
+    /// Resolves IGameQueryProvider from context mutations.
+    /// Per INVARIANT_THEORY.md §2.2: Query facet for version checking.
     /// </summary>
-    private static IGameProvider? ResolveProvider(CommandContext context, string providerName)
+    private static IGameQueryProvider? ResolveQueryProvider(CommandContext context, string providerName)
     {
-        var key = $"GameProvider.{providerName}";
-        return context.Get<IGameProvider>(key);
+        var queryKey = $"GameQueryProvider.{providerName}";
+        var legacyKey = $"GameProvider.{providerName}";
+        return context.Get<IGameQueryProvider>(queryKey)
+            ?? context.Get<IGameQueryProvider>(legacyKey);
+    }
+
+    /// <summary>
+    /// Resolves IGameCommandProvider from context mutations.
+    /// Per INVARIANT_THEORY.md §2.2: Command facet for installation.
+    /// </summary>
+    private static IGameCommandProvider? ResolveCommandProvider(CommandContext context, string providerName)
+    {
+        var commandKey = $"GameCommandProvider.{providerName}";
+        var legacyKey = $"GameProvider.{providerName}";
+        return context.Get<IGameCommandProvider>(commandKey)
+            ?? context.Get<IGameCommandProvider>(legacyKey);
     }
 
     private static string Interpolate(string text, CommandContext context)

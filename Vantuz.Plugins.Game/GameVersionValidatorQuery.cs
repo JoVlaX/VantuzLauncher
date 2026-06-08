@@ -57,13 +57,15 @@ public class GameVersionValidatorQuery : IQueryPlugin
     }
 
     /// <summary>
-    /// Resolves IGameProvider from context payload.
-    /// Providers register themselves with key "GameProvider.{ProviderName}"
+    /// Resolves IGameQueryProvider from context payload.
+    /// Per INVARIANT_THEORY.md §2.2: Query plugins resolve only the Query facet.
     /// </summary>
-    private static IGameProvider? ResolveProvider(QueryContext context, string providerName)
+    private static IGameQueryProvider? ResolveProvider(QueryContext context, string providerName)
     {
-        var key = $"GameProvider.{providerName}";
-        return context.Get<IGameProvider>(key);
+        var queryKey = $"GameQueryProvider.{providerName}";
+        var legacyKey = $"GameProvider.{providerName}";
+        return context.Get<IGameQueryProvider>(queryKey)
+            ?? context.Get<IGameQueryProvider>(legacyKey);
     }
 
     private static string Interpolate(string text, QueryContext context)

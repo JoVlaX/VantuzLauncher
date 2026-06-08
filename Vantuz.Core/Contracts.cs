@@ -101,29 +101,49 @@ public record CommandResult(bool Success, string? ErrorMessage = null);
 // ============================================
 
 /// <summary>
-/// Universal game provider contract. Implementations are game-specific (Minecraft, Terraria, etc.)
-/// F_doc: {provider mixing Query (CheckVersion) and Command (InstallVersion) in same interface}
-/// E_doc: Roslyn analyzer or manual review detecting R(c) ∩ W(c) ≠ ∅
-/// Deviation: DEVIATION-009 (ExternalAbstraction scope exemption, deadline 2026-08-07)
+/// CQRS Query facet: read-only game provider operations.
+/// Per INVARIANT_THEORY.md §2.2 - pure query, no side effects.
+/// F_doc: {query returns stale version info or missing installDir}
+/// E_doc: Unit test with mock file system verifying CheckVersionAsync and BuildLaunchParametersAsync
 /// </summary>
-public interface IGameProvider : IAsyncDisposable
+public interface IGameQueryProvider
 {
     string ProviderName { get; }
-    
+
     /// <summary>
     /// Check if version exists locally
     /// </summary>
     Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct);
-    
-    /// <summary>
-    /// Install/update the specified version
-    /// </summary>
-    Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct, TimeSpan? timeout = null);
-    
+
     /// <summary>
     /// Build launch parameters for OS.Executor
     /// </summary>
     Task<LaunchParameters> BuildLaunchParametersAsync(string version, string installDir, LaunchOptions options, CancellationToken ct);
+}
+
+/// <summary>
+/// CQRS Command facet: state-mutating game provider operations.
+/// Per INVARIANT_THEORY.md §2.2 - only writes/modifies state.
+/// F_doc: {install fails or times out, leaving partial filesystem state}
+/// E_doc: Unit test with mock installer verifying InstallVersionAsync rollback
+/// </summary>
+public interface IGameCommandProvider
+{
+    string ProviderName { get; }
+
+    /// <summary>
+    /// Install/update the specified version
+    /// </summary>
+    Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct, TimeSpan? timeout = null);
+}
+
+/// <summary>
+/// Composite game provider contract. Implementations are game-specific (Minecraft, Terraria, etc.)
+/// Per INVARIANT_THEORY.md §2.2 CQRS - composed of pure Query + pure Command facets.
+/// Deviation: DEVIATION-009 resolved 2026-06-08 by splitting into IGameQueryProvider + IGameCommandProvider.
+/// </summary>
+public interface IGameProvider : IGameQueryProvider, IGameCommandProvider, IAsyncDisposable
+{
 }
 
 /// <summary>

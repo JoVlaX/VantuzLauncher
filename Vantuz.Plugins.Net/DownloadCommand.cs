@@ -144,7 +144,7 @@ public class DownloadCommand : ICommandPlugin
                 // Успех - удаляем бэкапы
                 foreach (var item in committedFiles)
                 {
-                    try { if (File.Exists(item.backupPath)) File.Delete(item.backupPath); } catch { }
+                    try { if (File.Exists(item.backupPath)) File.Delete(item.backupPath); } catch (Exception ex) { Console.WriteLine($"[DownloadCommand] WARN: failed to delete backup {item.backupPath}: {ex.Message}"); }
                 }
             }
             catch (IOException ex)
@@ -158,7 +158,7 @@ public class DownloadCommand : ICommandPlugin
                         if (File.Exists(item.finalPath)) File.Delete(item.finalPath);
                         if (File.Exists(item.backupPath)) File.Move(item.backupPath, item.finalPath);
                     }
-                    catch { }
+                    catch (Exception ex) { Console.WriteLine($"[DownloadCommand] WARN: rollback failed for {item.finalPath}: {ex.Message}"); }
                 }
                 return new CommandResult(false, "Ошибка I/O блокировки, состояние восстановлено");
             }
@@ -176,7 +176,7 @@ public class DownloadCommand : ICommandPlugin
             // Очистка временных файлов при любой ошибке
             foreach (var item in successfulDownloads)
             {
-                try { if (File.Exists(item.tmpPath)) File.Delete(item.tmpPath); } catch { }
+                try { if (File.Exists(item.tmpPath)) File.Delete(item.tmpPath); } catch (Exception innerEx) { Console.WriteLine($"[DownloadCommand] WARN: failed to delete temp {item.tmpPath}: {innerEx.Message}"); }
             }
             return new CommandResult(false, $"Ошибка при загрузке: {ex.Message}");
         }

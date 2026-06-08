@@ -148,7 +148,7 @@ namespace Vantuz.Host
                 var assemblyName = AssemblyName.GetAssemblyName(file); 
                 if (!_sharedAssemblies.Contains(assemblyName.Name)) 
                 { 
-                    try { context.LoadFromAssemblyStream(file); } catch { /* Игнорируем конфликты нативных DLL */ } 
+                    try { context.LoadFromAssemblyStream(file); } catch (Exception ex) { Console.WriteLine($"[PluginLoader] WARN: failed to load {file}: {ex.Message}"); } 
                 } 
             } 
         } 
@@ -164,7 +164,7 @@ namespace Vantuz.Host
             // Сборка мусора: чистим зависшие сессии ЭТОГО лаунчера 
             if (Directory.Exists(baseShadowDir)) { 
                 foreach (var dir in Directory.GetDirectories(baseShadowDir)) { 
-                    try { Directory.Delete(dir, true); } catch { } 
+                    try { Directory.Delete(dir, true); } catch (Exception ex) { Console.WriteLine($"[PluginLoader] WARN: failed to delete shadow dir {dir}: {ex.Message}"); } 
                 } 
             } 
  
