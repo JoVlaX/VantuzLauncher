@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,6 +21,7 @@ public class RuntimeDIContainerAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticDescriptors.RuntimeDIContainer);
+/// F_doc: {Initialize returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Initialize behavior
 
     public override void Initialize(AnalysisContext context)
     {

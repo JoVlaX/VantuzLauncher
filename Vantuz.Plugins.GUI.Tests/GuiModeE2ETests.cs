@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows.Automation;
 using System.Windows.Forms;
@@ -12,12 +12,13 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// waits for Avalonia plugin window "Vantuz Minecraft Launcher", enters credentials
 /// via UI Automation, clicks Play, and asserts all pipeline step completion markers
 /// are present in launcher_trace.log.
-/// Per COMPOSITUM_SPECIFICATION.md §4.1: GUI is a Category (plugin) concern, not Product.
+/// Per COMPOSITUM_SPECIFICATION.md В§4.1: GUI is a Category (plugin) concern, not Product.
 /// </summary>
 [Collection("GUI Sequential")]
 public class GuiModeE2ETests : IDisposable
 {
     private readonly List<Process> _processes = new();
+/// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
 
     public void Dispose()
     {
@@ -144,6 +145,7 @@ public class GuiModeE2ETests : IDisposable
     }
 
     [StaFact]
+    /// F_doc: {FullGuiPipeline_ClickPlayInPluginWindow_AllStepsCompleted returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies FullGuiPipeline_ClickPlayInPluginWindow_AllStepsCompleted behavior
     public void FullGuiPipeline_ClickPlayInPluginWindow_AllStepsCompleted()
     {
         string exe = ResolveExePath();

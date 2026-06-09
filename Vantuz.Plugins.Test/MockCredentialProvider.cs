@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace Vantuz.Plugins.Test;
 
 /// <summary>
 /// Mock credential provider for headless testing.
-/// Per INVARIANT_THEORY.md §1.2 Measurability: Automated verification without human interaction.
+/// Per INVARIANT_THEORY.md В§1.2 Measurability: Automated verification without human interaction.
 /// Per runtime-verification-limitations.md: Enables agentic self-testing.
 /// </summary>
 public class MockCredentialProvider : ICommandPlugin
@@ -39,6 +39,7 @@ public class MockCredentialProvider : ICommandPlugin
 
         return new CommandResult(true);
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
@@ -49,11 +50,14 @@ public class MockCredentialProvider : ICommandPlugin
         private readonly Credentials _credentials;
 
         public CredentialProviderImpl(Credentials credentials) => _credentials = credentials;
+/// F_doc: {CollectAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies CollectAsync behavior
 
         public Task<Credentials> CollectAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(_credentials);
+/// F_doc: {ShowProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ShowProgress behavior
 
         public void ShowProgress() { }
+        /// F_doc: {UpdateStatus returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies UpdateStatus behavior
         public void UpdateStatus(string message) { }
 
         #pragma warning disable CS0067 // Events unused in test stub

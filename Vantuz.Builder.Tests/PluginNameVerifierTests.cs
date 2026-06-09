@@ -1,12 +1,14 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using Xunit;
 
 namespace Vantuz.Builder.Tests;
+/// F_doc: {PluginNameVerifierTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies PluginNameVerifierTests behavior
 
 public class PluginNameVerifierTests
 {
     [Fact]
+    /// F_doc: {VerifyManifest_ValidBootJson_ReturnsZero returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VerifyManifest_ValidBootJson_ReturnsZero behavior
     public void VerifyManifest_ValidBootJson_ReturnsZero()
     {
         var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -31,6 +33,7 @@ public class PluginNameVerifierTests
     }
 
     [Fact]
+    /// F_doc: {VerifyDirectory_NoPlugins_ReturnsZero returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VerifyDirectory_NoPlugins_ReturnsZero behavior
     public void VerifyDirectory_NoPlugins_ReturnsZero()
     {
         var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());

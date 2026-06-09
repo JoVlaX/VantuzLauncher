@@ -1,4 +1,4 @@
-namespace Vantuz.Host;
+﻿namespace Vantuz.Host;
 
 using System;
 using System.Collections.Generic;
@@ -9,14 +9,17 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Vantuz.Core;
+/// F_doc: {BootManifest returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies BootManifest behavior
 
 public record BootManifest(Dictionary<string, string>? Variables, Dictionary<string, string> Plugins, List<StepConfig> Pipeline);
+/// F_doc: {StepConfig returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies StepConfig behavior
 public record StepConfig(string PluginName, JsonElement Config);
 
 /// <summary>
-/// VantuzEngine с поддержкой QuantizedNode (квантованного выполнения).
-/// Согласно Armatura:96-98 и .traerules:169-174.
+/// VantuzEngine СЃ РїРѕРґРґРµСЂР¶РєРѕР№ QuantizedNode (РєРІР°РЅС‚РѕРІР°РЅРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ).
+/// РЎРѕРіР»Р°СЃРЅРѕ Armatura:96-98 Рё .traerules:169-174.
 /// </summary>
+/// F_doc: {VantuzEngine returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VantuzEngine behavior
 public class VantuzEngine
 {
     private readonly string _pluginsFolder;
@@ -31,8 +34,8 @@ public class VantuzEngine
     }
 
     /// <summary>
-    /// Запускает pipeline с квантованным выполнением (QuantizedNode).
-    /// Согласно .traerules:98 - единственный метод запуска.
+    /// Р—Р°РїСѓСЃРєР°РµС‚ pipeline СЃ РєРІР°РЅС‚РѕРІР°РЅРЅС‹Рј РІС‹РїРѕР»РЅРµРЅРёРµРј (QuantizedNode).
+    /// РЎРѕРіР»Р°СЃРЅРѕ .traerules:98 - РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РјРµС‚РѕРґ Р·Р°РїСѓСЃРєР°.
     /// </summary>
     public async Task<QuantumExecutionResult> RunAsync(
         string bootJsonPath,
@@ -46,10 +49,10 @@ public class VantuzEngine
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
                 ?? throw new Exception("Invalid boot.json");
 
-            // 1. Валидация хэшей безопасности
+            // 1. Р’Р°Р»РёРґР°С†РёСЏ С…СЌС€РµР№ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё
             ValidateManifestHashes(manifest.Plugins);
 
-            // 2. Загрузка плагинов
+            // 2. Р—Р°РіСЂСѓР·РєР° РїР»Р°РіРёРЅРѕРІ
             string[] shared = new[]
             {
                 typeof(QuantizedNode).Assembly.GetName().Name!
@@ -57,23 +60,23 @@ public class VantuzEngine
             var loader = new PluginLoader(shared);
             var allowedDlls = manifest.Plugins.Keys.ToList();
 
-            // 3. Загрузка QuantizedNode (включая CQRS плагины через адаптеры)
+            // 3. Р—Р°РіСЂСѓР·РєР° QuantizedNode (РІРєР»СЋС‡Р°СЏ CQRS РїР»Р°РіРёРЅС‹ С‡РµСЂРµР· Р°РґР°РїС‚РµСЂС‹)
             var quantizedNodes = loader.LoadQuantizedNodesFromDirectory(_pluginsFolder, allowedDlls).ToList();
             var cqrsNodes = loader.LoadCqrsPluginsFromDirectory(_pluginsFolder, allowedDlls).ToList();
             quantizedNodes.AddRange(cqrsNodes);
 
             try
             {
-                // 4. Подготовка payload с интерполяцией переменных
+                // 4. РџРѕРґРіРѕС‚РѕРІРєР° payload СЃ РёРЅС‚РµСЂРїРѕР»СЏС†РёРµР№ РїРµСЂРµРјРµРЅРЅС‹С…
                 var payload = new Dictionary<string, object>();
 
-                // Сначала добавляем initialPayload (runtime значения имеют приоритет)
+                // РЎРЅР°С‡Р°Р»Р° РґРѕР±Р°РІР»СЏРµРј initialPayload (runtime Р·РЅР°С‡РµРЅРёСЏ РёРјРµСЋС‚ РїСЂРёРѕСЂРёС‚РµС‚)
                 if (initialPayload != null)
                 {
                     foreach (var kvp in initialPayload) payload[kvp.Key] = kvp.Value;
                 }
 
-                // Интерполируем переменные из manifest используя payload
+                // РРЅС‚РµСЂРїРѕР»РёСЂСѓРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ РёР· manifest РёСЃРїРѕР»СЊР·СѓСЏ payload
                 if (manifest.Variables != null)
                 {
                     var interpolatedVars = InterpolateVariables(manifest.Variables, payload);
@@ -83,7 +86,7 @@ public class VantuzEngine
                 string exeName = Path.GetFileName(System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "VantuzLauncher.exe");
                 payload["hostExecutable"] = exeName;
 
-                // 5. Выполнение через QuantumScheduler
+                // 5. Р’С‹РїРѕР»РЅРµРЅРёРµ С‡РµСЂРµР· QuantumScheduler
                 var scheduler = new QuantumScheduler(_reporter, payload);
                 var pipeline = BuildQuantumPipeline(manifest.Pipeline, quantizedNodes);
 
@@ -115,7 +118,7 @@ public class VantuzEngine
     {
         foreach (var (dllName, expectedHash) in pluginsConfig)
         {
-            // Пропускаем валидацию если хэш пустой (dev-режим)
+            // РџСЂРѕРїСѓСЃРєР°РµРј РІР°Р»РёРґР°С†РёСЋ РµСЃР»Рё С…СЌС€ РїСѓСЃС‚РѕР№ (dev-СЂРµР¶РёРј)
             if (string.IsNullOrWhiteSpace(expectedHash))
                 continue;
 
@@ -133,9 +136,9 @@ public class VantuzEngine
     }
 
     /// <summary>
-    /// Интерполирует переменные вида {{key}} используя значения из payload.
-    /// Поддерживает ${env:VAR} и ${special:Folder} для Nomadic конфигурации.
-    /// Согласно Armatura:42 (Explicit Input Payloads) и :65 (No hardcoded paths).
+    /// РРЅС‚РµСЂРїРѕР»РёСЂСѓРµС‚ РїРµСЂРµРјРµРЅРЅС‹Рµ РІРёРґР° {{key}} РёСЃРїРѕР»СЊР·СѓСЏ Р·РЅР°С‡РµРЅРёСЏ РёР· payload.
+    /// РџРѕРґРґРµСЂР¶РёРІР°РµС‚ ${env:VAR} Рё ${special:Folder} РґР»СЏ Nomadic РєРѕРЅС„РёРіСѓСЂР°С†РёРё.
+    /// РЎРѕРіР»Р°СЃРЅРѕ Armatura:42 (Explicit Input Payloads) Рё :65 (No hardcoded paths).
     /// </summary>
     internal static Dictionary<string, string> InterpolateVariables(
         Dictionary<string, string> variables,
@@ -147,13 +150,13 @@ public class VantuzEngine
         {
             string value = kvp.Value;
 
-            // 1. Заменяем ${env:VAR} на значения переменных окружения
+            // 1. Р—Р°РјРµРЅСЏРµРј ${env:VAR} РЅР° Р·РЅР°С‡РµРЅРёСЏ РїРµСЂРµРјРµРЅРЅС‹С… РѕРєСЂСѓР¶РµРЅРёСЏ
             value = InterpolateEnvironmentVariables(value);
 
-            // 2. Заменяем ${special:Folder} на пути SpecialFolder
+            // 2. Р—Р°РјРµРЅСЏРµРј ${special:Folder} РЅР° РїСѓС‚Рё SpecialFolder
             value = InterpolateSpecialFolders(value);
 
-            // 3. Заменяем все placeholder-ы {{key}} на значения из payload
+            // 3. Р—Р°РјРµРЅСЏРµРј РІСЃРµ placeholder-С‹ {{key}} РЅР° Р·РЅР°С‡РµРЅРёСЏ РёР· payload
             foreach (var payloadKvp in payload)
             {
                 string placeholder = "{{" + payloadKvp.Key + "}}";
@@ -164,7 +167,7 @@ public class VantuzEngine
                 }
             }
 
-            // 4. Заменяем placeholder-ы на уже интерполированные переменные (зависимости вида A → B)
+            // 4. Р—Р°РјРµРЅСЏРµРј placeholder-С‹ РЅР° СѓР¶Рµ РёРЅС‚РµСЂРїРѕР»РёСЂРѕРІР°РЅРЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ (Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РІРёРґР° A в†’ B)
             foreach (var resultKvp in result)
             {
                 string placeholder = "{{" + resultKvp.Key + "}}";
@@ -182,7 +185,7 @@ public class VantuzEngine
     }
 
     /// <summary>
-    /// Заменяет ${env:VAR} на значение переменной окружения.
+    /// Р—Р°РјРµРЅСЏРµС‚ ${env:VAR} РЅР° Р·РЅР°С‡РµРЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ РѕРєСЂСѓР¶РµРЅРёСЏ.
     /// </summary>
     private static string InterpolateEnvironmentVariables(string value)
     {
@@ -205,7 +208,7 @@ public class VantuzEngine
     }
 
     /// <summary>
-    /// Заменяет ${special:Folder} на путь SpecialFolder.
+    /// Р—Р°РјРµРЅСЏРµС‚ ${special:Folder} РЅР° РїСѓС‚СЊ SpecialFolder.
     /// </summary>
     private static string InterpolateSpecialFolders(string value)
     {
@@ -243,7 +246,7 @@ public class VantuzEngine
     }
 
     /// <summary>
-    /// Собирает pipeline из QuantizedNode.
+    /// РЎРѕР±РёСЂР°РµС‚ pipeline РёР· QuantizedNode.
     /// </summary>
     private List<(QuantizedNode Node, JsonElement Config)> BuildQuantumPipeline(
         List<StepConfig> steps,
@@ -268,10 +271,11 @@ public class VantuzEngine
 }
 
 /// <summary>
-/// Результат квантованного выполнения
+/// Р РµР·СѓР»СЊС‚Р°С‚ РєРІР°РЅС‚РѕРІР°РЅРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ
 /// </summary>
 public readonly record struct QuantumExecutionResult
 {
+    /// F_doc: {Success returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Success behavior
     public bool Success { get; init; }
     public IReadOnlyDictionary<string, object>? Payload { get; init; }
     public string? ErrorMessage { get; init; }

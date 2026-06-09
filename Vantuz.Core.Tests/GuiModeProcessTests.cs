@@ -1,11 +1,11 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Xunit;
 
 namespace Vantuz.Core.Tests;
 
 /// <summary>
-/// GUI-mode process lifecycle verification per AGENT_FAILURE_ANALYSIS.md §6.5 (R4, R5).
+/// GUI-mode process lifecycle verification per AGENT_FAILURE_ANALYSIS.md В§6.5 (R4, R5).
 /// Ensures double-clicking the EXE creates a window and closing it kills the process cleanly.
 /// </summary>
 [Collection("GUI Sequential")]
@@ -21,6 +21,7 @@ public class GuiModeProcessTests : IDisposable
     public GuiModeProcessTests()
     {
     }
+/// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
 
     public void Dispose()
     {
@@ -52,6 +53,7 @@ public class GuiModeProcessTests : IDisposable
     }
 
     [Fact]
+    /// F_doc: {GuiMode_ProcessStarts_WindowAppearsWithin10Seconds returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiMode_ProcessStarts_WindowAppearsWithin10Seconds behavior
     public void GuiMode_ProcessStarts_WindowAppearsWithin10Seconds()
     {
         string exe = ResolveExePath();
@@ -65,23 +67,24 @@ public class GuiModeProcessTests : IDisposable
         Assert.NotNull(proc);
         _ownedProcesses.Add(proc);
 
-        // Wait up to 30s for a window handle (R4) — increased for parallel test runs
+        // Wait up to 30s for a window handle (R4) вЂ” increased for parallel test runs
         bool windowAppeared = SpinWait.SpinUntil(() => { proc.Refresh(); return proc.MainWindowHandle != IntPtr.Zero; }, TimeSpan.FromSeconds(30));
         Assert.True(windowAppeared, "MainWindowHandle was not created within 30 seconds");
 
-        // Graceful close via WM_CLOSE (R5) — Avalonia does not respond to Process.CloseMainWindow()
+        // Graceful close via WM_CLOSE (R5) вЂ” Avalonia does not respond to Process.CloseMainWindow()
         bool closed = SendMessage(proc.MainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero) != IntPtr.Zero;
         if (!closed)
         {
             proc.Kill();
         }
 
-        // Wait up to 20s for exit — increased for parallel test runs
+        // Wait up to 20s for exit вЂ” increased for parallel test runs
         bool exited = proc.WaitForExit(20_000);
-        Assert.True(exited, "Process did not exit within 20 seconds after window close — potential zombie");
+        Assert.True(exited, "Process did not exit within 20 seconds after window close вЂ” potential zombie");
     }
 
     [Fact]
+    /// F_doc: {GuiMode_ProcessKilled_NoZombieRemains returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiMode_ProcessKilled_NoZombieRemains behavior
     public void GuiMode_ProcessKilled_NoZombieRemains()
     {
         string exe = ResolveExePath();
@@ -108,6 +111,7 @@ public class GuiModeProcessTests : IDisposable
     }
 
     [Fact]
+    /// F_doc: {GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog behavior
     public void GuiMode_FullLaunch_NoApplicationInstanceErrorInTraceLog()
     {
         string exe = ResolveExePath();
@@ -127,7 +131,7 @@ public class GuiModeProcessTests : IDisposable
         Assert.NotNull(proc);
         _ownedProcesses.Add(proc);
 
-        // R4: wait for main window — increased for parallel test runs
+        // R4: wait for main window вЂ” increased for parallel test runs
         bool windowAppeared = SpinWait.SpinUntil(
             () => { proc.Refresh(); return proc.MainWindowHandle != IntPtr.Zero; },
             TimeSpan.FromSeconds(30));
@@ -136,7 +140,7 @@ public class GuiModeProcessTests : IDisposable
         // Let the pipeline run for a few seconds (enough for GUI plugin + version validation)
         Thread.Sleep(5_000);
 
-        // Graceful shutdown — Avalonia does not respond to Process.CloseMainWindow()
+        // Graceful shutdown вЂ” Avalonia does not respond to Process.CloseMainWindow()
         SendMessage(proc.MainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
         if (!proc.WaitForExit(5_000))
         {

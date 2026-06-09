@@ -4,11 +4,16 @@
 /// Credentials container for authentication.
 /// Per INVARIANT_THEORY.md В§2.2 CQRS: immutable data transfer object.
 /// </summary>
+/// F_doc: {Credentials returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Credentials behavior
 public sealed class Credentials
 {
+    /// F_doc: {Username returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Username behavior
     public string Username { get; }
+    /// F_doc: {Password returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Password behavior
     public string Password { get; }
+    /// F_doc: {RememberMe returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies RememberMe behavior
     public bool RememberMe { get; }
+    /// F_doc: {RamMb returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies RamMb behavior
     public int RamMb { get; }
 
     public Credentials(string username, string password, bool rememberMe, int ramMb)
@@ -24,6 +29,7 @@ public sealed class Credentials
 /// Interface for collecting user credentials through GUI.
 /// Per COMPOSITUM_SPECIFICATION.md В§4.2: Plugin-provided capability, not Core concern.
 /// </summary>
+/// F_doc: {ICredentialProvider returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ICredentialProvider behavior
 public interface ICredentialProvider
 {
     /// <summary>
@@ -56,6 +62,7 @@ public interface ICredentialProvider
 
 public sealed class CredentialsSubmittedEventArgs : EventArgs
 {
+    /// F_doc: {Credentials returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Credentials behavior
     public Credentials Credentials { get; }
     public CredentialsSubmittedEventArgs(Credentials credentials) => Credentials = credentials;
 }

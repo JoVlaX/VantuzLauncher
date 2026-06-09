@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Minecraft;
+﻿namespace Vantuz.Plugins.Minecraft;
 
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -18,13 +18,14 @@ public class MinecraftProviderCommand : ICommandPlugin
 
     /// <summary>
     /// Registers the Minecraft game providers for use by Game.* plugins.
-    /// Per INVARIANT_THEORY.md §2.2: registers Query and Command facets separately.
+    /// Per INVARIANT_THEORY.md В§2.2: registers Query and Command facets separately.
     /// </summary>
+    /// F_doc: {ExecuteAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ExecuteAsync behavior
     public Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         context.Set($"GameQueryProvider.{_queryProvider.ProviderName}", _queryProvider);
         context.Set($"GameCommandProvider.{_commandProvider.ProviderName}", _commandProvider);
-        context.Reporter.ReportState($"Провайдер {_queryProvider.ProviderName} зарегистрирован (Query + Command).");
+        context.Reporter.ReportState($"РџСЂРѕРІР°Р№РґРµСЂ {_queryProvider.ProviderName} Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ (Query + Command).");
         return Task.FromResult(new CommandResult(true));
     }
 

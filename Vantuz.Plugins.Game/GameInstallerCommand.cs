@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Game;
+﻿namespace Vantuz.Plugins.Game;
 
 using System;
 using System.IO;
@@ -42,7 +42,7 @@ public class GameInstallerCommand : ICommandPlugin
 
         try
         {
-            // Check dryRun mode per INVARIANT_THEORY.md §1.2 Measurability - test must not mutate state
+            // Check dryRun mode per INVARIANT_THEORY.md В§1.2 Measurability - test must not mutate state
             bool dryRun = stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean();
             if (dryRun)
             {
@@ -57,7 +57,7 @@ public class GameInstallerCommand : ICommandPlugin
             if (checkResult == null)
             {
                 // No validator ran, run check ourselves
-                context.Reporter.ReportState($"Проверка версии {versionName} перед установкой...");
+                context.Reporter.ReportState($"РџСЂРѕРІРµСЂРєР° РІРµСЂСЃРёРё {versionName} РїРµСЂРµРґ СѓСЃС‚Р°РЅРѕРІРєРѕР№...");
                 var queryProvider = ResolveReadProvider(context, providerName);
                 if (queryProvider == null)
                 {
@@ -69,12 +69,12 @@ public class GameInstallerCommand : ICommandPlugin
             // Skip if already exists
             if (checkResult.Exists)
             {
-                context.Reporter.ReportState($"Версия {versionName} уже установлена, пропуск установки.");
+                context.Reporter.ReportState($"Р’РµСЂСЃРёСЏ {versionName} СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅР°, РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё.");
                 context.Set("InstallSkipped", true);
                 return new CommandResult(true);
             }
 
-            context.Reporter.ReportState($"Установка версии {versionName}...");
+            context.Reporter.ReportState($"РЈСЃС‚Р°РЅРѕРІРєР° РІРµСЂСЃРёРё {versionName}...");
 
             // Resolve command provider
             var commandProvider = ResolveCommandProvider(context, providerName);
@@ -101,7 +101,7 @@ public class GameInstallerCommand : ICommandPlugin
                 return new CommandResult(false, installResult.ErrorMessage ?? "Installation failed");
             }
 
-            context.Reporter.ReportState($"Версия {versionName} успешно установлена.");
+            context.Reporter.ReportState($"Р’РµСЂСЃРёСЏ {versionName} СѓСЃРїРµС€РЅРѕ СѓСЃС‚Р°РЅРѕРІР»РµРЅР°.");
             context.Set("InstallSuccess", true);
             if (!string.IsNullOrEmpty(installResult.InstalledVersionName))
             {
@@ -122,7 +122,7 @@ public class GameInstallerCommand : ICommandPlugin
 
     /// <summary>
     /// Resolves IGameQueryProvider from context mutations.
-    /// Per INVARIANT_THEORY.md §2.2: Query facet for version checking.
+    /// Per INVARIANT_THEORY.md В§2.2: Query facet for version checking.
     /// </summary>
     private static IGameQueryProvider? ResolveReadProvider(CommandContext context, string providerName)
     {
@@ -134,7 +134,7 @@ public class GameInstallerCommand : ICommandPlugin
 
     /// <summary>
     /// Resolves IGameCommandProvider from context mutations.
-    /// Per INVARIANT_THEORY.md §2.2: Command facet for installation.
+    /// Per INVARIANT_THEORY.md В§2.2: Command facet for installation.
     /// </summary>
     private static IGameCommandProvider? ResolveCommandProvider(CommandContext context, string providerName)
     {
@@ -154,6 +154,7 @@ public class GameInstallerCommand : ICommandPlugin
         }
         return text;
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

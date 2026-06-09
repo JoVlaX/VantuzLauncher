@@ -1,4 +1,4 @@
-namespace Vantuz.Core.Tests;
+﻿namespace Vantuz.Core.Tests;
 
 using System;
 using System.Text.Json;
@@ -8,9 +8,10 @@ using Vantuz.Plugins.Net;
 using Xunit;
 
 /// <summary>
-/// Tests for UpdateCommand — ARM005 CQRS Command for launcher updates.
-/// Per INVARIANT_THEORY §1.2: falsifiable claims about update state transitions.
+/// Tests for UpdateCommand вЂ” ARM005 CQRS Command for launcher updates.
+/// Per INVARIANT_THEORY В§1.2: falsifiable claims about update state transitions.
 /// </summary>
+/// F_doc: {UpdateCommandTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies UpdateCommandTests behavior
 public class UpdateCommandTests
 {
     /// <summary>
@@ -33,7 +34,7 @@ public class UpdateCommandTests
         var result = await command.ExecuteAsync(context, stepConfig);
 
         Assert.True(result.Success);
-        Assert.Contains("актуальная версия", reporter.Logs[^1]);
+        Assert.Contains("Р°РєС‚СѓР°Р»СЊРЅР°СЏ РІРµСЂСЃРёСЏ", reporter.Logs[^1]);
     }
 
     /// <summary>

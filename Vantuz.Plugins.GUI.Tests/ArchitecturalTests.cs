@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using System.Xml.Linq;
 using Xunit;
@@ -6,10 +6,11 @@ using Xunit;
 namespace Vantuz.Plugins.GUI.Tests;
 
 /// <summary>
-/// Architectural regression tests per COMPOSITUM_SPECIFICATION.md §4.1 Component Scope Invariant.
+/// Architectural regression tests per COMPOSITUM_SPECIFICATION.md В§4.1 Component Scope Invariant.
 /// Ensures the Product (VantuzLauncher) contains NO UI dependencies or types.
 /// GUI is exclusively a Category (plugin) concern.
 /// </summary>
+/// F_doc: {ArchitecturalTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ArchitecturalTests behavior
 public class ArchitecturalTests
 {
     private static string ResolveProductProjectPath()
@@ -34,6 +35,7 @@ public class ArchitecturalTests
     }
 
     [Fact]
+    /// F_doc: {ProductCsproj_DoesNotReferenceWpf returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ProductCsproj_DoesNotReferenceWpf behavior
     public void ProductCsproj_DoesNotReferenceWpf()
     {
         string csprojPath = ResolveProductProjectPath();
@@ -49,6 +51,7 @@ public class ArchitecturalTests
     }
 
     [Fact]
+    /// F_doc: {ProductAssembly_DoesNotContainWpfTypes returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ProductAssembly_DoesNotContainWpfTypes behavior
     public void ProductAssembly_DoesNotContainWpfTypes()
     {
         string assemblyPath = ResolveProductAssemblyPath();
@@ -81,6 +84,7 @@ public class ArchitecturalTests
     }
 
     [Fact]
+    /// F_doc: {ProductAssembly_DoesNotReferenceWpfAssemblies returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ProductAssembly_DoesNotReferenceWpfAssemblies behavior
     public void ProductAssembly_DoesNotReferenceWpfAssemblies()
     {
         string assemblyPath = ResolveProductAssemblyPath();
@@ -95,6 +99,7 @@ public class ArchitecturalTests
     }
 
     [Fact]
+    /// F_doc: {ProductCsproj_DoesNotContainXamlFiles returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ProductCsproj_DoesNotContainXamlFiles behavior
     public void ProductCsproj_DoesNotContainXamlFiles()
     {
         string csprojPath = ResolveProductProjectPath();

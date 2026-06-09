@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using Xunit;
@@ -8,12 +8,13 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// <summary>
 /// Recidivism prevention test: verifies the launch path is exercised in headless mode
 /// so we never again claim "working" when authlib is missing or the JVM crashes on start.
-/// Per INVARIANT_THEORY.md §1.2 (Measurability) and §17 (Determinism):
+/// Per INVARIANT_THEORY.md В§1.2 (Measurability) and В§17 (Determinism):
 /// this test runs fully headless with boot.test.json, no GUI window, no network calls.
 /// </summary>
 public class RealLaunchRecidivismTests : IDisposable
 {
     private readonly List<Process> _processes = new();
+/// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
 
     public void Dispose()
     {
@@ -45,6 +46,7 @@ public class RealLaunchRecidivismTests : IDisposable
     }
 
     [StaFact]
+    /// F_doc: {HeadlessLaunchPipeline_AuthlibExists_And_ProcessDoesNotCrash returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies HeadlessLaunchPipeline_AuthlibExists_And_ProcessDoesNotCrash behavior
     public void HeadlessLaunchPipeline_AuthlibExists_And_ProcessDoesNotCrash()
     {
         string exe = ResolveExePath();
@@ -111,7 +113,7 @@ public class RealLaunchRecidivismTests : IDisposable
             // 3. Place a mock authlib so Game.LaunchCommand does not fail on missing file
             File.WriteAllText(authlibPath, "MOCK_AUTHLIB");
 
-            // 4. Launch headless process — no GUI window, deterministic per INVARIANT_THEORY.md
+            // 4. Launch headless process вЂ” no GUI window, deterministic per INVARIANT_THEORY.md
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -146,8 +148,8 @@ public class RealLaunchRecidivismTests : IDisposable
 
             // Forge installation step must have been reached (dryRun or real)
             Assert.True(
-                combined.Contains("Forge установлен:") ||
-                combined.Contains("пропуск установки") ||
+                combined.Contains("Forge СѓСЃС‚Р°РЅРѕРІР»РµРЅ:") ||
+                combined.Contains("РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё") ||
                 combined.Contains("[DRY RUN] Installation of"),
                 "Forge installation was not reached or skipped.\n" +
                 $"Combined output:\n{combined}");

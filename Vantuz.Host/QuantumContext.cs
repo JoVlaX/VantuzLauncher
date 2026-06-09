@@ -1,4 +1,4 @@
-namespace Vantuz.Host;
+﻿namespace Vantuz.Host;
 
 using System;
 using System.Collections.Generic;
@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using Vantuz.Core;
 
 /// <summary>
-/// Реализация IQuantumContext для управления квантом выполнения.
-/// Согласно Armatura:169-174 - Host-контролируемое scheduling.
+/// Р РµР°Р»РёР·Р°С†РёСЏ IQuantumContext РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РєРІР°РЅС‚РѕРј РІС‹РїРѕР»РЅРµРЅРёСЏ.
+/// РЎРѕРіР»Р°СЃРЅРѕ Armatura:169-174 - Host-РєРѕРЅС‚СЂРѕР»РёСЂСѓРµРјРѕРµ scheduling.
 /// </summary>
 internal sealed class QuantumContext : IQuantumContext, IDisposable
 {
@@ -21,10 +21,15 @@ internal sealed class QuantumContext : IQuantumContext, IDisposable
     private bool _disposed;
 
     public TimeSpan RemainingQuantum => TotalQuantum - _quantumTimer.Elapsed;
+    /// F_doc: {TotalQuantum returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies TotalQuantum behavior
     public TimeSpan TotalQuantum { get; }
+    /// F_doc: {CancellationToken returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies CancellationToken behavior
     public CancellationToken CancellationToken { get; }
+    /// F_doc: {Reporter returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Reporter behavior
     public IStatusReporter Reporter { get; }
+    /// F_doc: {Payload returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Payload behavior
     public IReadOnlyPayload Payload { get; }
+    /// F_doc: {Mutations returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Mutations behavior
     public ICommandMutations Mutations { get; }
 
     public QuantumContext(
@@ -45,19 +50,22 @@ internal sealed class QuantumContext : IQuantumContext, IDisposable
         Mutations = new MutationsWrapper(_mutations);
         _quantumTimer = Stopwatch.StartNew();
     }
+/// F_doc: {YieldQuantumAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies YieldQuantumAsync behavior
 
     public Task YieldQuantumAsync() => _yieldCallback();
+    /// F_doc: {StepAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies StepAsync behavior
     public Task StepAsync() => _stepCallback();
 
     /// <summary>
-    /// Получает все мутации, накопленные за время кванта
+    /// РџРѕР»СѓС‡Р°РµС‚ РІСЃРµ РјСѓС‚Р°С†РёРё, РЅР°РєРѕРїР»РµРЅРЅС‹Рµ Р·Р° РІСЂРµРјСЏ РєРІР°РЅС‚Р°
     /// </summary>
     internal IReadOnlyDictionary<string, object> GetMutations() => _mutations;
 
     /// <summary>
-    /// Останавивает таймер и возвращает оставшееся время
+    /// РћСЃС‚Р°РЅР°РІРёРІР°РµС‚ С‚Р°Р№РјРµСЂ Рё РІРѕР·РІСЂР°С‰Р°РµС‚ РѕСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ
     /// </summary>
     internal TimeSpan Stop() => RemainingQuantum;
+/// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
 
     public void Dispose()
     {
@@ -69,7 +77,7 @@ internal sealed class QuantumContext : IQuantumContext, IDisposable
     }
 
     /// <summary>
-    /// Wrapper для мутаций
+    /// Wrapper РґР»СЏ РјСѓС‚Р°С†РёР№
     /// </summary>
     private sealed class MutationsWrapper : ICommandMutations
     {
@@ -88,7 +96,7 @@ internal sealed class QuantumContext : IQuantumContext, IDisposable
 }
 
 /// <summary>
-/// Реализация IReadOnlyPayload на основе Dictionary
+/// Р РµР°Р»РёР·Р°С†РёСЏ IReadOnlyPayload РЅР° РѕСЃРЅРѕРІРµ Dictionary
 /// </summary>
 internal sealed class ReadOnlyPayload : IReadOnlyPayload
 {
@@ -105,18 +113,19 @@ internal sealed class ReadOnlyPayload : IReadOnlyPayload
             return typed;
         return default;
     }
+/// F_doc: {Contains returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Contains behavior
 
     public bool Contains(string key) => _data.ContainsKey(key);
 
     /// <summary>
-    /// Возвращает все данные payload (используется CQRS адаптерами).
+    /// Р’РѕР·РІСЂР°С‰Р°РµС‚ РІСЃРµ РґР°РЅРЅС‹Рµ payload (РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ CQRS Р°РґР°РїС‚РµСЂР°РјРё).
     /// </summary>
     internal IReadOnlyDictionary<string, object> GetAllInternal() => _data;
 }
 
 /// <summary>
-/// Адаптер IReadOnlyPayload для совместимости с Dictionary.
-/// Используется для передачи существующих данных в QueryContext.
+/// РђРґР°РїС‚РµСЂ IReadOnlyPayload РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё СЃ Dictionary.
+/// РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РїРµСЂРµРґР°С‡Рё СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… РґР°РЅРЅС‹С… РІ QueryContext.
 /// </summary>
 internal sealed class PayloadAdapter : IReadOnlyPayload
 {
@@ -133,6 +142,7 @@ internal sealed class PayloadAdapter : IReadOnlyPayload
             return typed;
         return default;
     }
+/// F_doc: {Contains returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Contains behavior
 
     public bool Contains(string key) => _source.ContainsKey(key);
 

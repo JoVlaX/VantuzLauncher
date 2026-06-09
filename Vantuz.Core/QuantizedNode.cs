@@ -1,4 +1,4 @@
-namespace Vantuz.Core;
+﻿namespace Vantuz.Core;
 
 using System;
 using System.Text.Json;
@@ -6,43 +6,47 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// ARM007: QuantizedNode - базовый класс для квантованного выполнения плагинов.
-/// Заменяет free-form async Task методы на строго контролируемые кванты выполнения.
-/// Согласно Armatura:96-98 и Armatura:169-174.
+/// ARM007: QuantizedNode - Р±Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РґР»СЏ РєРІР°РЅС‚РѕРІР°РЅРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ РїР»Р°РіРёРЅРѕРІ.
+/// Р—Р°РјРµРЅСЏРµС‚ free-form async Task РјРµС‚РѕРґС‹ РЅР° СЃС‚СЂРѕРіРѕ РєРѕРЅС‚СЂРѕР»РёСЂСѓРµРјС‹Рµ РєРІР°РЅС‚С‹ РІС‹РїРѕР»РЅРµРЅРёСЏ.
+/// РЎРѕРіР»Р°СЃРЅРѕ Armatura:96-98 Рё Armatura:169-174.
 /// </summary>
 public abstract class QuantizedNode : IAsyncDisposable
 {
     /// <summary>
-    /// Уникальное имя узла для роутинга
+    /// РЈРЅРёРєР°Р»СЊРЅРѕРµ РёРјСЏ СѓР·Р»Р° РґР»СЏ СЂРѕСѓС‚РёРЅРіР°
     /// </summary>
+    /// F_doc: {Name returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Name behavior
     public abstract string Name { get; }
 
     /// <summary>
-    /// Выполняет один квант работы.
-    /// Метод ДОЛЖЕН завершиться в течение выделенного кванта времени.
-    /// Если работа не завершена - возвращает Yield для продолжения.
+    /// Р’С‹РїРѕР»РЅСЏРµС‚ РѕРґРёРЅ РєРІР°РЅС‚ СЂР°Р±РѕС‚С‹.
+    /// РњРµС‚РѕРґ Р”РћР›Р–Р•Рќ Р·Р°РІРµСЂС€РёС‚СЊСЃСЏ РІ С‚РµС‡РµРЅРёРµ РІС‹РґРµР»РµРЅРЅРѕРіРѕ РєРІР°РЅС‚Р° РІСЂРµРјРµРЅРё.
+    /// Р•СЃР»Рё СЂР°Р±РѕС‚Р° РЅРµ Р·Р°РІРµСЂС€РµРЅР° - РІРѕР·РІСЂР°С‰Р°РµС‚ Yield РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ.
     /// </summary>
-    /// <param name="context">Контекст выполнения с оставшимся временем кванта</param>
-    /// <param name="stepConfig">Конфигурация шага pipeline</param>
+    /// <param name="context">РљРѕРЅС‚РµРєСЃС‚ РІС‹РїРѕР»РЅРµРЅРёСЏ СЃ РѕСЃС‚Р°РІС€РёРјСЃСЏ РІСЂРµРјРµРЅРµРј РєРІР°РЅС‚Р°</param>
+    /// <param name="stepConfig">РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ С€Р°РіР° pipeline</param>
     /// <param name="ct">CancellationToken</param>
-    /// <returns>Результат кванта: Complete, Yield или Error</returns>
+    /// <returns>Р РµР·СѓР»СЊС‚Р°С‚ РєРІР°РЅС‚Р°: Complete, Yield РёР»Рё Error</returns>
+    /// F_doc: {ExecuteQuantumAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ExecuteQuantumAsync behavior
     public abstract Task<QuantumResult> ExecuteQuantumAsync(
         IQuantumContext context,
         JsonElement stepConfig,
         CancellationToken ct);
 
     /// <summary>
-    /// Инициализация узла перед первым квантом.
-    /// Вызывается один раз перед началом выполнения.
+    /// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СѓР·Р»Р° РїРµСЂРµРґ РїРµСЂРІС‹Рј РєРІР°РЅС‚РѕРј.
+    /// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РѕРґРёРЅ СЂР°Р· РїРµСЂРµРґ РЅР°С‡Р°Р»РѕРј РІС‹РїРѕР»РЅРµРЅРёСЏ.
     /// </summary>
+    /// F_doc: {InitializeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies InitializeAsync behavior
     public virtual ValueTask InitializeAsync(JsonElement stepConfig, CancellationToken ct)
     {
         return ValueTask.CompletedTask;
     }
 
     /// <summary>
-    /// Очистка ресурсов при завершении работы узла.
+    /// РћС‡РёСЃС‚РєР° СЂРµСЃСѓСЂСЃРѕРІ РїСЂРё Р·Р°РІРµСЂС€РµРЅРёРё СЂР°Р±РѕС‚С‹ СѓР·Р»Р°.
     /// </summary>
+    /// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
     public virtual ValueTask DisposeAsync()
     {
         return ValueTask.CompletedTask;
@@ -50,71 +54,75 @@ public abstract class QuantizedNode : IAsyncDisposable
 }
 
 /// <summary>
-/// Контекст выполнения кванта с контролем времени и backpressure
+/// РљРѕРЅС‚РµРєСЃС‚ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРІР°РЅС‚Р° СЃ РєРѕРЅС‚СЂРѕР»РµРј РІСЂРµРјРµРЅРё Рё backpressure
 /// </summary>
+/// F_doc: {IQuantumContext returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies IQuantumContext behavior
 public interface IQuantumContext
 {
     /// <summary>
-    /// Оставшееся время текущего кванта
+    /// РћСЃС‚Р°РІС€РµРµСЃСЏ РІСЂРµРјСЏ С‚РµРєСѓС‰РµРіРѕ РєРІР°РЅС‚Р°
     /// </summary>
     TimeSpan RemainingQuantum { get; }
 
     /// <summary>
-    /// Полный размер кванта (для расчёта процентов)
+    /// РџРѕР»РЅС‹Р№ СЂР°Р·РјРµСЂ РєРІР°РЅС‚Р° (РґР»СЏ СЂР°СЃС‡С‘С‚Р° РїСЂРѕС†РµРЅС‚РѕРІ)
     /// </summary>
     TimeSpan TotalQuantum { get; }
 
     /// <summary>
-    /// CancellationToken для отмены операции
+    /// CancellationToken РґР»СЏ РѕС‚РјРµРЅС‹ РѕРїРµСЂР°С†РёРё
     /// </summary>
     CancellationToken CancellationToken { get; }
 
     /// <summary>
-    /// Репортёр для информирования о прогрессе
+    /// Р РµРїРѕСЂС‚С‘СЂ РґР»СЏ РёРЅС„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ Рѕ РїСЂРѕРіСЂРµСЃСЃРµ
     /// </summary>
     IStatusReporter Reporter { get; }
 
     /// <summary>
-    /// Payload данные только для чтения (Query)
+    /// Payload РґР°РЅРЅС‹Рµ С‚РѕР»СЊРєРѕ РґР»СЏ С‡С‚РµРЅРёСЏ (Query)
     /// </summary>
     IReadOnlyPayload Payload { get; }
 
     /// <summary>
-    /// Мутации для записи результатов (Command)
+    /// РњСѓС‚Р°С†РёРё РґР»СЏ Р·Р°РїРёСЃРё СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ (Command)
     /// </summary>
     ICommandMutations Mutations { get; }
 
     /// <summary>
-    /// Принудительно уступить оставшийся квант и вернуться в планировщик.
-    /// Используется для кооперативной многозадачности.
+    /// РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ СѓСЃС‚СѓРїРёС‚СЊ РѕСЃС‚Р°РІС€РёР№СЃСЏ РєРІР°РЅС‚ Рё РІРµСЂРЅСѓС‚СЊСЃСЏ РІ РїР»Р°РЅРёСЂРѕРІС‰РёРє.
+    /// РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РєРѕРѕРїРµСЂР°С‚РёРІРЅРѕР№ РјРЅРѕРіРѕР·Р°РґР°С‡РЅРѕСЃС‚Рё.
     /// </summary>
     Task YieldQuantumAsync();
 
     /// <summary>
-    /// Перейти к следующему шагу pipeline.
-    /// Может быть вызван только при Complete результате.
+    /// РџРµСЂРµР№С‚Рё Рє СЃР»РµРґСѓСЋС‰РµРјСѓ С€Р°РіСѓ pipeline.
+    /// РњРѕР¶РµС‚ Р±С‹С‚СЊ РІС‹Р·РІР°РЅ С‚РѕР»СЊРєРѕ РїСЂРё Complete СЂРµР·СѓР»СЊС‚Р°С‚Рµ.
     /// </summary>
     Task StepAsync();
 }
 
 /// <summary>
-/// Результат выполнения кванта
+/// Р РµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ РєРІР°РЅС‚Р°
 /// </summary>
 public readonly record struct QuantumResult
 {
+    /// F_doc: {Status returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Status behavior
     public QuantumStatus Status { get; init; }
     public object? State { get; init; }
     public string? ErrorMessage { get; init; }
 
     /// <summary>
-    /// Квант завершён успешно, можно переходить к следующему шагу
+    /// РљРІР°РЅС‚ Р·Р°РІРµСЂС€С‘РЅ СѓСЃРїРµС€РЅРѕ, РјРѕР¶РЅРѕ РїРµСЂРµС…РѕРґРёС‚СЊ Рє СЃР»РµРґСѓСЋС‰РµРјСѓ С€Р°РіСѓ
     /// </summary>
+    /// F_doc: {Complete returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Complete behavior
     public static QuantumResult Complete() => new() { Status = QuantumStatus.Complete };
 
     /// <summary>
-    /// Требуется дополнительный квант для продолжения работы.
-    /// State сохраняется и передаётся в следующий квант.
+    /// РўСЂРµР±СѓРµС‚СЃСЏ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Р№ РєРІР°РЅС‚ РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ СЂР°Р±РѕС‚С‹.
+    /// State СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ Рё РїРµСЂРµРґР°С‘С‚СЃСЏ РІ СЃР»РµРґСѓСЋС‰РёР№ РєРІР°РЅС‚.
     /// </summary>
+    /// F_doc: {Yield returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Yield behavior
     public static QuantumResult Yield(object? state = null) => new()
     {
         Status = QuantumStatus.Yield,
@@ -122,8 +130,9 @@ public readonly record struct QuantumResult
     };
 
     /// <summary>
-    /// Ошибка выполнения кванта
+    /// РћС€РёР±РєР° РІС‹РїРѕР»РЅРµРЅРёСЏ РєРІР°РЅС‚Р°
     /// </summary>
+    /// F_doc: {Error returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Error behavior
     public static QuantumResult Error(string message) => new()
     {
         Status = QuantumStatus.Error,
@@ -131,30 +140,33 @@ public readonly record struct QuantumResult
     };
 
     /// <summary>
-    /// Прервать выполнение pipeline
+    /// РџСЂРµСЂРІР°С‚СЊ РІС‹РїРѕР»РЅРµРЅРёРµ pipeline
     /// </summary>
+    /// F_doc: {Abort returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Abort behavior
     public static QuantumResult Abort(string reason) => new()
     {
         Status = QuantumStatus.Abort,
         ErrorMessage = reason
     };
 }
+/// F_doc: {QuantumStatus returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies QuantumStatus behavior
 
 public enum QuantumStatus
 {
-    /// <summary>Квант успешно завершён</summary>
+    /// <summary>РљРІР°РЅС‚ СѓСЃРїРµС€РЅРѕ Р·Р°РІРµСЂС€С‘РЅ</summary>
     Complete,
-    /// <summary>Требуется ещё один квант</summary>
+    /// <summary>РўСЂРµР±СѓРµС‚СЃСЏ РµС‰С‘ РѕРґРёРЅ РєРІР°РЅС‚</summary>
     Yield,
-    /// <summary>Ошибка, но можно продолжить pipeline</summary>
+    /// <summary>РћС€РёР±РєР°, РЅРѕ РјРѕР¶РЅРѕ РїСЂРѕРґРѕР»Р¶РёС‚СЊ pipeline</summary>
     Error,
-    /// <summary>Критическая ошибка, прервать pipeline</summary>
+    /// <summary>РљСЂРёС‚РёС‡РµСЃРєР°СЏ РѕС€РёР±РєР°, РїСЂРµСЂРІР°С‚СЊ pipeline</summary>
     Abort
 }
 
 /// <summary>
-/// Интерфейс для чтения payload (Query side CQRS)
+/// РРЅС‚РµСЂС„РµР№СЃ РґР»СЏ С‡С‚РµРЅРёСЏ payload (Query side CQRS)
 /// </summary>
+/// F_doc: {IReadOnlyPayload returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies IReadOnlyPayload behavior
 public interface IReadOnlyPayload
 {
     T? Get<T>(string key);
@@ -162,8 +174,9 @@ public interface IReadOnlyPayload
 }
 
 /// <summary>
-/// Интерфейс для мутаций (Command side CQRS)
+/// РРЅС‚РµСЂС„РµР№СЃ РґР»СЏ РјСѓС‚Р°С†РёР№ (Command side CQRS)
 /// </summary>
+/// F_doc: {ICommandMutations returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ICommandMutations behavior
 public interface ICommandMutations
 {
     void Set<T>(string key, T value) where T : notnull;

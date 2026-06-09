@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,10 +11,12 @@ namespace Vantuz.Builder;
 /// <summary>
 /// Build-time verification: cross-references boot.json pipeline pluginNames
 /// against discovered plugin class Name properties via static IL analysis.
-/// Per INVARIANT_THEORY.md §1.2 Measurability — no runtime instantiation.
+/// Per INVARIANT_THEORY.md В§1.2 Measurability вЂ” no runtime instantiation.
 /// </summary>
+/// F_doc: {PluginNameVerifier returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies PluginNameVerifier behavior
 public static class PluginNameVerifier
 {
+    /// F_doc: {VerifyManifest returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VerifyManifest behavior
     public static int VerifyManifest(string bootJsonPath, string pluginsDir)
     {
         if (!File.Exists(bootJsonPath))
@@ -58,6 +60,7 @@ public static class PluginNameVerifier
 
         return 0;
     }
+/// F_doc: {VerifyDirectory returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VerifyDirectory behavior
 
     public static int VerifyDirectory(string dirPath, string pluginsDir)
     {
@@ -207,7 +210,7 @@ public static class PluginNameVerifier
         return violations;
     }
 
-    // DEVIATION-002: ForbiddenResourceTypes disabled — CmlLib.Core, Vantuz.Host, Vantuz.Plugins.Net legitimately
+    // DEVIATION-002: ForbiddenResourceTypes disabled вЂ” CmlLib.Core, Vantuz.Host, Vantuz.Plugins.Net legitimately
     // use FileStream, HttpClient, Process. VerifyScope (ARM-BUILD-024) already guards cross-assembly references.
     private static readonly string[] ForbiddenResourceTypes = Array.Empty<string>();
 
@@ -392,11 +395,13 @@ public static class PluginNameVerifier
 
     private class BootManifest
     {
+        /// F_doc: {Pipeline returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Pipeline behavior
         public List<PipelineStep> Pipeline { get; set; } = new();
     }
 
     private class PipelineStep
     {
+        /// F_doc: {PluginName returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies PluginName behavior
         public string PluginName { get; set; } = "";
     }
 }

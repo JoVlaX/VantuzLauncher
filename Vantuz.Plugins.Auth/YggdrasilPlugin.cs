@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Auth;
+﻿namespace Vantuz.Plugins.Auth;
 
 using System;
 using System.Collections.Generic;
@@ -24,10 +24,10 @@ public class YggdrasilPlugin : ICommandPlugin
 
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
-            return new CommandResult(false, "Логин или пароль не переданы в конвейер.");
+            return new CommandResult(false, "Р›РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ РЅРµ РїРµСЂРµРґР°РЅС‹ РІ РєРѕРЅРІРµР№РµСЂ.");
         }
 
-        context.Reporter.ReportState("Авторизация на сервере..."); 
+        context.Reporter.ReportState("РђРІС‚РѕСЂРёР·Р°С†РёСЏ РЅР° СЃРµСЂРІРµСЂРµ..."); 
   
          var requestBody = new Dictionary<string, object>();
 
@@ -62,7 +62,7 @@ var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.
   
              if (string.IsNullOrWhiteSpace(responseText))
             {
-                return new CommandResult(false, "Сервер авторизации вернул пустой ответ.");
+                return new CommandResult(false, "РЎРµСЂРІРµСЂ Р°РІС‚РѕСЂРёР·Р°С†РёРё РІРµСЂРЅСѓР» РїСѓСЃС‚РѕР№ РѕС‚РІРµС‚.");
             } 
   
              using var doc = JsonDocument.Parse(responseText);
@@ -71,15 +71,15 @@ var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.
              if (root.TryGetProperty("error", out var errorElement))
             {
                 string errorMsg = root.TryGetProperty("errorMessage", out var errMsgElement)
-                    ? errMsgElement.GetString() ?? "Неизвестная ошибка сервера"
-                    : "Неизвестная ошибка сервера";
+                    ? errMsgElement.GetString() ?? "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°"
+                    : "РќРµРёР·РІРµСЃС‚РЅР°СЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°";
 
-                return new CommandResult(false, $"Ошибка авторизации: {errorMsg}");
+                return new CommandResult(false, $"РћС€РёР±РєР° Р°РІС‚РѕСЂРёР·Р°С†РёРё: {errorMsg}");
             } 
   
              if (root.TryGetProperty("has_access", out var accessElement) && !accessElement.GetBoolean())
             {
-                return new CommandResult(false, "Доступ закрыт. Оплатите активацию на сайте.");
+                return new CommandResult(false, "Р”РѕСЃС‚СѓРї Р·Р°РєСЂС‹С‚. РћРїР»Р°С‚РёС‚Рµ Р°РєС‚РёРІР°С†РёСЋ РЅР° СЃР°Р№С‚Рµ.");
             } 
   
              var profile = root.GetProperty("selectedProfile");
@@ -92,11 +92,11 @@ var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.
             if (root.TryGetProperty("is_admin", out var isAdmin)) context.Set("is_admin", isAdmin.GetBoolean());
             if (root.TryGetProperty("is_tester", out var isTester)) context.Set("is_tester", isTester.GetBoolean()); 
   
-context.Reporter.ReportState("Авторизация успешна."); 
+context.Reporter.ReportState("РђРІС‚РѕСЂРёР·Р°С†РёСЏ СѓСЃРїРµС€РЅР°."); 
          }
         catch (Exception ex)
         {
-            return new CommandResult(false, $"Сбой при обращении к серверу авторизации: {ex.Message}");
+            return new CommandResult(false, $"РЎР±РѕР№ РїСЂРё РѕР±СЂР°С‰РµРЅРёРё Рє СЃРµСЂРІРµСЂСѓ Р°РІС‚РѕСЂРёР·Р°С†РёРё: {ex.Message}");
         }
 
         return new CommandResult(true);
@@ -112,6 +112,7 @@ context.Reporter.ReportState("Авторизация успешна.");
         }
         return text;
     } 
+  /// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
   
 public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 } 

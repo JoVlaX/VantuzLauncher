@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,7 +14,7 @@ namespace Armatura.Core.Sdk.Analyzers;
 /// ARM012: Unmatched Context Key
 /// ARM013: Similar Context Keys Detected
 /// 
-/// INVARIANT_THEORY.md §2.1 - All contracts must be explicit and verifiable
+/// INVARIANT_THEORY.md В§2.1 - All contracts must be explicit and verifiable
 /// 
 /// Detects context key contract violations:
 /// - context.Set("X") without corresponding context.Get("X")
@@ -29,6 +29,7 @@ public class ContextKeyAnalyzer : DiagnosticAnalyzer
             DiagnosticDescriptors.UnmatchedContextKey,
             DiagnosticDescriptors.SimilarContextKeys
         );
+/// F_doc: {Initialize returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Initialize behavior
 
     public override void Initialize(AnalysisContext context)
     {

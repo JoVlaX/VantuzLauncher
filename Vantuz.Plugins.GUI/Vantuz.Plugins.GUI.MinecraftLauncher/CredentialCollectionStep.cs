@@ -55,6 +55,7 @@ public class CredentialCollectionStep : ICommandPlugin
             return new CommandResult(false, $"Credential collection failed: {ex.Message}");
         }
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

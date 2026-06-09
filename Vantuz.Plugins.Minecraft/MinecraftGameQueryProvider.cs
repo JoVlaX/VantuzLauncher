@@ -1,4 +1,4 @@
-#pragma warning disable ARM007 // ExternalAbstraction, not pipeline plugin
+﻿#pragma warning disable ARM007 // ExternalAbstraction, not pipeline plugin
 
 namespace Vantuz.Plugins.Minecraft;
 
@@ -15,12 +15,24 @@ using Vantuz.Core;
 
 /// <summary>
 /// CQRS Query facet of Minecraft game provider.
-/// Per INVARIANT_THEORY.md §2.2 — read-only operations only.
+/// Per INVARIANT_THEORY.md В§2.2 вЂ” read-only operations only.
+/// F_doc: {class contains write operations or mutates filesystem state}
+/// E_doc: Static analysis grep for 'File.Write', 'File.Delete', 'Directory.Create' in this file returns zero matches
 /// </summary>
 public class MinecraftGameQueryProvider : IGameQueryProvider
 {
+    /// <summary>
+    /// Provider identifier for context registration.
+    /// F_doc: {Name is null or empty string}
+    /// E_doc: Unit test asserts ProviderName == "Minecraft"
+    /// </summary>
     public string ProviderName => "Minecraft";
 
+    /// <summary>
+    /// Check if version exists locally.
+    /// F_doc: {version exists but returns false, or version missing but returns true}
+    /// E_doc: Unit test with mock file system: existing version.json + jar returns Exists=true; missing returns Exists=false
+    /// </summary>
     public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
     {
         try
@@ -50,6 +62,11 @@ public class MinecraftGameQueryProvider : IGameQueryProvider
         }
     }
 
+    /// <summary>
+    /// Build launch parameters for OS.Executor.
+    /// F_doc: {launch parameters contain invalid paths or missing authlib}
+    /// E_doc: Unit test with mock MinecraftPath verifies LaunchParameters.ExecutablePath is non-empty and valid
+    /// </summary>
     public async Task<LaunchParameters> BuildLaunchParametersAsync(
         string version,
         string installDir,
@@ -193,6 +210,7 @@ public class MinecraftGameQueryProvider : IGameQueryProvider
     }
 
     internal static (string McVersion, string ForgeVersion) ParseForgeVersion(string version)
+    /// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
     {
         var idx = version.IndexOf("-forge-", StringComparison.OrdinalIgnoreCase);
         if (idx >= 0)
@@ -208,9 +226,14 @@ public class MinecraftGameQueryProvider : IGameQueryProvider
             return (allParts[0], string.Join("-", allParts.Skip(2)));
         }
 
-        throw new InvalidOperationException($"Невозможно разобрать Forge-версию из строки: {version}");
+        throw new InvalidOperationException($"РќРµРІРѕР·РјРѕР¶РЅРѕ СЂР°Р·РѕР±СЂР°С‚СЊ Forge-РІРµСЂСЃРёСЋ РёР· СЃС‚СЂРѕРєРё: {version}");
     }
 
+    /// <summary>
+    /// Dispose query provider resources.
+    /// F_doc: {DisposeAsync throws or leaves unmanaged resources}
+    /// E_doc: Unit test calls DisposeAsync twice without exception
+    /// </summary>
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 

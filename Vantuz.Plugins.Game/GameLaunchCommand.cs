@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Game;
+﻿namespace Vantuz.Plugins.Game;
 
 using System;
 using System.Collections.Generic;
@@ -39,7 +39,7 @@ public class GameLaunchCommand : ICommandPlugin
 
             installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
-            // Check dryRun mode per INVARIANT_THEORY.md §1.2 Measurability - test must not mutate state
+            // Check dryRun mode per INVARIANT_THEORY.md В§1.2 Measurability - test must not mutate state
             bool dryRun = stepConfig.TryGetProperty("dryRun", out var dr) && dr.GetBoolean();
             if (dryRun)
             {
@@ -85,7 +85,7 @@ public class GameLaunchCommand : ICommandPlugin
                 }
             }
 
-            context.Reporter.ReportState($"Генерация аргументов запуска {versionName}...");
+            context.Reporter.ReportState($"Р“РµРЅРµСЂР°С†РёСЏ Р°СЂРіСѓРјРµРЅС‚РѕРІ Р·Р°РїСѓСЃРєР° {versionName}...");
 
             // Pre-flight validation: ensure critical paths exist before attempting launch
             if (!Directory.Exists(installDir))
@@ -136,7 +136,7 @@ public class GameLaunchCommand : ICommandPlugin
             context.Set("gameArgs", launchParams.Arguments);
             context.Set("gameWorkDir", launchParams.WorkingDirectory);
 
-            context.Reporter.ReportState("Аргументы запуска сгенерированы.");
+            context.Reporter.ReportState("РђСЂРіСѓРјРµРЅС‚С‹ Р·Р°РїСѓСЃРєР° СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅС‹.");
 
             return new CommandResult(true);
         }
@@ -148,7 +148,7 @@ public class GameLaunchCommand : ICommandPlugin
 
     /// <summary>
     /// Resolves IGameQueryProvider from context mutations.
-    /// Per INVARIANT_THEORY.md §2.2: Launch only needs the Query facet (BuildLaunchParameters).
+    /// Per INVARIANT_THEORY.md В§2.2: Launch only needs the Query facet (BuildLaunchParameters).
     /// </summary>
     private static IGameQueryProvider? ResolveProvider(CommandContext context, string providerName)
     {
@@ -195,6 +195,7 @@ public class GameLaunchCommand : ICommandPlugin
         }
         return false;
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

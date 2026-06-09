@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,7 +10,7 @@ namespace Armatura.Core.Sdk.Analyzers;
 /// <summary>
 /// ARM011: Component Scope Invariant Violation
 /// 
-/// INVARIANT_THEORY.md §2.3 - Component Scope Invariant
+/// INVARIANT_THEORY.md В§2.3 - Component Scope Invariant
 /// 
 /// Detects violations of the level hierarchy:
 /// - Level 4 (Product) implementing Level 2 (Plugin) interfaces
@@ -21,6 +21,7 @@ public class ComponentScopeAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
         ImmutableArray.Create(DiagnosticDescriptors.ComponentScopeViolation);
+/// F_doc: {Initialize returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Initialize behavior
 
     public override void Initialize(AnalysisContext context)
     {

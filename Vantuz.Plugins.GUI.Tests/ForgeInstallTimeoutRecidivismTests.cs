@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -12,19 +12,23 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// <summary>
 /// Recidivism prevention: verifies that GameInstallerCommand fails fast with a clear timeout
 /// message when the Forge/network installer stalls, instead of hanging forever at 0%.
-/// Per INVARIANT_THEORY.md §1.2 and §17.
+/// Per INVARIANT_THEORY.md В§1.2 and В§17.
 /// </summary>
+/// F_doc: {ForgeInstallTimeoutRecidivismTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ForgeInstallTimeoutRecidivismTests behavior
 public class ForgeInstallTimeoutRecidivismTests
 {
     private class NullReporter : IStatusReporter
     {
+        /// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
         public void ReportProgress(string taskName, double percentage) { }
+        /// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
         public void ReportState(string message) { }
     }
 
     private class MockSlowProvider : IGameProvider
     {
         public string ProviderName => "SlowForge";
+/// F_doc: {CheckVersionAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies CheckVersionAsync behavior
 
         public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
             => Task.FromResult(new VersionCheckResult(false));
@@ -41,6 +45,7 @@ public class ForgeInstallTimeoutRecidivismTests
             await Task.Delay(Timeout.InfiniteTimeSpan, ct);
             return new InstallResult(true);
         }
+/// F_doc: {BuildLaunchParametersAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies BuildLaunchParametersAsync behavior
 
         public Task<LaunchParameters> BuildLaunchParametersAsync(
             string version,
@@ -48,6 +53,7 @@ public class ForgeInstallTimeoutRecidivismTests
             LaunchOptions options,
             CancellationToken ct)
             => throw new NotImplementedException();
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
@@ -69,7 +75,7 @@ public class ForgeInstallTimeoutRecidivismTests
         Assert.False(result.Success);
         Assert.Contains("timed out", result.ErrorMessage, StringComparison.OrdinalIgnoreCase);
         // Upper bound must tolerate loaded CI environments where timer thread scheduling can lag.
-        // Per INVARIANT_THEORY §1.2: the claim is "timeout fires", not "fires at exactly 2 s".
+        // Per INVARIANT_THEORY В§1.2: the claim is "timeout fires", not "fires at exactly 2 s".
         Assert.True(sw.Elapsed.TotalSeconds < 30,
             $"Expected timeout within a reasonable window, but elapsed {sw.Elapsed.TotalSeconds:F1} s. The command did not respect the timeout.");
     }

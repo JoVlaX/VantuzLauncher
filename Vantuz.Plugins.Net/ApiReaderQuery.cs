@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Net;
+﻿namespace Vantuz.Plugins.Net;
 
 using System;
 using System.Net.Http;
@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 using Vantuz.Core;
 
 /// <summary>
-/// ARM005 CQRS Query: Чтение данных из API.
-/// Per Armatura:76-78 - только чтение, нет side effects.
+/// ARM005 CQRS Query: Р§С‚РµРЅРёРµ РґР°РЅРЅС‹С… РёР· API.
+/// Per Armatura:76-78 - С‚РѕР»СЊРєРѕ С‡С‚РµРЅРёРµ, РЅРµС‚ side effects.
 /// F_doc: {HTTP request returns non-2xx or payloadKey missing from response}
 /// E_doc: Unit test with HttpMessageHandler mock returning 404
 /// </summary>
@@ -34,7 +34,7 @@ public class ApiReaderQuery : IQueryPlugin
 
         url = Interpolate(url, context);
 
-        // Анти-кэш
+        // РђРЅС‚Рё-РєСЌС€
         url = url.Contains('?')
             ? $"{url}&t={DateTime.UtcNow.Ticks}"
             : $"{url}?t={DateTime.UtcNow.Ticks}";
@@ -72,16 +72,16 @@ public class ApiReaderQuery : IQueryPlugin
         }
         catch (Exception ex)
         {
-            // Паттерн Fallback (Graceful Degradation)
+            // РџР°С‚С‚РµСЂРЅ Fallback (Graceful Degradation)
             if (fallback != null)
             {
-                context.Reporter.ReportState($"Сетевая ошибка API. Используем fallback для {payloadKey}.");
+                context.Reporter.ReportState($"РЎРµС‚РµРІР°СЏ РѕС€РёР±РєР° API. РСЃРїРѕР»СЊР·СѓРµРј fallback РґР»СЏ {payloadKey}.");
                 var fallbackResult = Interpolate(fallback, context);
                 return new ApiReaderResult(payloadKey, fallbackResult);
             }
             else
             {
-                throw new InvalidOperationException($"Ошибка ApiReader при запросе {url}: {ex.Message}", ex);
+                throw new InvalidOperationException($"РћС€РёР±РєР° ApiReader РїСЂРё Р·Р°РїСЂРѕСЃРµ {url}: {ex.Message}", ex);
             }
         }
     }
@@ -95,11 +95,13 @@ public class ApiReaderQuery : IQueryPlugin
         }
         return text;
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
 /// <summary>
-/// Результат выполнения ApiReaderQuery для передачи через мутации.
+/// Р РµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ ApiReaderQuery РґР»СЏ РїРµСЂРµРґР°С‡Рё С‡РµСЂРµР· РјСѓС‚Р°С†РёРё.
 /// </summary>
+/// F_doc: {ApiReaderResult returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ApiReaderResult behavior
 public record ApiReaderResult(string PayloadKey, string Data); 

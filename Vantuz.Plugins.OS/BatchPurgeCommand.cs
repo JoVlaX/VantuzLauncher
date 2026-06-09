@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,8 +9,8 @@ using Vantuz.Core;
 namespace Vantuz.Plugins.OS;
 
 /// <summary>
-/// ARM005 CQRS Command: Пакетная очистка файлов и пустых директорий.
-/// Per Armatura:76-78 - только запись/модификация состояния (удаление).
+/// ARM005 CQRS Command: РџР°РєРµС‚РЅР°СЏ РѕС‡РёСЃС‚РєР° С„Р°Р№Р»РѕРІ Рё РїСѓСЃС‚С‹С… РґРёСЂРµРєС‚РѕСЂРёР№.
+/// Per Armatura:76-78 - С‚РѕР»СЊРєРѕ Р·Р°РїРёСЃСЊ/РјРѕРґРёС„РёРєР°С†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ (СѓРґР°Р»РµРЅРёРµ).
 /// F_doc: {purge target contains non-empty directory or file not matching pattern}
 /// E_doc: Unit test with mock file system verifying purge scope
 /// </summary>
@@ -30,11 +30,11 @@ public class BatchPurgeCommand : ICommandPlugin
 
         string mcDir = context.Get<string>("mcDir") ?? throw new InvalidOperationException("mcDir is missing in context");
 
-        context.Reporter.ReportState("Сборка мусора и очистка...");
+        context.Reporter.ReportState("РЎР±РѕСЂРєР° РјСѓСЃРѕСЂР° Рё РѕС‡РёСЃС‚РєР°...");
 
         await Task.Run(() =>
         {
-            // 1. Удаление файлов
+            // 1. РЈРґР°Р»РµРЅРёРµ С„Р°Р№Р»РѕРІ
             if (deleteQueue != null)
             {
                 foreach (var filePath in deleteQueue)
@@ -45,12 +45,12 @@ public class BatchPurgeCommand : ICommandPlugin
                     }
                     catch (IOException)
                     {
-                        // Игнорируем заблокированные файлы
+                        // РРіРЅРѕСЂРёСЂСѓРµРј Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅС‹Рµ С„Р°Р№Р»С‹
                     }
                 }
             }
 
-            // 2. Удаление пустых папок (Bottom-Up)
+            // 2. РЈРґР°Р»РµРЅРёРµ РїСѓСЃС‚С‹С… РїР°РїРѕРє (Bottom-Up)
             if (purgeZones != null)
             {
                 foreach (var zone in purgeZones)
@@ -65,7 +65,7 @@ public class BatchPurgeCommand : ICommandPlugin
                     }
                     catch (IOException)
                     {
-                        // Игнорируем ошибки доступа к папкам
+                        // РРіРЅРѕСЂРёСЂСѓРµРј РѕС€РёР±РєРё РґРѕСЃС‚СѓРїР° Рє РїР°РїРєР°Рј
                     }
                 }
             }
@@ -87,6 +87,7 @@ public class BatchPurgeCommand : ICommandPlugin
             }
         }
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Vantuz.Core;
@@ -8,11 +8,12 @@ namespace Vantuz.Plugins.Test;
 /// <summary>
 /// Mock game launch plugin for headless/GUI recidivism testing.
 /// Sets gameCommand/gameArgs/gameWorkDir for downstream OS.ExecuteCommand without real game logic.
-/// Per INVARIANT_THEORY.md §1.2 Measurability: deterministic, no external processes.
+/// Per INVARIANT_THEORY.md В§1.2 Measurability: deterministic, no external processes.
 /// </summary>
 public class MockGameLaunchCommand : ICommandPlugin
 {
     public string Name => "Test.MockGameLaunch";
+/// F_doc: {ExecuteAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ExecuteAsync behavior
 
     public Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
@@ -35,6 +36,7 @@ public class MockGameLaunchCommand : ICommandPlugin
         context.Reporter.ReportState($"[MOCK] Game launch simulated: {command} {arguments}");
         return Task.FromResult(new CommandResult(true));
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

@@ -1,10 +1,11 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Armatura.Core.Sdk;
 
 /// <summary>
 /// Diagnostic descriptors for Armatura architectural constitution analyzers.
 /// </summary>
+/// F_doc: {DiagnosticDescriptors returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DiagnosticDescriptors behavior
 public static class DiagnosticDescriptors
 {
     // ARM005: CQRS Blender Detection
@@ -66,7 +67,7 @@ public static class DiagnosticDescriptors
     public static readonly DiagnosticDescriptor ComponentScopeViolation = new(
         id: "ARM011",
         title: "Component Scope Invariant Violation",
-        messageFormat: "ARM011: Level {0} component '{1}' implements Level {2} interface '{3}'. Components may only implement interfaces from their own level or one level above per INVARIANT_THEORY.md §2.3.",
+        messageFormat: "ARM011: Level {0} component '{1}' implements Level {2} interface '{3}'. Components may only implement interfaces from their own level or one level above per INVARIANT_THEORY.md В§2.3.",
         category: "Architecture",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,

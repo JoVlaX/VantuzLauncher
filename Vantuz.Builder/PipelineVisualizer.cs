@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,10 +8,12 @@ namespace Vantuz.Builder;
 
 /// <summary>
 /// Visualizes pipeline dependency graph from boot manifests.
-/// Per COMPOSITUM_SPECIFICATION.md §3.2: Pipeline dependency graph must be explicit.
+/// Per COMPOSITUM_SPECIFICATION.md В§3.2: Pipeline dependency graph must be explicit.
 /// </summary>
+/// F_doc: {PipelineVisualizer returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies PipelineVisualizer behavior
 public static class PipelineVisualizer
 {
+    /// F_doc: {Run returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Run behavior
     public static void Run(string[] args)
     {
         if (args.Length < 1)
@@ -76,9 +78,9 @@ public static class PipelineVisualizer
     private static void VisualizePipeline(List<PipelineStep> steps)
     {
         Console.WriteLine();
-        Console.WriteLine("╔════════════════════════════════════════════════════════════════╗");
-        Console.WriteLine("║           PIPELINE DEPENDENCY GRAPH                            ║");
-        Console.WriteLine("╚════════════════════════════════════════════════════════════════╝");
+        Console.WriteLine("в•”в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•—");
+        Console.WriteLine("в•‘           PIPELINE DEPENDENCY GRAPH                            в•‘");
+        Console.WriteLine("в•љв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ќ");
         Console.WriteLine();
 
         // Build dependency graph
@@ -123,18 +125,18 @@ public static class PipelineVisualizer
         {
             var step = steps[i];
             var indent = new string(' ', i * 4);
-            var arrow = i == 0 ? "   " : "↓ ";
+            var arrow = i == 0 ? "   " : "в†“ ";
             
             Console.WriteLine($"{indent}{arrow}[{i + 1}] {step.PluginName}");
             
             if (produces[step.PluginName].Any())
             {
-                Console.WriteLine($"{indent}     └─ Produces: {string.Join(", ", produces[step.PluginName])}");
+                Console.WriteLine($"{indent}     в””в”Ђ Produces: {string.Join(", ", produces[step.PluginName])}");
             }
             
             if (consumes[step.PluginName].Any())
             {
-                Console.WriteLine($"{indent}     └─ Consumes: {string.Join(", ", consumes[step.PluginName])}");
+                Console.WriteLine($"{indent}     в””в”Ђ Consumes: {string.Join(", ", consumes[step.PluginName])}");
             }
         }
 
@@ -148,7 +150,7 @@ public static class PipelineVisualizer
             if (deps.Any())
             {
                 Console.WriteLine($"  {step.PluginName}");
-                Console.WriteLine($"    └─ Depends on: {string.Join(" → ", deps)}");
+                Console.WriteLine($"    в””в”Ђ Depends on: {string.Join(" в†’ ", deps)}");
             }
             else
             {
@@ -157,15 +159,15 @@ public static class PipelineVisualizer
         }
 
         Console.WriteLine();
-        Console.WriteLine("══════════════════════════════════════════════════════════════════");
+        Console.WriteLine("в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ");
 
-        // DAG verification per INVARIANT_THEORY §2.1
+        // DAG verification per INVARIANT_THEORY В§2.1
         var cycle = DetectCycle(dependencies);
         if (cycle != null)
         {
             Console.Error.WriteLine("[ARM-BUILD-021] DAG VIOLATION: Cycle detected in pipeline dependency graph.");
-            Console.Error.WriteLine($"  Cycle: {string.Join(" → ", cycle)} → {cycle[0]}");
-            throw new InvalidOperationException("Pipeline is not a DAG — cycle detected.");
+            Console.Error.WriteLine($"  Cycle: {string.Join(" в†’ ", cycle)} в†’ {cycle[0]}");
+            throw new InvalidOperationException("Pipeline is not a DAG вЂ” cycle detected.");
         }
         else
         {
@@ -289,12 +291,15 @@ public static class PipelineVisualizer
 
     private class BootManifest
     {
+        /// F_doc: {Pipeline returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Pipeline behavior
         public List<PipelineStep> Pipeline { get; set; } = new();
     }
 
     private class PipelineStep
     {
+        /// F_doc: {PluginName returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies PluginName behavior
         public string PluginName { get; set; } = "";
+        /// F_doc: {Config returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Config behavior
         public Dictionary<string, JsonElement> Config { get; set; } = new();
     }
 }

@@ -1,4 +1,4 @@
-using System; 
+﻿using System; 
 using System.IO; 
 using System.IO.Compression; 
 using System.Net.Http; 
@@ -9,8 +9,8 @@ using Vantuz.Core;
 namespace Vantuz.Plugins.Net 
 { 
     /// <summary>
-    /// ARM005 CQRS Command: Скачивание и подготовка обновлений лаунчера.
-    /// Per Armatura:76-78 - только запись/модификация состояния.
+    /// ARM005 CQRS Command: РЎРєР°С‡РёРІР°РЅРёРµ Рё РїРѕРґРіРѕС‚РѕРІРєР° РѕР±РЅРѕРІР»РµРЅРёР№ Р»Р°СѓРЅС‡РµСЂР°.
+    /// Per Armatura:76-78 - С‚РѕР»СЊРєРѕ Р·Р°РїРёСЃСЊ/РјРѕРґРёС„РёРєР°С†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ.
     /// F_doc: {update archive hash mismatch or version not newer than current}
     /// E_doc: Unit test with mock HttpClient returning mismatched hash
     /// </summary>
@@ -32,7 +32,7 @@ namespace Vantuz.Plugins.Net
 
             if (!string.IsNullOrEmpty(currentVer) && currentVer == targetVer)
             {
-                context.Reporter.ReportState("Установлена актуальная версия.");
+                context.Reporter.ReportState("РЈСЃС‚Р°РЅРѕРІР»РµРЅР° Р°РєС‚СѓР°Р»СЊРЅР°СЏ РІРµСЂСЃРёСЏ.");
                 return new CommandResult(true);
             } 
 
@@ -46,9 +46,9 @@ namespace Vantuz.Plugins.Net
  
             try 
             { 
-                context.Reporter.ReportState("Скачивание обновления лаунчера..."); 
+                context.Reporter.ReportState("РЎРєР°С‡РёРІР°РЅРёРµ РѕР±РЅРѕРІР»РµРЅРёСЏ Р»Р°СѓРЅС‡РµСЂР°..."); 
                  
-                // 1. Скачивание (Staging) 
+                // 1. РЎРєР°С‡РёРІР°РЅРёРµ (Staging) 
                 using (var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, context.CancellationToken)) 
                 { 
                     response.EnsureSuccessStatusCode(); 
@@ -56,35 +56,35 @@ namespace Vantuz.Plugins.Net
                     await response.Content.CopyToAsync(fs, context.CancellationToken); 
                 } 
  
-                context.Reporter.ReportState("Распаковка обновления..."); 
+                context.Reporter.ReportState("Р Р°СЃРїР°РєРѕРІРєР° РѕР±РЅРѕРІР»РµРЅРёСЏ..."); 
                  
-                // 2. Очистка старой песочницы и распаковка 
+                // 2. РћС‡РёСЃС‚РєР° СЃС‚Р°СЂРѕР№ РїРµСЃРѕС‡РЅРёС†С‹ Рё СЂР°СЃРїР°РєРѕРІРєР° 
                 if (Directory.Exists(pendingDir)) Directory.Delete(pendingDir, true); 
                 Directory.CreateDirectory(pendingDir); 
                 ZipFile.ExtractToDirectory(tempZip, pendingDir, overwriteFiles: true); 
                 File.Delete(tempZip); 
  
-                // 3. Поиск скрипта обновления в распакованном архиве 
+                // 3. РџРѕРёСЃРє СЃРєСЂРёРїС‚Р° РѕР±РЅРѕРІР»РµРЅРёСЏ РІ СЂР°СЃРїР°РєРѕРІР°РЅРЅРѕРј Р°СЂС…РёРІРµ 
                 string scriptName = stepConfig.TryGetProperty("scriptName", out var sn) ? sn.GetString()! : "update.bat"; 
                 string scriptPath = Path.Combine(pendingDir, scriptName); 
                 
                 if (File.Exists(scriptPath)) 
                 { 
-                    // 4. Сигнализируем Ядру о необходимости перезапуска 
+                    // 4. РЎРёРіРЅР°Р»РёР·РёСЂСѓРµРј РЇРґСЂСѓ Рѕ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё РїРµСЂРµР·Р°РїСѓСЃРєР° 
                     context.Set("UpdateReady", true); 
                     context.Set("UpdateScript", scriptPath); 
-                    context.Reporter.ReportState("Обновление готово. Инициализация перезапуска..."); 
+                    context.Reporter.ReportState("РћР±РЅРѕРІР»РµРЅРёРµ РіРѕС‚РѕРІРѕ. РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРµСЂРµР·Р°РїСѓСЃРєР°..."); 
                 } 
                 else
                 {
-                    context.Reporter.ReportState("Обновление распаковано, но скрипт не найден.");
+                    context.Reporter.ReportState("РћР±РЅРѕРІР»РµРЅРёРµ СЂР°СЃРїР°РєРѕРІР°РЅРѕ, РЅРѕ СЃРєСЂРёРїС‚ РЅРµ РЅР°Р№РґРµРЅ.");
                 }
 
                 return new CommandResult(true);
             }
             catch (Exception ex)
             {
-                return new CommandResult(false, $"Сбой подготовки обновления: {ex.Message}");
+                return new CommandResult(false, $"РЎР±РѕР№ РїРѕРґРіРѕС‚РѕРІРєРё РѕР±РЅРѕРІР»РµРЅРёСЏ: {ex.Message}");
             }
         } 
  
@@ -98,6 +98,7 @@ namespace Vantuz.Plugins.Net
             } 
             return text; 
         } 
+ /// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
  
         public ValueTask DisposeAsync() 
         { 

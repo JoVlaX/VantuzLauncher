@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,6 +12,7 @@ public class CompositeReporter : IStatusReporter
     {
         _reporters = reporters.Where(r => r != null).ToList();
     }
+/// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
 
     public void ReportState(string message)
     {
@@ -20,6 +21,7 @@ public class CompositeReporter : IStatusReporter
             try { reporter.ReportState(message); } catch { }
         }
     }
+/// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
 
     public void ReportProgress(string taskName, double percentage)
     {

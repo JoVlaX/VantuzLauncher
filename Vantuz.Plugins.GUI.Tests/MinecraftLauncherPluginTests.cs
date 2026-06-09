@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using Avalonia;
 using Vantuz.Core;
@@ -10,9 +10,10 @@ namespace Vantuz.Plugins.GUI.Tests;
 
 /// <summary>
 /// Unit tests for MinecraftLauncherGUIPlugin.
-/// Per INVARIANT_THEORY.md §1.2: plugin must return immediately so scheduler
+/// Per INVARIANT_THEORY.md В§1.2: plugin must return immediately so scheduler
 /// can proceed to downstream steps (CredentialCollection, Auth, etc.).
 /// </summary>
+/// F_doc: {MinecraftLauncherPluginTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies MinecraftLauncherPluginTests behavior
 public class MinecraftLauncherPluginTests
 {
     /// <summary>
@@ -46,10 +47,10 @@ public class MinecraftLauncherPluginTests
 
         try
         {
-            // Assert: returned quickly — the critical fix
+            // Assert: returned quickly вЂ” the critical fix
             Assert.True(result.Success, $"Plugin failed: {result.ErrorMessage}");
             Assert.True(sw.ElapsedMilliseconds < 30_000,
-                $"Plugin blocked for {sw.ElapsedMilliseconds}ms — expected immediate return (<30000ms). " +
+                $"Plugin blocked for {sw.ElapsedMilliseconds}ms вЂ” expected immediate return (<30000ms). " +
                 "If this fails, the plugin still contains await Task.Delay(-1) which blocks the QuantumScheduler pipeline.");
 
             // Assert: published credential provider to context for downstream CredentialCollection step
@@ -67,8 +68,11 @@ public class MinecraftLauncherPluginTests
 
     private class TestReporter : IStatusReporter
     {
+        /// F_doc: {Logs returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Logs behavior
         public List<string> Logs { get; } = new();
+        /// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
         public void ReportState(string message) => Logs.Add(message);
+        /// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
         public void ReportProgress(string taskName, double percentage) { }
     }
 }

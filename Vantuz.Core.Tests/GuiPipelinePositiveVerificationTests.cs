@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using Vantuz.Host;
 using Xunit;
@@ -7,10 +7,11 @@ namespace Vantuz.Core.Tests;
 
 /// <summary>
 /// GUI pipeline positive verification tests.
-/// Per INVARIANT_THEORY.md §1.2: a claim must be falsifiable by a positive observation.
+/// Per INVARIANT_THEORY.md В§1.2: a claim must be falsifiable by a positive observation.
 /// These tests assert that the GUI manifest (boot.json) pipeline can be fully resolved
 /// to loaded plugin classes, closing the gap between "build succeeds" and "GUI pipeline works".
 /// </summary>
+/// F_doc: {GuiPipelinePositiveVerificationTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiPipelinePositiveVerificationTests behavior
 public class GuiPipelinePositiveVerificationTests
 {
     /// <summary>
@@ -229,12 +230,15 @@ public class GuiPipelinePositiveVerificationTests
 
     private class ListReporter : IStatusReporter
     {
+        /// F_doc: {Logs returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Logs behavior
         public List<string> Logs { get; } = new();
+/// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
 
         public void ReportState(string message)
         {
             Logs.Add(message);
         }
+/// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
 
         public void ReportProgress(string taskName, double percentage)
         {

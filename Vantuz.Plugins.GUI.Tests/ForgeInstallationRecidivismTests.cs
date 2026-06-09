@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using Xunit;
@@ -8,12 +8,13 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// <summary>
 /// Recidivism prevention test: verifies the Forge installer path is exercised
 /// in headless mode so we never again report "working" when Forge versions silently fail.
-/// Per INVARIANT_THEORY.md §1.2 (Measurability) and §17 (Determinism):
+/// Per INVARIANT_THEORY.md В§1.2 (Measurability) and В§17 (Determinism):
 /// this test runs fully headless with boot.test.json, no GUI window, no network calls.
 /// </summary>
 public class ForgeInstallationRecidivismTests : IDisposable
 {
     private readonly List<Process> _processes = new();
+/// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
 
     public void Dispose()
     {
@@ -45,6 +46,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
     }
 
     [StaFact]
+    /// F_doc: {HeadlessForgePipeline_ProducesHumanReadableErrorOrSucceeds returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies HeadlessForgePipeline_ProducesHumanReadableErrorOrSucceeds behavior
     public void HeadlessForgePipeline_ProducesHumanReadableErrorOrSucceeds()
     {
         string exe = ResolveExePath();
@@ -106,7 +108,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 JsonSerializer.Serialize(modifiedManifest, new JsonSerializerOptions { WriteIndented = true }));
             File.WriteAllText(Path.Combine(tempDir, ".portable"), "");
 
-            // 3. Launch headless process — no GUI window, deterministic per INVARIANT_THEORY.md
+            // 3. Launch headless process вЂ” no GUI window, deterministic per INVARIANT_THEORY.md
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -146,8 +148,8 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 $"Combined output:\n{combined}");
 
             Assert.True(
-                combined.Contains("Forge установлен:") ||
-                combined.Contains("пропуск установки") ||
+                combined.Contains("Forge СѓСЃС‚Р°РЅРѕРІР»РµРЅ:") ||
+                combined.Contains("РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё") ||
                 combined.Contains("[DRY RUN] Installation of"),
                 "Neither Forge installation nor skip/dry-run message found. " +
                 "GameInstallerCommand may have failed before reaching the provider.\n" +
@@ -159,7 +161,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 Assert.DoesNotContain("KeyNotFoundException", combined);
                 Assert.DoesNotContain("ExitCode: 1", combined);
                 Assert.True(
-                    combined.Contains("Stderr:") || combined.Contains("Ошибка установки"),
+                    combined.Contains("Stderr:") || combined.Contains("РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІРєРё"),
                     "Crash log contains a bare ExitCode without stderr context.\n" +
                     $"Combined output:\n{combined}");
             }

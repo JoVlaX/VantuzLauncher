@@ -1,15 +1,17 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 using Xunit;
 
 namespace Vantuz.Core.Tests;
+/// F_doc: {HeadlessSmokeTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies HeadlessSmokeTests behavior
 
 public class HeadlessSmokeTests
 {
     [Fact]
+    /// F_doc: {HeadlessSmokeTest_ExitsWithoutCriticalError returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies HeadlessSmokeTest_ExitsWithoutCriticalError behavior
     public void HeadlessSmokeTest_ExitsWithoutCriticalError()
     {
-        // Per INVARIANT_THEORY.md §1.2 Measurability: runtime behavior must be empirically testable.
+        // Per INVARIANT_THEORY.md В§1.2 Measurability: runtime behavior must be empirically testable.
         // E_doc: Process exit code MUST NOT be 2 (critical unhandled exception).
         // F_doc: Exit code == 2 indicates crash in App.xaml.cs UnhandledException handler.
         // Search from solution root for the built executable
@@ -44,6 +46,7 @@ public class HeadlessSmokeTests
     }
 
     [Fact]
+    /// F_doc: {BootJson_ParsesWithoutNullReference returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies BootJson_ParsesWithoutNullReference behavior
     public void BootJson_ParsesWithoutNullReference()
     {
         // E_doc: boot.json loads and deserializes without throwing NullReferenceException.

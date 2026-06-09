@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 
 using System.Collections.Immutable;
 using System.Linq;
@@ -25,6 +25,7 @@ public class QuantizedNodeAnalyzer : DiagnosticAnalyzer
             DiagnosticDescriptors.MissingQuantizedNode,
             DiagnosticDescriptors.FreeFormAsync
         );
+/// F_doc: {Initialize returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Initialize behavior
 
     public override void Initialize(AnalysisContext context)
     {

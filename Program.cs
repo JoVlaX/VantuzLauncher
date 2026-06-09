@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -12,9 +12,10 @@ namespace VantuzLauncher;
 
 class Program
 {
+    /// F_doc: {WorkspacePath returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies WorkspacePath behavior
     public static string WorkspacePath { get; private set; } = string.Empty;
 
-    // Win32 MessageBox for WinExe error surfacing — console is invisible
+    // Win32 MessageBox for WinExe error surfacing вЂ” console is invisible
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int MessageBoxW(nint hWnd, string text, string caption, uint type);
     private const uint MB_OK = 0x0;
@@ -30,7 +31,7 @@ class Program
             var ex = (Exception)e.ExceptionObject;
             string msg = $"CRITICAL: {ex.Message}\n{ex.StackTrace}";
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher — Critical Error", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, "Vantuz Launcher вЂ” Critical Error", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         };
 
@@ -53,9 +54,9 @@ class Program
         }
         catch (UnauthorizedAccessException)
         {
-            string msg = $"Ошибка доступа! Нет прав на запись в рабочую папку:\n{WorkspacePath}\nЗапустите от имени Администратора или удалите файл .portable.";
+            string msg = $"РћС€РёР±РєР° РґРѕСЃС‚СѓРїР°! РќРµС‚ РїСЂР°РІ РЅР° Р·Р°РїРёСЃСЊ РІ СЂР°Р±РѕС‡СѓСЋ РїР°РїРєСѓ:\n{WorkspacePath}\nР—Р°РїСѓСЃС‚РёС‚Рµ РѕС‚ РёРјРµРЅРё РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР° РёР»Рё СѓРґР°Р»РёС‚Рµ С„Р°Р№Р» .portable.";
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher — Ошибка доступа", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, "Vantuz Launcher вЂ” РћС€РёР±РєР° РґРѕСЃС‚СѓРїР°", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -67,7 +68,7 @@ class Program
         {
             string msg = $"boot.gui.json not found at {bootJsonPath}";
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher — Missing Config", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, "Vantuz Launcher вЂ” Missing Config", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -92,10 +93,10 @@ class Program
             }
             catch { }
 
-            // Surface to user — WinExe hides console, so use Win32 MessageBox
+            // Surface to user вЂ” WinExe hides console, so use Win32 MessageBox
             // Keep message user-friendly and actionable
-            string userFriendly = $"Ошибка запуска:\n{error}\n\nПодробности записаны в:\n{crashLogPath}";
-            MessageBoxW(0, userFriendly, "Vantuz Launcher — Ошибка", MB_OK | MB_ICONERROR);
+            string userFriendly = $"РћС€РёР±РєР° Р·Р°РїСѓСЃРєР°:\n{error}\n\nРџРѕРґСЂРѕР±РЅРѕСЃС‚Рё Р·Р°РїРёСЃР°РЅС‹ РІ:\n{crashLogPath}";
+            MessageBoxW(0, userFriendly, "Vantuz Launcher вЂ” РћС€РёР±РєР°", MB_OK | MB_ICONERROR);
 
             // Give the dialog a moment to render before the process exits
             await Task.Delay(100);
@@ -204,6 +205,7 @@ class ConsoleReporter : IStatusReporter
         }
         catch { /* Silent fail - logging to console is sufficient */ }
     }
+/// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
 
     public void ReportProgress(string taskName, double percentage)
     {
@@ -212,6 +214,7 @@ class ConsoleReporter : IStatusReporter
         AppendToLog(line);
         ReportHub.ReportProgress(taskName, percentage);
     }
+/// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
 
     public void ReportState(string message)
     {

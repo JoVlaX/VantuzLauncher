@@ -1,13 +1,15 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using Vantuz.Host;
 using Xunit;
 
 namespace Vantuz.Plugins.GUI.Tests;
+/// F_doc: {ManifestSerializationTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ManifestSerializationTests behavior
 
 public class ManifestSerializationTests
 {
     [Fact]
+    /// F_doc: {ModifiedManifest_ContainsTwoDownloadCommands returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ModifiedManifest_ContainsTwoDownloadCommands behavior
     public void ModifiedManifest_ContainsTwoDownloadCommands()
     {
         string bootGuiPath = Path.Combine(

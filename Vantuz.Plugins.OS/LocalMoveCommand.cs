@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
@@ -8,8 +8,8 @@ using Vantuz.Core;
 namespace Vantuz.Plugins.OS;
 
 /// <summary>
-/// ARM005 CQRS Command: Локальное перемещение файлов (дедупликация).
-/// Per Armatura:76-78 - только запись/модификация состояния.
+/// ARM005 CQRS Command: Р›РѕРєР°Р»СЊРЅРѕРµ РїРµСЂРµРјРµС‰РµРЅРёРµ С„Р°Р№Р»РѕРІ (РґРµРґСѓРїР»РёРєР°С†РёСЏ).
+/// Per Armatura:76-78 - С‚РѕР»СЊРєРѕ Р·Р°РїРёСЃСЊ/РјРѕРґРёС„РёРєР°С†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ.
 /// F_doc: {source file missing or destination already exists with different hash}
 /// E_doc: Unit test verifying atomic move and rollback on failure
 /// </summary>
@@ -25,7 +25,7 @@ public class LocalMoveCommand : ICommandPlugin
             return new CommandResult(true);
         }
 
-        context.Reporter.ReportState($"Локальное перемещение файлов ({localMoveQueue.Count})...");
+        context.Reporter.ReportState($"Р›РѕРєР°Р»СЊРЅРѕРµ РїРµСЂРµРјРµС‰РµРЅРёРµ С„Р°Р№Р»РѕРІ ({localMoveQueue.Count})...");
 
         int successCount = await Task.Run(() =>
         {
@@ -36,7 +36,7 @@ public class LocalMoveCommand : ICommandPlugin
                 {
                     if (File.Exists(op.SourcePath))
                     {
-                        // PathHelper.GetSafePath в DeltaAnalyzer уже гарантирует существование папки назначения
+                        // PathHelper.GetSafePath РІ DeltaAnalyzer СѓР¶Рµ РіР°СЂР°РЅС‚РёСЂСѓРµС‚ СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёРµ РїР°РїРєРё РЅР°Р·РЅР°С‡РµРЅРёСЏ
                         if (File.Exists(op.DestPath)) File.Delete(op.DestPath);
                         File.Move(op.SourcePath, op.DestPath);
                         count++;
@@ -44,8 +44,8 @@ public class LocalMoveCommand : ICommandPlugin
                 }
                 catch (Exception ex)
                 {
-                    context.Reporter.ReportState($"[WARN] Не удалось переместить {Path.GetFileName(op.SourcePath)}: {ex.Message}");
-                    // Не прерываем весь процесс из-за одной ошибки перемещения, файл просто попадет в очередь загрузки в следующий раз
+                    context.Reporter.ReportState($"[WARN] РќРµ СѓРґР°Р»РѕСЃСЊ РїРµСЂРµРјРµСЃС‚РёС‚СЊ {Path.GetFileName(op.SourcePath)}: {ex.Message}");
+                    // РќРµ РїСЂРµСЂС‹РІР°РµРј РІРµСЃСЊ РїСЂРѕС†РµСЃСЃ РёР·-Р·Р° РѕРґРЅРѕР№ РѕС€РёР±РєРё РїРµСЂРµРјРµС‰РµРЅРёСЏ, С„Р°Р№Р» РїСЂРѕСЃС‚Рѕ РїРѕРїР°РґРµС‚ РІ РѕС‡РµСЂРµРґСЊ Р·Р°РіСЂСѓР·РєРё РІ СЃР»РµРґСѓСЋС‰РёР№ СЂР°Р·
                 }
             }
             return count;
@@ -54,6 +54,7 @@ public class LocalMoveCommand : ICommandPlugin
         context.Set("LocalMoveSuccessCount", successCount);
         return new CommandResult(true);
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

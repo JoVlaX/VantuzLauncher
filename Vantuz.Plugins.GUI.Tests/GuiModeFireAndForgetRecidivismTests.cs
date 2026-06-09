@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,12 +10,13 @@ namespace Vantuz.Plugins.GUI.Tests;
 
 /// <summary>
 /// Recidivism prevention test: verifies that GUI-mode pipeline with OS.ExecuteCommand
-/// (waitForExit=false) does NOT hang the launcher. Per INVARIANT_THEORY.md §1.2 and §17.
+/// (waitForExit=false) does NOT hang the launcher. Per INVARIANT_THEORY.md В§1.2 and В§17.
 /// </summary>
 [Collection("GUI Sequential")]
 public class GuiModeFireAndForgetRecidivismTests : IDisposable
 {
     private readonly List<Process> _processes = new();
+/// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
 
     public void Dispose()
     {
@@ -47,6 +48,7 @@ public class GuiModeFireAndForgetRecidivismTests : IDisposable
     }
 
     [StaFact]
+    /// F_doc: {GuiMode_FireAndForget_ExecuteCommand_PipelineDoesNotHang returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiMode_FireAndForget_ExecuteCommand_PipelineDoesNotHang behavior
     public void GuiMode_FireAndForget_ExecuteCommand_PipelineDoesNotHang()
     {
         string exe = ResolveExePath();

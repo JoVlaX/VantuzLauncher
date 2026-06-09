@@ -1,4 +1,4 @@
-using System; 
+﻿using System; 
 using System.Collections.Generic; 
 using System.IO; 
 using System.Linq; 
@@ -10,7 +10,7 @@ namespace Vantuz.Host
 { 
     public class PluginLoader : IDisposable
     { 
-        // УДЕРЖАНИЕ (Rooting) - защита от сборщика мусора 
+        // РЈР”Р•Р Р–РђРќРР• (Rooting) - Р·Р°С‰РёС‚Р° РѕС‚ СЃР±РѕСЂС‰РёРєР° РјСѓСЃРѕСЂР° 
         private readonly List<AssemblyLoadContext> _activeContexts = new(); 
         private readonly List<string> _shadowDirs = new();
         private readonly string[] _sharedAssemblies; 
@@ -22,9 +22,10 @@ namespace Vantuz.Host
 
 
         /// <summary>
-        /// Загружает QuantizedNode из директории плагинов.
-        /// Согласно Armatura:98 - новый паттерн вместо free-form async.
+        /// Р—Р°РіСЂСѓР¶Р°РµС‚ QuantizedNode РёР· РґРёСЂРµРєС‚РѕСЂРёРё РїР»Р°РіРёРЅРѕРІ.
+        /// РЎРѕРіР»Р°СЃРЅРѕ Armatura:98 - РЅРѕРІС‹Р№ РїР°С‚С‚РµСЂРЅ РІРјРµСЃС‚Рѕ free-form async.
         /// </summary>
+        /// F_doc: {LoadQuantizedNodesFromDirectory returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies LoadQuantizedNodesFromDirectory behavior
         public IEnumerable<QuantizedNode> LoadQuantizedNodesFromDirectory(string pluginsPath, List<string> allowedDlls)
         {
             var nodes = new List<QuantizedNode>();
@@ -52,10 +53,10 @@ namespace Vantuz.Host
                 catch (System.Reflection.ReflectionTypeLoadException ex)
                 {
                     string loaderErrors = string.Join("\n", (ex.LoaderExceptions ?? Array.Empty<Exception>()).Where(e => e != null).Select(e => e!.Message));
-                    throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex);
+                    throw new Exception($"[Р”РРђР“РќРћРЎРўРРљРђ] РћС€РёР±РєР° ReflectionTypeLoadException РІ Р±РёР±Р»РёРѕС‚РµРєРµ {dllName}:\n{loaderErrors}", ex);
                 }
 
-                // Ищем классы, наследующиеся от QuantizedNode
+                // РС‰РµРј РєР»Р°СЃСЃС‹, РЅР°СЃР»РµРґСѓСЋС‰РёРµСЃСЏ РѕС‚ QuantizedNode
                 var nodeTypes = types.Where(t =>
                     typeof(Vantuz.Core.QuantizedNode).IsAssignableFrom(t) &&
                     !t.IsInterface &&
@@ -73,10 +74,11 @@ namespace Vantuz.Host
         }
 
         /// <summary>
-        /// Загружает CQRS плагины (ICommandPlugin, IQueryPlugin) из директории плагинов.
-        /// Оборачивает их в QuantizedNode адаптеры.
-        /// Согласно Armatura:98 - возвращаем QuantizedNode для квантованного выполнения.
+        /// Р—Р°РіСЂСѓР¶Р°РµС‚ CQRS РїР»Р°РіРёРЅС‹ (ICommandPlugin, IQueryPlugin) РёР· РґРёСЂРµРєС‚РѕСЂРёРё РїР»Р°РіРёРЅРѕРІ.
+        /// РћР±РѕСЂР°С‡РёРІР°РµС‚ РёС… РІ QuantizedNode Р°РґР°РїС‚РµСЂС‹.
+        /// РЎРѕРіР»Р°СЃРЅРѕ Armatura:98 - РІРѕР·РІСЂР°С‰Р°РµРј QuantizedNode РґР»СЏ РєРІР°РЅС‚РѕРІР°РЅРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ.
         /// </summary>
+        /// F_doc: {LoadCqrsPluginsFromDirectory returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies LoadCqrsPluginsFromDirectory behavior
         public IEnumerable<QuantizedNode> LoadCqrsPluginsFromDirectory(string pluginsPath, List<string> allowedDlls)
         {
             var nodes = new List<QuantizedNode>();
@@ -86,7 +88,7 @@ namespace Vantuz.Host
 
             foreach (var dllName in allowedDlls)
             {
-                // Автоматически добавляем .dll если не указано расширение
+                // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РґРѕР±Р°РІР»СЏРµРј .dll РµСЃР»Рё РЅРµ СѓРєР°Р·Р°РЅРѕ СЂР°СЃС€РёСЂРµРЅРёРµ
                 string actualDllName = dllName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)
                     ? dllName
                     : dllName + ".dll";
@@ -108,10 +110,10 @@ namespace Vantuz.Host
                 catch (System.Reflection.ReflectionTypeLoadException ex)
                 {
                     string loaderErrors = string.Join("\n", (ex.LoaderExceptions ?? Array.Empty<Exception>()).Where(e => e != null).Select(e => e!.Message));
-                    throw new Exception($"[ДИАГНОСТИКА] Ошибка ReflectionTypeLoadException в библиотеке {dllName}:\n{loaderErrors}", ex);
+                    throw new Exception($"[Р”РРђР“РќРћРЎРўРРљРђ] РћС€РёР±РєР° ReflectionTypeLoadException РІ Р±РёР±Р»РёРѕС‚РµРєРµ {dllName}:\n{loaderErrors}", ex);
                 }
 
-                // Ищем ICommandPlugin implementations
+                // РС‰РµРј ICommandPlugin implementations
                 var commandTypes = types.Where(t =>
                     typeof(Vantuz.Core.ICommandPlugin).IsAssignableFrom(t) &&
                     !t.IsInterface &&
@@ -125,7 +127,7 @@ namespace Vantuz.Host
                     }
                 }
 
-                // Ищем IQueryPlugin implementations
+                // РС‰РµРј IQueryPlugin implementations
                 var queryTypes = types.Where(t =>
                     typeof(Vantuz.Core.IQueryPlugin).IsAssignableFrom(t) &&
                     !t.IsInterface &&
@@ -162,7 +164,7 @@ namespace Vantuz.Host
  
             string baseShadowDir = Path.Combine(Path.GetTempPath(), "VantuzLauncher_Shadow_" + hashStr); 
  
-            // Сборка мусора: чистим зависшие сессии ЭТОГО лаунчера 
+            // РЎР±РѕСЂРєР° РјСѓСЃРѕСЂР°: С‡РёСЃС‚РёРј Р·Р°РІРёСЃС€РёРµ СЃРµСЃСЃРёРё Р­РўРћР“Рћ Р»Р°СѓРЅС‡РµСЂР° 
             if (Directory.Exists(baseShadowDir)) { 
                 foreach (var dir in Directory.GetDirectories(baseShadowDir)) { 
                     try { Directory.Delete(dir, true); } catch (Exception ex) { Console.WriteLine($"[PluginLoader] WARN: failed to delete shadow dir {dir}: {ex.Message}"); } 
@@ -173,15 +175,15 @@ namespace Vantuz.Host
             Directory.CreateDirectory(shadowDir);
             _shadowDirs.Add(shadowDir); 
             
-            // Рекурсивное копирование всех файлов и папок (включая runtimes и .deps.json)
-            // Исключаем shared assemblies - они загружаются в default context
+            // Р РµРєСѓСЂСЃРёРІРЅРѕРµ РєРѕРїРёСЂРѕРІР°РЅРёРµ РІСЃРµС… С„Р°Р№Р»РѕРІ Рё РїР°РїРѕРє (РІРєР»СЋС‡Р°СЏ runtimes Рё .deps.json)
+            // РСЃРєР»СЋС‡Р°РµРј shared assemblies - РѕРЅРё Р·Р°РіСЂСѓР¶Р°СЋС‚СЃСЏ РІ default context
             foreach (string dirPath in System.IO.Directory.GetDirectories(originalDir, "*", System.IO.SearchOption.AllDirectories)) 
             { 
                 System.IO.Directory.CreateDirectory(dirPath.Replace(originalDir, shadowDir)); 
             } 
             foreach (string newPath in System.IO.Directory.GetFiles(originalDir, "*.*", System.IO.SearchOption.AllDirectories)) 
             { 
-                // Пропускаем shared assemblies - они загружаются в default context
+                // РџСЂРѕРїСѓСЃРєР°РµРј shared assemblies - РѕРЅРё Р·Р°РіСЂСѓР¶Р°СЋС‚СЃСЏ РІ default context
                 string fileName = Path.GetFileName(newPath);
                 string assemblyName = Path.GetFileNameWithoutExtension(fileName);
                 if (_sharedAssemblies.Contains(assemblyName))
@@ -193,8 +195,9 @@ namespace Vantuz.Host
 
         /// <summary>
         /// ARM003 Resource Lifecycle: cleans up all shadow directories created during plugin loading.
-        /// Per INVARIANT_THEORY §3.1 — ephemeral directories must not outlive the loader.
+        /// Per INVARIANT_THEORY В§3.1 вЂ” ephemeral directories must not outlive the loader.
         /// </summary>
+        /// F_doc: {Dispose returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Dispose behavior
         public void Dispose()
         {
             foreach (var dir in _shadowDirs)

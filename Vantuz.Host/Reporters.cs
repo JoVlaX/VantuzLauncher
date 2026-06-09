@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -7,8 +7,8 @@ using Vantuz.Core;
 namespace Vantuz.Host;
 
 /// <summary>
-/// Асинхронный репортер, записывающий логи в файл.
-/// ВНИМАНИЕ: Текущая реализация использует Unbounded Channel, что может привести к OOM.
+/// РђСЃРёРЅС…СЂРѕРЅРЅС‹Р№ СЂРµРїРѕСЂС‚РµСЂ, Р·Р°РїРёСЃС‹РІР°СЋС‰РёР№ Р»РѕРіРё РІ С„Р°Р№Р».
+/// Р’РќРРњРђРќРР•: РўРµРєСѓС‰Р°СЏ СЂРµР°Р»РёР·Р°С†РёСЏ РёСЃРїРѕР»СЊР·СѓРµС‚ Unbounded Channel, С‡С‚Рѕ РјРѕР¶РµС‚ РїСЂРёРІРµСЃС‚Рё Рє OOM.
 /// </summary>
 public class AsyncFileReporter : IStatusReporter, IAsyncDisposable
 {
@@ -20,9 +20,9 @@ public class AsyncFileReporter : IStatusReporter, IAsyncDisposable
     {
         _writer = new StreamWriter(new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
         
-        // Ограничиваем очередь до 10 000 сообщений (около пары мегабайт ОЗУ). 
-        // Если диск завис и очередь заполнилась, новые логи будут просто отбрасываться (DropWrite), 
-        // гарантируя, что лаунчер НИКОГДА не упадет из-за нехватки памяти. 
+        // РћРіСЂР°РЅРёС‡РёРІР°РµРј РѕС‡РµСЂРµРґСЊ РґРѕ 10 000 СЃРѕРѕР±С‰РµРЅРёР№ (РѕРєРѕР»Рѕ РїР°СЂС‹ РјРµРіР°Р±Р°Р№С‚ РћР—РЈ). 
+        // Р•СЃР»Рё РґРёСЃРє Р·Р°РІРёСЃ Рё РѕС‡РµСЂРµРґСЊ Р·Р°РїРѕР»РЅРёР»Р°СЃСЊ, РЅРѕРІС‹Рµ Р»РѕРіРё Р±СѓРґСѓС‚ РїСЂРѕСЃС‚Рѕ РѕС‚Р±СЂР°СЃС‹РІР°С‚СЊСЃСЏ (DropWrite), 
+        // РіР°СЂР°РЅС‚РёСЂСѓСЏ, С‡С‚Рѕ Р»Р°СѓРЅС‡РµСЂ РќРРљРћР“Р”Рђ РЅРµ СѓРїР°РґРµС‚ РёР·-Р·Р° РЅРµС…РІР°С‚РєРё РїР°РјСЏС‚Рё. 
         var options = new System.Threading.Channels.BoundedChannelOptions(10000) 
         { 
             SingleReader = true, 
@@ -32,11 +32,13 @@ public class AsyncFileReporter : IStatusReporter, IAsyncDisposable
         _channel = System.Threading.Channels.Channel.CreateBounded<string>(options);
         _processTask = ProcessLogsAsync();
     }
+/// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
 
     public void ReportState(string message)
     {
         _channel.Writer.TryWrite($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [STATE] {message}");
     }
+/// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
 
     public void ReportProgress(string taskName, double percentage)
     {
@@ -50,14 +52,14 @@ public class AsyncFileReporter : IStatusReporter, IAsyncDisposable
             await foreach (var log in _channel.Reader.ReadAllAsync())
             {
                 await _writer.WriteLineAsync(log);
-                // Периодический сброс буфера для надежности
+                // РџРµСЂРёРѕРґРёС‡РµСЃРєРёР№ СЃР±СЂРѕСЃ Р±СѓС„РµСЂР° РґР»СЏ РЅР°РґРµР¶РЅРѕСЃС‚Рё
                 await _writer.FlushAsync();
             }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ошибка в AsyncFileReporter: {ex.Message}");
+            Console.WriteLine($"РћС€РёР±РєР° РІ AsyncFileReporter: {ex.Message}");
         }
     }
 

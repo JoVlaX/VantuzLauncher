@@ -1,14 +1,15 @@
-namespace Vantuz.Core.Tests;
+﻿namespace Vantuz.Core.Tests;
 
 using System.IO;
 using Vantuz.Plugins.Minecraft;
 using Xunit;
 
 /// <summary>
-/// Tests for MinecraftGameQueryProvider — the layer that CmlLib uses to check version
+/// Tests for MinecraftGameQueryProvider вЂ” the layer that CmlLib uses to check version
 /// existence and parse Forge version strings.
-/// Per INVARIANT_THEORY.md §1.2: falsifiable claims about version detection.
+/// Per INVARIANT_THEORY.md В§1.2: falsifiable claims about version detection.
 /// </summary>
+/// F_doc: {MinecraftGameQueryProviderTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies MinecraftGameQueryProviderTests behavior
 public class MinecraftGameQueryProviderTests
 {
     /// <summary>
@@ -305,7 +306,7 @@ public class MinecraftGameQueryProviderTests
             var result = await command.ExecuteAsync(context, stepConfig);
 
             Assert.True(result.Success);
-            Assert.Contains("уже установлена", reporter.Logs[^1]); // "Версия ... уже установлена, пропуск установки."
+            Assert.Contains("СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅР°", reporter.Logs[^1]); // "Р’РµСЂСЃРёСЏ ... СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅР°, РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё."
             Assert.True(context.Get<bool>("InstallSkipped"));
         }
         finally
@@ -377,8 +378,11 @@ public class MinecraftGameQueryProviderTests
 
     private class ListReporter : IStatusReporter
     {
+        /// F_doc: {Logs returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Logs behavior
         public List<string> Logs { get; } = new();
+        /// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
         public void ReportState(string message) => Logs.Add(message);
+        /// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
         public void ReportProgress(string taskName, double percentage) => Logs.Add($"[{taskName}] {percentage:F1}%");
     }
 }

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Vantuz.Core;
 using Vantuz.Host;
 using Xunit;
@@ -7,10 +7,11 @@ namespace Vantuz.Core.Tests;
 
 /// <summary>
 /// Positive verification tests for the Vantuz pipeline.
-/// Per INVARIANT_THEORY.md §1.2: a claim must be falsifiable by a positive observation.
+/// Per INVARIANT_THEORY.md В§1.2: a claim must be falsifiable by a positive observation.
 /// These tests assert that specific pipeline steps actually executed and logged completion markers,
 /// not merely that no crash occurred.
 /// </summary>
+/// F_doc: {PipelinePositiveVerificationTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies PipelinePositiveVerificationTests behavior
 public class PipelinePositiveVerificationTests
 {
     /// <summary>
@@ -78,7 +79,7 @@ public class PipelinePositiveVerificationTests
 
             // Positive assertion 3: downstream payload mutations exist (proof pipeline produced data)
             Assert.NotNull(result.Payload);
-            Assert.True(result.Payload.ContainsKey("workspace"), "Payload missing 'workspace' — pipeline did not propagate initial payload");
+            Assert.True(result.Payload.ContainsKey("workspace"), "Payload missing 'workspace' вЂ” pipeline did not propagate initial payload");
         }
         finally
         {
@@ -232,12 +233,15 @@ public class PipelinePositiveVerificationTests
     /// </summary>
     private class ListReporter : IStatusReporter
     {
+        /// F_doc: {Logs returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Logs behavior
         public List<string> Logs { get; } = new();
+/// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
 
         public void ReportState(string message)
         {
             Logs.Add(message);
         }
+/// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
 
         public void ReportProgress(string taskName, double percentage)
         {

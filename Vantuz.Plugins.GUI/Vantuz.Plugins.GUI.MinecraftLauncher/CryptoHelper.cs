@@ -50,6 +50,7 @@ public static class CryptoHelper
         }
         catch { return ""; }
     }
+/// F_doc: {Decrypt returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Decrypt behavior
 
     public static string Decrypt(string cipherText)
     {

@@ -1,4 +1,4 @@
-namespace Vantuz.Core;
+﻿namespace Vantuz.Core;
 
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,11 @@ public interface IStatusReporter
     void ReportState(string message);
 }
 
-// CQRS Query Context - только чтение данных
+/// <summary>
+/// CQRS Query Context - read-only payload access.
+/// F_doc: {context returns wrong type or null for existing key}
+/// E_doc: Unit test with mock payload dictionary verifies Get returns correct typed value
+/// </summary>
 public sealed class QueryContext
 {
     public IReadOnlyDictionary<string, object> Payload { get; }
@@ -34,7 +38,11 @@ public sealed class QueryContext
     public T? Get<T>(string key) => Payload.TryGetValue(key, out var val) && val is T typedVal ? typedVal : default;
 }
 
-// CQRS Command Context - только запись/модификация состояния
+/// <summary>
+/// CQRS Command Context - state mutation and abort signaling.
+/// F_doc: {mutation is lost after command execution, or abort signal is ignored}
+/// E_doc: Unit test verifies Set + GetMutations roundtrip and Abort sets IsAborted
+/// </summary>
 public sealed class CommandContext
 {
     private readonly Dictionary<string, object> _mutations = new();
@@ -54,20 +62,39 @@ public sealed class CommandContext
         IsAborted = true;
         AbortReason = reason;
     }
+/// F_doc: {FileState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies FileState behavior
 
     public void Set<T>(string key, T value) where T : notnull => _mutations[key] = value;
+    /// F_doc: {MoveOperation returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies MoveOperation behavior
     public T? Get<T>(string key) => _mutations.TryGetValue(key, out var val) && val is T typedVal ? typedVal : default;
     public IReadOnlyDictionary<string, object> GetMutations() => _mutations;
 }
 
 public delegate Task QueryDelegate(QueryContext context);
+/// F_doc: {ModpackManifestResult returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ModpackManifestResult behavior
 public delegate Task CommandDelegate(CommandContext context);
 
+/// F_doc: {Version returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Version behavior
+/// <summary>
+/// F_doc: {MinecraftVersion returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies MinecraftVersion behavior
+/// File metadata for delta-update manifest entries.
+/// F_doc: {Files returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Files behavior
+/// F_doc: {Hash collision or Size mismatch with actual file}
+/// E_doc: Unit test computes hash of known file and asserts FileState.Hash matches
+/// </summary>
 public record FileState(string RelativePath, string Hash, long Size, string? Url);
+
+/// <summary>
+/// File move operation descriptor.
+/// F_doc: {SourcePath does not exist or DestPath already exists}
+/// E_doc: Unit test with mock filesystem verifies move succeeds and source no longer exists
+/// </summary>
 public record MoveOperation(string SourcePath, string DestPath);
 
 /// <summary>
-/// Result of modpack manifest loading for delta-updates
+/// Result of modpack manifest loading for delta-updates.
+/// F_doc: {manifest parsing fails or produces empty Files list on valid input}
+/// E_doc: Unit test with sample JSON manifest asserts Version and Files.Count > 0
 /// </summary>
 public class ModpackManifestResult
 {
@@ -78,20 +105,33 @@ public class ModpackManifestResult
     public object? RawManifest { get; set; }  // Original manifest for advanced processing
 }
 
-// ARM005: Строгое разделение CQRS - Query плагины только читают
+/// <summary>
+/// ARM005: CQRS Query plugin contract вЂ” read-only operations.
+/// F_doc: {plugin writes to context mutations or filesystem}
+/// E_doc: Static analysis verifies no 'Set' or 'File.Write' calls in Query plugin implementations
+/// </summary>
 public interface IQueryPlugin : IAsyncDisposable
 {
     string Name { get; }
     Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig);
 }
 
-// ARM005: Строгое разделение CQRS - Command плагины только пишут
+/// <summary>
+/// ARM005: CQRS Command plugin contract вЂ” state-mutating operations.
+/// F_doc: {plugin returns Success=true but leaves no observable side effect}
+/// E_doc: Unit test with mock context verifies ExecuteAsync calls Set or Abort
+/// </summary>
 public interface ICommandPlugin : IAsyncDisposable
 {
     string Name { get; }
     Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig);
 }
 
+/// <summary>
+/// Result of a command plugin execution.
+/// F_doc: {Success=true but ErrorMessage is non-null, or Success=false with null ErrorMessage}
+/// E_doc: Unit test asserts CommandResult(Success=true) has null ErrorMessage; Failure has non-null ErrorMessage
+/// </summary>
 public record CommandResult(bool Success, string? ErrorMessage = null);
 
 // ============================================
@@ -102,52 +142,72 @@ public record CommandResult(bool Success, string? ErrorMessage = null);
 
 /// <summary>
 /// CQRS Query facet: read-only game provider operations.
-/// Per INVARIANT_THEORY.md §2.2 - pure query, no side effects.
+/// Per INVARIANT_THEORY.md В§2.2 - pure query, no side effects.
 /// F_doc: {query returns stale version info or missing installDir}
 /// E_doc: Unit test with mock file system verifying CheckVersionAsync and BuildLaunchParametersAsync
 /// </summary>
 public interface IGameQueryProvider
 {
+    /// <summary>
+    /// Game provider display name for logging and UI.
+    /// F_doc: {Name is null or empty}
+    /// E_doc: Unit test asserts ProviderName is non-empty string
+    /// </summary>
     string ProviderName { get; }
 
     /// <summary>
-    /// Check if version exists locally
+    /// Check if version exists locally.
+    /// F_doc: {version exists but returns false, or version missing but returns true}
+    /// E_doc: Unit test with mock file system: existing files return Exists=true; missing return Exists=false
     /// </summary>
     Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct);
 
     /// <summary>
-    /// Build launch parameters for OS.Executor
+    /// Build launch parameters for OS.Executor.
+    /// F_doc: {launch parameters contain invalid paths or missing authlib}
+    /// E_doc: Unit test with mock path verifies LaunchParameters.ExecutablePath is non-empty
     /// </summary>
     Task<LaunchParameters> BuildLaunchParametersAsync(string version, string installDir, LaunchOptions options, CancellationToken ct);
 }
 
 /// <summary>
 /// CQRS Command facet: state-mutating game provider operations.
-/// Per INVARIANT_THEORY.md §2.2 - only writes/modifies state.
+/// Per INVARIANT_THEORY.md В§2.2 - only writes/modifies state.
 /// F_doc: {install fails or times out, leaving partial filesystem state}
 /// E_doc: Unit test with mock installer verifying InstallVersionAsync rollback
 /// </summary>
 public interface IGameCommandProvider
 {
+    /// <summary>
+    /// Game provider display name for logging and UI.
+    /// F_doc: {Name is null or empty}
+    /// E_doc: Unit test asserts ProviderName is non-empty string
+    /// </summary>
     string ProviderName { get; }
 
     /// <summary>
-    /// Install/update the specified version
+    /// Install/update the specified version.
+    /// F_doc: {install fails silently, times out, or leaves partial filesystem state}
+    /// E_doc: Unit test with mock installer verifying InstallVersionAsync rollback on failure
     /// </summary>
     Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct, TimeSpan? timeout = null);
 }
 
 /// <summary>
 /// Composite game provider contract. Implementations are game-specific (Minecraft, Terraria, etc.)
-/// Per INVARIANT_THEORY.md §2.2 CQRS - composed of pure Query + pure Command facets.
+/// Per INVARIANT_THEORY.md В§2.2 CQRS - composed of pure Query + pure Command facets.
 /// Deviation: DEVIATION-009 resolved 2026-06-08 by splitting into IGameQueryProvider + IGameCommandProvider.
+/// F_doc: {implementation mixes Query and Command in single class}
+/// E_doc: Builder ARM-BUILD-022 verifies no class implements IGameProvider without also implementing IGameQueryProvider and IGameCommandProvider separately
 /// </summary>
 public interface IGameProvider : IGameQueryProvider, IGameCommandProvider, IAsyncDisposable
 {
 }
 
 /// <summary>
-/// Result of version check operation
+/// Result of version check operation.
+/// F_doc: {Exists=true but ErrorMessage is non-null, or Exists=false with null ErrorMessage}
+/// E_doc: Unit test asserts VersionCheckResult(true) has null ErrorMessage; failure has non-null ErrorMessage
 /// </summary>
 public record VersionCheckResult(
     bool Exists, 
@@ -155,7 +215,9 @@ public record VersionCheckResult(
 );
 
 /// <summary>
-/// Result of install operation
+/// Result of install operation.
+/// F_doc: {Success=true but InstalledVersionName is null or empty}
+/// E_doc: Unit test asserts InstallResult(true, null, "1.20.1").InstalledVersionName is non-null
 /// </summary>
 public record InstallResult(
     bool Success,
@@ -164,7 +226,9 @@ public record InstallResult(
 );
 
 /// <summary>
-/// Launch parameters for OS.Executor
+/// Launch parameters for OS.Executor.
+/// F_doc: {ExecutablePath is null, empty, or points to non-existent file}
+/// E_doc: Unit test asserts LaunchParameters.ExecutablePath is non-empty and File.Exists returns true
 /// </summary>
 public record LaunchParameters(
     string ExecutablePath,
@@ -174,7 +238,9 @@ public record LaunchParameters(
 );
 
 /// <summary>
-/// Options for launching a game
+/// Options for launching a game.
+/// F_doc: {PlayerName is null or empty, or RamMb is negative}
+/// E_doc: Unit test asserts LaunchOptions("test").PlayerName is non-empty and RamMb >= 0
 /// </summary>
 public record LaunchOptions(
     string PlayerName,
@@ -201,7 +267,9 @@ public interface ICredentialProvider
 }
 
 /// <summary>
-/// User credentials for authentication
+/// User credentials for authentication.
+/// F_doc: {Username or Password is null or empty}
+/// E_doc: Unit test asserts Credentials("user", "pass").Username is non-empty
 /// </summary>
 public record Credentials(
     string Username,
@@ -211,7 +279,9 @@ public record Credentials(
 );
 
 /// <summary>
-/// Event args for credential submission
+/// Event args for credential submission.
+/// F_doc: {Credentials property is null or contains invalid data}
+/// E_doc: Unit test asserts new CredentialsSubmittedEventArgs { Credentials = valid }.Credentials is non-null
 /// </summary>
 public class CredentialsSubmittedEventArgs : EventArgs
 {

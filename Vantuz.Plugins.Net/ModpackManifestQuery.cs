@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Net;
+﻿namespace Vantuz.Plugins.Net;
 
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Vantuz.Core;
 
 /// <summary>
-/// ARM005 CQRS Query: Загрузка манифеста модпака и конвертация в TargetState.
+/// ARM005 CQRS Query: Р—Р°РіСЂСѓР·РєР° РјР°РЅРёС„РµСЃС‚Р° РјРѕРґРїР°РєР° Рё РєРѕРЅРІРµСЂС‚Р°С†РёСЏ РІ TargetState.
 /// Per Armatura:126 - no external dependencies in domain types.
 /// </summary>
 public class ModpackManifestQuery : IQueryPlugin
@@ -42,7 +42,7 @@ public class ModpackManifestQuery : IQueryPlugin
         bool ignoreSslErrors = stepConfig.TryGetProperty("ignoreSslErrors", out var sslProp) && sslProp.GetBoolean();
         installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
-        context.Reporter.ReportState("Загрузка манифеста модпака...");
+        context.Reporter.ReportState("Р—Р°РіСЂСѓР·РєР° РјР°РЅРёС„РµСЃС‚Р° РјРѕРґРїР°РєР°...");
 
         try
         {
@@ -77,7 +77,7 @@ public class ModpackManifestQuery : IQueryPlugin
                 throw new InvalidOperationException("Failed to parse modpack manifest");
             }
 
-            context.Reporter.ReportState($"Манифест загружен: {manifest.Version}, {manifest.Files?.Count ?? 0} файлов");
+            context.Reporter.ReportState($"РњР°РЅРёС„РµСЃС‚ Р·Р°РіСЂСѓР¶РµРЅ: {manifest.Version}, {manifest.Files?.Count ?? 0} С„Р°Р№Р»РѕРІ");
 
             // Convert manifest files to FileState for DeltaAnalyzer
             var targetState = new List<FileState>();
@@ -125,6 +125,7 @@ public class ModpackManifestQuery : IQueryPlugin
         }
         return text;
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync()
     {
@@ -136,19 +137,27 @@ public class ModpackManifestQuery : IQueryPlugin
 /// <summary>
 /// Structure of modpack.json from server
 /// </summary>
+/// F_doc: {ModpackManifest returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ModpackManifest behavior
 public class ModpackManifest
 {
+    /// F_doc: {Version returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Version behavior
     public string Version { get; set; } = "";
+    /// F_doc: {Minecraft returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Minecraft behavior
     public string Minecraft { get; set; } = "";
     public List<ModpackFile>? Files { get; set; }
     public List<string>? RemovedFiles { get; set; }
 }
+/// F_doc: {ModpackFile returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ModpackFile behavior
 
 public class ModpackFile
 {
+    /// F_doc: {Path returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Path behavior
     public string Path { get; set; } = "";
+    /// F_doc: {Hash returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Hash behavior
     public string Hash { get; set; } = "";
+    /// F_doc: {Size returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Size behavior
     public long Size { get; set; }
+    /// F_doc: {Url returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Url behavior
     public string Url { get; set; } = "";
 }
 

@@ -1,4 +1,4 @@
-namespace Vantuz.Core.Tests;
+﻿namespace Vantuz.Core.Tests;
 
 using System;
 using System.Collections.Generic;
@@ -9,9 +9,10 @@ using Vantuz.Plugins.Net;
 using Xunit;
 
 /// <summary>
-/// Tests for ApiReaderQuery — ARM005 CQRS Query for reading API data.
-/// Per INVARIANT_THEORY §1.2: falsifiable claims about request/response handling.
+/// Tests for ApiReaderQuery вЂ” ARM005 CQRS Query for reading API data.
+/// Per INVARIANT_THEORY В§1.2: falsifiable claims about request/response handling.
 /// </summary>
+/// F_doc: {ApiReaderQueryTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ApiReaderQueryTests behavior
 public class ApiReaderQueryTests
 {
     /// <summary>

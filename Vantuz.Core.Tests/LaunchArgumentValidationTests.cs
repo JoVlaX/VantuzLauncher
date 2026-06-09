@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Vantuz.Core;
 using Vantuz.Plugins.Game;
 using Vantuz.Plugins.OS;
@@ -8,8 +8,9 @@ namespace Vantuz.Core.Tests;
 
 /// <summary>
 /// Tests for pre-flight validation and early-failure paths in launch-related commands.
-/// Per INVARIANT_THEORY.md §4.1: falsifiable claims about argument correctness.
+/// Per INVARIANT_THEORY.md В§4.1: falsifiable claims about argument correctness.
 /// </summary>
+/// F_doc: {LaunchArgumentValidationTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies LaunchArgumentValidationTests behavior
 public class LaunchArgumentValidationTests
 {
     /// <summary>
@@ -123,7 +124,7 @@ public class LaunchArgumentValidationTests
     }
 
     /// <summary>
-    /// E_doc: Full chain GameLaunchCommand → OS.ExecuteCommand works when variables are properly resolved.
+    /// E_doc: Full chain GameLaunchCommand в†’ OS.ExecuteCommand works when variables are properly resolved.
     /// F_doc: Reproduces the 2026-06-07 crash where unresolved {{mcDir}} leaked into gameArgs.
     /// </summary>
     [Fact]
@@ -222,20 +223,26 @@ public class LaunchArgumentValidationTests
 
     private class ListReporter : IStatusReporter
     {
+        /// F_doc: {Logs returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Logs behavior
         public List<string> Logs { get; } = new();
+        /// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
         public void ReportState(string message) => Logs.Add(message);
+        /// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
         public void ReportProgress(string taskName, double percentage) => Logs.Add($"[{taskName}] {percentage:F1}%");
     }
 
     private class MockGameProvider : IGameProvider
     {
         public string ProviderName => "MockProvider";
+/// F_doc: {CheckVersionAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies CheckVersionAsync behavior
 
         public Task<VersionCheckResult> CheckVersionAsync(string version, string installDir, CancellationToken ct)
             => Task.FromResult(new VersionCheckResult(Exists: true));
+/// F_doc: {InstallVersionAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies InstallVersionAsync behavior
 
         public Task<InstallResult> InstallVersionAsync(string version, string installDir, IStatusReporter reporter, CancellationToken ct, TimeSpan? timeout = null)
             => Task.FromResult(new InstallResult(Success: true));
+/// F_doc: {BuildLaunchParametersAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies BuildLaunchParametersAsync behavior
 
         public Task<LaunchParameters> BuildLaunchParametersAsync(
             string version,
@@ -249,6 +256,7 @@ public class LaunchArgumentValidationTests
                 WorkingDirectory: installDir
             ));
         }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }

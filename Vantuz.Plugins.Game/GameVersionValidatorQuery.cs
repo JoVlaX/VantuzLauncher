@@ -1,4 +1,4 @@
-namespace Vantuz.Plugins.Game;
+﻿namespace Vantuz.Plugins.Game;
 
 using System;
 using System.IO;
@@ -32,7 +32,7 @@ public class GameVersionValidatorQuery : IQueryPlugin
 
         installDir = Path.GetFullPath(installDir.Replace('/', Path.DirectorySeparatorChar));
 
-        context.Reporter.ReportState($"Проверка версии {versionName}...");
+        context.Reporter.ReportState($"РџСЂРѕРІРµСЂРєР° РІРµСЂСЃРёРё {versionName}...");
 
         // Resolve provider from context (registered by provider plugin)
         var provider = ResolveProvider(context, providerName);
@@ -46,11 +46,11 @@ public class GameVersionValidatorQuery : IQueryPlugin
 
         if (!result.Exists)
         {
-            context.Reporter.ReportState($"Версия {versionName} не найдена. Требуется установка.");
+            context.Reporter.ReportState($"Р’РµСЂСЃРёСЏ {versionName} РЅРµ РЅР°Р№РґРµРЅР°. РўСЂРµР±СѓРµС‚СЃСЏ СѓСЃС‚Р°РЅРѕРІРєР°.");
         }
         else
         {
-            context.Reporter.ReportState($"Версия {versionName} найдена.");
+            context.Reporter.ReportState($"Р’РµСЂСЃРёСЏ {versionName} РЅР°Р№РґРµРЅР°.");
         }
 
         return result;
@@ -58,7 +58,7 @@ public class GameVersionValidatorQuery : IQueryPlugin
 
     /// <summary>
     /// Resolves IGameQueryProvider from context payload.
-    /// Per INVARIANT_THEORY.md §2.2: Query plugins resolve only the Query facet.
+    /// Per INVARIANT_THEORY.md В§2.2: Query plugins resolve only the Query facet.
     /// </summary>
     private static IGameQueryProvider? ResolveProvider(QueryContext context, string providerName)
     {
@@ -77,6 +77,7 @@ public class GameVersionValidatorQuery : IQueryPlugin
         }
         return text;
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

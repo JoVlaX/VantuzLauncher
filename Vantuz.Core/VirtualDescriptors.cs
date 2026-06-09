@@ -1,4 +1,4 @@
-namespace Vantuz.Core;
+﻿namespace Vantuz.Core;
 
 using System;
 using System.Buffers;
@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// ARM002/ARM003: Virtual Descriptor система вместо raw I/O Stream объектов.
-/// Представляет собой легковесный integer-based токен для доступа к данным.
+/// ARM002/ARM003: Virtual Descriptor СЃРёСЃС‚РµРјР° РІРјРµСЃС‚Рѕ raw I/O Stream РѕР±СЉРµРєС‚РѕРІ.
+/// РџСЂРµРґСЃС‚Р°РІР»СЏРµС‚ СЃРѕР±РѕР№ Р»РµРіРєРѕРІРµСЃРЅС‹Р№ integer-based С‚РѕРєРµРЅ РґР»СЏ РґРѕСЃС‚СѓРїР° Рє РґР°РЅРЅС‹Рј.
 /// </summary>
 public sealed class VirtualDescriptor : IDisposable
 {
@@ -37,8 +37,9 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Создает VirtualDescriptor из byte array (в памяти)
+    /// РЎРѕР·РґР°РµС‚ VirtualDescriptor РёР· byte array (РІ РїР°РјСЏС‚Рё)
     /// </summary>
+    /// F_doc: {FromMemory returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies FromMemory behavior
     public static VirtualDescriptor FromMemory(byte[] data, string? contentType = null)
     {
         if (data == null) throw new ArgumentNullException(nameof(data));
@@ -46,8 +47,9 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Создает VirtualDescriptor из строки (в памяти)
+    /// РЎРѕР·РґР°РµС‚ VirtualDescriptor РёР· СЃС‚СЂРѕРєРё (РІ РїР°РјСЏС‚Рё)
     /// </summary>
+    /// F_doc: {FromString returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies FromString behavior
     public static VirtualDescriptor FromString(string content, string? contentType = "text/plain")
     {
         if (content == null) throw new ArgumentNullException(nameof(content));
@@ -56,7 +58,7 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Асинхронно создает VirtualDescriptor из файла (загружает в память)
+    /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ СЃРѕР·РґР°РµС‚ VirtualDescriptor РёР· С„Р°Р№Р»Р° (Р·Р°РіСЂСѓР¶Р°РµС‚ РІ РїР°РјСЏС‚СЊ)
     /// </summary>
     public static async Task<VirtualDescriptor> FromFileAsync(string filePath, string? contentType = null, CancellationToken ct = default)
     {
@@ -70,7 +72,7 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Асинхронно создает VirtualDescriptor из HTTP ответа
+    /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ СЃРѕР·РґР°РµС‚ VirtualDescriptor РёР· HTTP РѕС‚РІРµС‚Р°
     /// </summary>
     public static async Task<VirtualDescriptor> FromHttpResponseAsync(Stream responseStream, long? contentLength, string? contentType = null, CancellationToken ct = default)
     {
@@ -84,8 +86,9 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Получает данные как ReadOnlyMemory<byte>
+    /// РџРѕР»СѓС‡Р°РµС‚ РґР°РЅРЅС‹Рµ РєР°Рє ReadOnlyMemory<byte>
     /// </summary>
+    /// F_doc: {GetData returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GetData behavior
     public ReadOnlyMemory<byte> GetData()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(VirtualDescriptor));
@@ -94,8 +97,9 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Получает данные как строку
+    /// РџРѕР»СѓС‡Р°РµС‚ РґР°РЅРЅС‹Рµ РєР°Рє СЃС‚СЂРѕРєСѓ
     /// </summary>
+    /// F_doc: {GetString returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GetString behavior
     public string GetString()
     {
         if (_disposed) throw new ObjectDisposedException(nameof(VirtualDescriptor));
@@ -104,7 +108,7 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Записывает данные в поток
+    /// Р—Р°РїРёСЃС‹РІР°РµС‚ РґР°РЅРЅС‹Рµ РІ РїРѕС‚РѕРє
     /// </summary>
     public async Task WriteToStreamAsync(Stream target, CancellationToken ct = default)
     {
@@ -116,8 +120,8 @@ public sealed class VirtualDescriptor : IDisposable
     }
 
     /// <summary>
-    /// Асинхронно сохраняет данные в файл.
-    /// Per INVARIANT_THEORY §3.2 Nomadic Invariant: rejects absolute paths to enforce host portability.
+    /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ СЃРѕС…СЂР°РЅСЏРµС‚ РґР°РЅРЅС‹Рµ РІ С„Р°Р№Р».
+    /// Per INVARIANT_THEORY В§3.2 Nomadic Invariant: rejects absolute paths to enforce host portability.
     /// F_doc: {absolute path passed to SaveToFileAsync}
     /// E_doc: Unit test with Path.IsPathRooted validation
     /// </summary>
@@ -143,6 +147,7 @@ public sealed class VirtualDescriptor : IDisposable
         }
     }
 }
+/// F_doc: {DescriptorType returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DescriptorType behavior
 
 public enum DescriptorType
 {
@@ -153,10 +158,12 @@ public enum DescriptorType
 }
 
 /// <summary>
-/// Extension methods для интеграции VirtualDescriptor с CommandContext и QueryContext
+/// Extension methods РґР»СЏ РёРЅС‚РµРіСЂР°С†РёРё VirtualDescriptor СЃ CommandContext Рё QueryContext
 /// </summary>
+/// F_doc: {VirtualDescriptorExtensions returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VirtualDescriptorExtensions behavior
 public static class VirtualDescriptorExtensions
 {
+    /// F_doc: {SetDescriptor returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies SetDescriptor behavior
     public static void SetDescriptor(this CommandContext context, string key, VirtualDescriptor descriptor)
     {
         if (context == null) throw new ArgumentNullException(nameof(context));

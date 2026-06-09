@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,8 +9,8 @@ using Vantuz.Core;
 namespace Vantuz.Plugins.OS;
 
 /// <summary>
-/// ARM005 CQRS Query: Анализ дельты между текущим и целевым состоянием.
-/// Per Armatura:76-78 - только чтение, нет side effects.
+/// ARM005 CQRS Query: РђРЅР°Р»РёР· РґРµР»СЊС‚С‹ РјРµР¶РґСѓ С‚РµРєСѓС‰РёРј Рё С†РµР»РµРІС‹Рј СЃРѕСЃС‚РѕСЏРЅРёРµРј.
+/// Per Armatura:76-78 - С‚РѕР»СЊРєРѕ С‡С‚РµРЅРёРµ, РЅРµС‚ side effects.
 /// F_doc: {delta analysis returns false positives for moved files or hash collisions}
 /// E_doc: Unit test with staged file tree comparing expected vs actual delta
 /// </summary>
@@ -20,7 +20,7 @@ public class DeltaAnalyzerQuery : IQueryPlugin
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
-        // ПАТТЕРН GRACEFUL SKIP
+        // РџРђРўРўР•Р Рќ GRACEFUL SKIP
         var targetState = context.Get<List<FileState>>("TargetState");
 
         // Check for modpack manifest result from Net.ModpackManifest
@@ -28,19 +28,19 @@ public class DeltaAnalyzerQuery : IQueryPlugin
         if (manifestResult != null)
         {
             targetState = manifestResult.Files;
-            context.Reporter.ReportState($"Модпак {manifestResult.Version}: {targetState.Count} файлов для синхронизации.");
+            context.Reporter.ReportState($"РњРѕРґРїР°Рє {manifestResult.Version}: {targetState.Count} С„Р°Р№Р»РѕРІ РґР»СЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё.");
         }
 
         if (targetState == null || targetState.Count == 0)
         {
-            context.Reporter.ReportState("Синхронизация кастомных файлов не требуется.");
+            context.Reporter.ReportState("РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РєР°СЃС‚РѕРјРЅС‹С… С„Р°Р№Р»РѕРІ РЅРµ С‚СЂРµР±СѓРµС‚СЃСЏ.");
             return new DeltaAnalyzerResult(new List<FileState>(), new List<string>(), new List<MoveOperation>());
         }
 
         var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
         string mcDir = context.Get<string>("mcDir") ?? throw new InvalidOperationException("mcDir is missing in context");
 
-        context.Reporter.ReportState("Анализ изменений и дедупликация...");
+        context.Reporter.ReportState("РђРЅР°Р»РёР· РёР·РјРµРЅРµРЅРёР№ Рё РґРµРґСѓРїР»РёРєР°С†РёСЏ...");
 
         return await Task.Run(() =>
         {
@@ -61,7 +61,7 @@ public class DeltaAnalyzerQuery : IQueryPlugin
                 }
             }
 
-            // 1. Проверка локальных файлов
+            // 1. РџСЂРѕРІРµСЂРєР° Р»РѕРєР°Р»СЊРЅС‹С… С„Р°Р№Р»РѕРІ
             foreach (var file in targetState)
             {
                 string fullPath = PathHelper.GetSafePath(mcDir, file.RelativePath);
@@ -86,7 +86,7 @@ public class DeltaAnalyzerQuery : IQueryPlugin
                 }
             }
 
-            // 2. Сбор файлов на удаление в зонах очистки
+            // 2. РЎР±РѕСЂ С„Р°Р№Р»РѕРІ РЅР° СѓРґР°Р»РµРЅРёРµ РІ Р·РѕРЅР°С… РѕС‡РёСЃС‚РєРё
             foreach (var zone in purgeZones)
             {
                 string zonePath = PathHelper.GetSafePath(mcDir, zone);
@@ -104,7 +104,7 @@ public class DeltaAnalyzerQuery : IQueryPlugin
                 }
             }
 
-            // 3. Дедупликация (Local Move Optimization)
+            // 3. Р”РµРґСѓРїР»РёРєР°С†РёСЏ (Local Move Optimization)
             var toDownload = new List<FileState>(downloadQueue);
             var toDelete = new List<string>(deleteQueue);
 
@@ -118,7 +118,7 @@ public class DeltaAnalyzerQuery : IQueryPlugin
                         string deleteHash = PathHelper.CalculateHash(deletePath);
                         if (deleteHash == downloadItem.Hash)
                         {
-                            // Найдено совпадение! Можно просто перенести файл вместо скачивания.
+                            // РќР°Р№РґРµРЅРѕ СЃРѕРІРїР°РґРµРЅРёРµ! РњРѕР¶РЅРѕ РїСЂРѕСЃС‚Рѕ РїРµСЂРµРЅРµСЃС‚Рё С„Р°Р№Р» РІРјРµСЃС‚Рѕ СЃРєР°С‡РёРІР°РЅРёСЏ.
                             string destPath = PathHelper.GetSafePath(mcDir, downloadItem.RelativePath);
                             localMoveQueue.Add(new MoveOperation(deletePath, destPath));
 
@@ -130,18 +130,20 @@ public class DeltaAnalyzerQuery : IQueryPlugin
                 }
             }
 
-            context.Reporter.ReportState($"Анализ завершен: {downloadQueue.Count} к загрузке, {localMoveQueue.Count} локальных перемещений, {deleteQueue.Count} к удалению.");
+            context.Reporter.ReportState($"РђРЅР°Р»РёР· Р·Р°РІРµСЂС€РµРЅ: {downloadQueue.Count} Рє Р·Р°РіСЂСѓР·РєРµ, {localMoveQueue.Count} Р»РѕРєР°Р»СЊРЅС‹С… РїРµСЂРµРјРµС‰РµРЅРёР№, {deleteQueue.Count} Рє СѓРґР°Р»РµРЅРёСЋ.");
 
             return new DeltaAnalyzerResult(downloadQueue, deleteQueue, localMoveQueue);
         });
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
 
 /// <summary>
-/// Результат анализа дельты для передачи через мутации.
+/// Р РµР·СѓР»СЊС‚Р°С‚ Р°РЅР°Р»РёР·Р° РґРµР»СЊС‚С‹ РґР»СЏ РїРµСЂРµРґР°С‡Рё С‡РµСЂРµР· РјСѓС‚Р°С†РёРё.
 /// </summary>
+/// F_doc: {DeltaAnalyzerResult returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DeltaAnalyzerResult behavior
 public record DeltaAnalyzerResult(
     List<FileState> DownloadQueue,
     List<string> DeleteQueue,

@@ -1,15 +1,16 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using Xunit;
 
 namespace Vantuz.Core.Tests;
 
 /// <summary>
-/// Functional GUI-mode verification per AGENT_FAILURE_ANALYSIS.md §7.5 (R7).
+/// Functional GUI-mode verification per AGENT_FAILURE_ANALYSIS.md В§7.5 (R7).
 /// Ensures the configured Minecraft version string is valid and manifests are consistent.
 /// This would have caught the "Cannot find 1.20.1-forge-47.2.20" root cause
 /// (boot.json loaded instead of boot.gui.json with mismatched versions).
 /// </summary>
+/// F_doc: {GuiModeFunctionalTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiModeFunctionalTests behavior
 public class GuiModeFunctionalTests
 {
     private static readonly string ProjectRoot = Path.Combine(
@@ -20,6 +21,7 @@ public class GuiModeFunctionalTests
         Path.GetFullPath(Path.Combine(ProjectRoot, relative));
 
     [Fact]
+    /// F_doc: {GuiManifest_GameVersion_IsValidForgeFormat returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GuiManifest_GameVersion_IsValidForgeFormat behavior
     public void GuiManifest_GameVersion_IsValidForgeFormat()
     {
         string guiManifestPath = ResolvePath("boot.gui.json");
@@ -41,6 +43,7 @@ public class GuiModeFunctionalTests
     }
 
     [Fact]
+    /// F_doc: {GeneratedBootJson_MatchesGuiManifest_GameVersion returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies GeneratedBootJson_MatchesGuiManifest_GameVersion behavior
     public void GeneratedBootJson_MatchesGuiManifest_GameVersion()
     {
         // Per plan fix-r7-blocker-622aab: boot.json (generated from template)
@@ -65,6 +68,7 @@ public class GuiModeFunctionalTests
     }
 
     [Fact]
+    /// F_doc: {AllManifests_HaveConsistentGameProvider returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies AllManifests_HaveConsistentGameProvider behavior
     public void AllManifests_HaveConsistentGameProvider()
     {
         var manifests = new[] { "boot.gui.json", "boot.template.json", "boot.headless.json", "boot.test.json" };
@@ -95,9 +99,10 @@ public class GuiModeFunctionalTests
     }
 
     [Fact]
+    /// F_doc: {Program_Loads_GuiManifest_NotTemplate returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Program_Loads_GuiManifest_NotTemplate behavior
     public void Program_Loads_GuiManifest_NotTemplate()
     {
-        // Per AGENT_FAILURE_ANALYSIS.md §7.3: GUI mode must load boot.gui.json
+        // Per AGENT_FAILURE_ANALYSIS.md В§7.3: GUI mode must load boot.gui.json
         // in GUI mode, not boot.json (generated from boot.template.json).
         // The entry point (Program.cs) now owns manifest selection.
         string programPath = ResolvePath("Program.cs");

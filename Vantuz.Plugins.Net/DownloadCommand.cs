@@ -1,4 +1,4 @@
-#pragma warning disable ARM010 // FileStream requires DAG host-managed disposal; TODO: refactor to DAG ref counting (deadline: 2026-12-01)
+﻿#pragma warning disable ARM010 // FileStream requires DAG host-managed disposal; TODO: refactor to DAG ref counting (deadline: 2026-12-01)
 
 using System;
 using System.Collections.Generic;
@@ -12,8 +12,8 @@ using Vantuz.Core;
 namespace Vantuz.Plugins.Net;
 
 /// <summary>
-/// ARM005 CQRS Command: Пакетная загрузка файлов с транзакционным коммитом.
-/// Per Armatura:76-78 - только запись/модификация состояния.
+/// ARM005 CQRS Command: РџР°РєРµС‚РЅР°СЏ Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»РѕРІ СЃ С‚СЂР°РЅР·Р°РєС†РёРѕРЅРЅС‹Рј РєРѕРјРјРёС‚РѕРј.
+/// Per Armatura:76-78 - С‚РѕР»СЊРєРѕ Р·Р°РїРёСЃСЊ/РјРѕРґРёС„РёРєР°С†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ.
 /// </summary>
 public class DownloadCommand : ICommandPlugin
 {
@@ -62,14 +62,14 @@ public class DownloadCommand : ICommandPlugin
         string mcDir = context.Get<string>("mcDir")
             ?? throw new InvalidOperationException("mcDir is missing in context");
 
-        context.Reporter.ReportState($"Загрузка файлов ({downloadQueue.Count})...");
+        context.Reporter.ReportState($"Р—Р°РіСЂСѓР·РєР° С„Р°Р№Р»РѕРІ ({downloadQueue.Count})...");
 
         var successfulDownloads = new List<(string finalPath, string tmpPath, string backupPath)>();
         int completedCount = 0;
 
         try
         {
-            // Фаза 1: Скачивание во временные файлы
+            // Р¤Р°Р·Р° 1: РЎРєР°С‡РёРІР°РЅРёРµ РІРѕ РІСЂРµРјРµРЅРЅС‹Рµ С„Р°Р№Р»С‹
             var tasks = new List<Task>();
             foreach (var file in downloadQueue)
             {
@@ -97,7 +97,7 @@ public class DownloadCommand : ICommandPlugin
                             }
                         }
 
-                        // Верификация хэша (skip if no expected hash provided)
+                        // Р’РµСЂРёС„РёРєР°С†РёСЏ С…СЌС€Р° (skip if no expected hash provided)
                         if (!string.IsNullOrEmpty(file.Hash))
                         {
                             string downloadedHash = PathHelper.CalculateHash(tmpPath);
@@ -112,7 +112,7 @@ public class DownloadCommand : ICommandPlugin
                         {
                             successfulDownloads.Add((finalPath, tmpPath, backupPath));
                             completedCount++;
-                            context.Reporter.ReportProgress("Загрузка",
+                            context.Reporter.ReportProgress("Р—Р°РіСЂСѓР·РєР°",
                                 (double)completedCount / downloadQueue.Count * 100);
                         }
                     }
@@ -125,8 +125,8 @@ public class DownloadCommand : ICommandPlugin
 
             await Task.WhenAll(tasks);
 
-            // Фаза 2: Теневой коммит (Transactionally Safe)
-            context.Reporter.ReportState("Применение обновлений...");
+            // Р¤Р°Р·Р° 2: РўРµРЅРµРІРѕР№ РєРѕРјРјРёС‚ (Transactionally Safe)
+            context.Reporter.ReportState("РџСЂРёРјРµРЅРµРЅРёРµ РѕР±РЅРѕРІР»РµРЅРёР№...");
             var committedFiles = new List<(string finalPath, string tmpPath, string backupPath)>();
 
             try
@@ -141,7 +141,7 @@ public class DownloadCommand : ICommandPlugin
                     committedFiles.Add(item);
                 }
 
-                // Успех - удаляем бэкапы
+                // РЈСЃРїРµС… - СѓРґР°Р»СЏРµРј Р±СЌРєР°РїС‹
                 foreach (var item in committedFiles)
                 {
                     try { if (File.Exists(item.backupPath)) File.Delete(item.backupPath); } catch (Exception ex) { Console.WriteLine($"[DownloadCommand] WARN: failed to delete backup {item.backupPath}: {ex.Message}"); }
@@ -149,8 +149,8 @@ public class DownloadCommand : ICommandPlugin
             }
             catch (IOException ex)
             {
-                // Откат при ошибке I/O
-                context.Reporter.ReportState($"[CRITICAL] Ошибка I/O при коммите: {ex.Message}. Начинаю откат...");
+                // РћС‚РєР°С‚ РїСЂРё РѕС€РёР±РєРµ I/O
+                context.Reporter.ReportState($"[CRITICAL] РћС€РёР±РєР° I/O РїСЂРё РєРѕРјРјРёС‚Рµ: {ex.Message}. РќР°С‡РёРЅР°СЋ РѕС‚РєР°С‚...");
                 foreach (var item in committedFiles)
                 {
                     try
@@ -160,7 +160,7 @@ public class DownloadCommand : ICommandPlugin
                     }
                     catch (Exception rollbackEx) { Console.WriteLine($"[DownloadCommand] WARN: rollback failed for {item.finalPath}: {rollbackEx.Message}"); }
                 }
-                return new CommandResult(false, "Ошибка I/O блокировки, состояние восстановлено");
+                return new CommandResult(false, "РћС€РёР±РєР° I/O Р±Р»РѕРєРёСЂРѕРІРєРё, СЃРѕСЃС‚РѕСЏРЅРёРµ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРѕ");
             }
 
             context.Set("DownloadSuccess", true);
@@ -173,14 +173,15 @@ public class DownloadCommand : ICommandPlugin
         }
         catch (Exception ex)
         {
-            // Очистка временных файлов при любой ошибке
+            // РћС‡РёСЃС‚РєР° РІСЂРµРјРµРЅРЅС‹С… С„Р°Р№Р»РѕРІ РїСЂРё Р»СЋР±РѕР№ РѕС€РёР±РєРµ
             foreach (var item in successfulDownloads)
             {
                 try { if (File.Exists(item.tmpPath)) File.Delete(item.tmpPath); } catch (Exception innerEx) { Console.WriteLine($"[DownloadCommand] WARN: failed to delete temp {item.tmpPath}: {innerEx.Message}"); }
             }
-            return new CommandResult(false, $"Ошибка при загрузке: {ex.Message}");
+            return new CommandResult(false, $"РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ: {ex.Message}");
         }
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync()
     {

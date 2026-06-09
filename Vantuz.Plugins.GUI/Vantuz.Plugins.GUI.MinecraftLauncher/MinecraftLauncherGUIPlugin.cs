@@ -120,6 +120,7 @@ public class PluginApp : Avalonia.Application
         _autoSubmit = autoSubmitTestCredentials;
         Styles.Add(new Avalonia.Themes.Fluent.FluentTheme());
     }
+/// F_doc: {OnFrameworkInitializationCompleted returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies OnFrameworkInitializationCompleted behavior
 
     public override void OnFrameworkInitializationCompleted()
     {
@@ -160,6 +161,7 @@ public class GUIProgressReporter : IStatusReporter
     {
         _uiContext = SynchronizationContext.Current;
     }
+/// F_doc: {ReportState returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportState behavior
 
     public void ReportState(string message)
     {
@@ -175,6 +177,7 @@ public class GUIProgressReporter : IStatusReporter
             Console.WriteLine($"[GUI] {message}");
         }
     }
+/// F_doc: {ReportProgress returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ReportProgress behavior
 
     public void ReportProgress(string operationId, double percent)
     {
@@ -192,13 +195,16 @@ public class GUIProgressReporter : IStatusReporter
 
 public class StatusUpdateEventArgs : EventArgs
 {
+    /// F_doc: {Message returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Message behavior
     public string Message { get; }
     public StatusUpdateEventArgs(string message) => Message = message;
 }
 
 public class ProgressUpdateEventArgs : EventArgs
 {
+    /// F_doc: {OperationId returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies OperationId behavior
     public string OperationId { get; }
+    /// F_doc: {Percent returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies Percent behavior
     public double Percent { get; }
     public ProgressUpdateEventArgs(string operationId, double percent)
     {

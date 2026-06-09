@@ -1,4 +1,4 @@
-namespace Vantuz.Core.Tests;
+﻿namespace Vantuz.Core.Tests;
 
 using System;
 using System.Collections.Generic;
@@ -11,9 +11,10 @@ using Vantuz.Plugins.OS;
 using Xunit;
 
 /// <summary>
-/// Tests for DeltaAnalyzerQuery — ARM005 CQRS Query for delta analysis.
-/// Per INVARIANT_THEORY §1.2: falsifiable claims about file delta computation.
+/// Tests for DeltaAnalyzerQuery вЂ” ARM005 CQRS Query for delta analysis.
+/// Per INVARIANT_THEORY В§1.2: falsifiable claims about file delta computation.
 /// </summary>
+/// F_doc: {DeltaAnalyzerQueryTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DeltaAnalyzerQueryTests behavior
 public class DeltaAnalyzerQueryTests
 {
     /// <summary>

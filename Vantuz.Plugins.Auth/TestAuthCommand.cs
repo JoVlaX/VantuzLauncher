@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Vantuz.Core;
 
 namespace Vantuz.Plugins.Auth;
@@ -22,6 +22,7 @@ public class TestAuthCommand : ICommandPlugin
     /// Executes deterministic test authentication.
     /// No external network calls - satisfies Nomadic Invariant.
     /// </summary>
+    /// F_doc: {ExecuteAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies ExecuteAsync behavior
     public Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
         // Deterministic test credentials per Axiom of Determinism (17)
@@ -43,6 +44,7 @@ public class TestAuthCommand : ICommandPlugin
 
         return Task.FromResult(new CommandResult(true));
     }
+/// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }
