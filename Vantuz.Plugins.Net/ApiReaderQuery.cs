@@ -19,11 +19,11 @@ public class ApiReaderQuery : IQueryPlugin
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
-        string url = stepConfig.GetProperty("url").GetString()
-            ?? throw new InvalidOperationException("URL is missing in step config");
+        if (!stepConfig.TryGetProperty("url", out var urlProp) || urlProp.GetString() is not { } url)
+            throw new InvalidOperationException("URL is missing in step config");
 
-        string payloadKey = stepConfig.GetProperty("payloadKey").GetString()
-            ?? throw new InvalidOperationException("payloadKey is missing in step config");
+        if (!stepConfig.TryGetProperty("payloadKey", out var payloadKeyProp) || payloadKeyProp.GetString() is not { } payloadKey)
+            throw new InvalidOperationException("payloadKey is missing in step config");
 
         bool ignoreSslErrors = stepConfig.TryGetProperty("ignoreSslErrors", out var sslProp)
             && sslProp.GetBoolean();

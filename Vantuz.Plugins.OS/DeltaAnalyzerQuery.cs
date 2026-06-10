@@ -20,6 +20,8 @@ public class DeltaAnalyzerQuery : IQueryPlugin
 
     public async Task<object?> ExecuteAsync(QueryContext context, JsonElement stepConfig)
     {
+        string mcDir = context.Get<string>("mcDir") ?? throw new InvalidOperationException("mcDir is missing in context");
+
         // РџРђРўРўР•Р Рќ GRACEFUL SKIP
         var targetState = context.Get<List<FileState>>("TargetState");
 
@@ -38,7 +40,6 @@ public class DeltaAnalyzerQuery : IQueryPlugin
         }
 
         var purgeZones = context.Get<List<string>>("PurgeZones") ?? new List<string>();
-        string mcDir = context.Get<string>("mcDir") ?? throw new InvalidOperationException("mcDir is missing in context");
 
         context.Reporter.ReportState("РђРЅР°Р»РёР· РёР·РјРµРЅРµРЅРёР№ Рё РґРµРґСѓРїР»РёРєР°С†РёСЏ...");
 

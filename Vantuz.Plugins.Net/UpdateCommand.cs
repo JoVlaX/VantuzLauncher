@@ -36,8 +36,8 @@ namespace Vantuz.Plugins.Net
                 return new CommandResult(true);
             } 
 
-            string url = stepConfig.GetProperty("url").GetString()
-                ?? throw new InvalidOperationException("URL is missing in UpdateCommand"); 
+            if (!stepConfig.TryGetProperty("url", out var urlProp) || urlProp.GetString() is not { } url)
+                throw new InvalidOperationException("URL is missing in UpdateCommand"); 
             url = Interpolate(url, context); 
  
             string baseDir = AppDomain.CurrentDomain.BaseDirectory; 

@@ -192,12 +192,13 @@ public static class PluginNameVerifier
                     if (type.IsInterface || type.IsAbstract || type.IsValueType) continue;
 
                     // ExecuteAsync is the universal pipeline method; do not treat as Command
+                    // IsSpecialName excludes property accessors (get_*, set_*) which trigger false positives
                     bool hasCommand = type.Interfaces.Any(i =>
                         i.InterfaceType.Name.Contains("Command")) ||
-                        type.Methods.Any(m => m.Name.Contains("Command") && !m.Name.Contains("ExecuteAsync"));
+                        type.Methods.Any(m => !m.IsSpecialName && m.Name.Contains("Command") && !m.Name.Contains("ExecuteAsync"));
                     bool hasQuery = type.Interfaces.Any(i =>
                         i.InterfaceType.Name.Contains("Query")) ||
-                        type.Methods.Any(m => m.Name.Contains("Query") || m.Name.Contains("Get"));
+                        type.Methods.Any(m => !m.IsSpecialName && (m.Name.Contains("Query") || m.Name.Contains("Get")));
 
                     if (hasCommand && hasQuery)
                     {
@@ -262,7 +263,8 @@ public static class PluginNameVerifier
         {
             "mscorlib", "System", "System.Core", "netstandard", "System.Runtime",
             "System.Collections", "System.Linq", "System.Text.Json", "System.Diagnostics",
-            "System.IO", "System.Net.Http", "System.Private.CoreLib", "Mono.Cecil"
+            "System.IO", "System.Net.Http", "System.Private.CoreLib", "Mono.Cecil",
+            "Vantuz.Core"
         };
 
         foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
@@ -333,6 +335,9 @@ public static class PluginNameVerifier
         foreach (var dllPath in Directory.GetFiles(pluginsDir, "*.dll"))
         {
             var dllName = Path.GetFileNameWithoutExtension(dllPath);
+            // Skip test assemblies that legitimately use P/Invoke for GUI testing
+            if (dllName.EndsWith(".Tests", StringComparison.OrdinalIgnoreCase))
+                continue;
             // Skip third-party dependencies that legitimately use P/Invoke (GUI frameworks, compression, etc.)
             if (ThirdPartyPInvokeWhitelist.Any(w => dllName.StartsWith(w, StringComparison.OrdinalIgnoreCase)))
                 continue;

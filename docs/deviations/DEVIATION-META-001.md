@@ -6,7 +6,7 @@ parent_version: 1.1
 
 # Deviation Protocol META-001: Reflexive Measurability Violation in Audit Deliverables
 
-**Status:** Open
+**Status:** Resolved 2026-06-09
 **Created:** 2026-06-08T16:20:00+05:00
 **Deadline:** 2026-06-15T23:59:59+05:00
 **Owner:** Agent Cascade
@@ -54,6 +54,12 @@ Verification: Automated PowerShell script checks:
 
 `Test-Path scripts/verify-compliance-report.ps1` returns `$false`.
 
+## Resolution
+
+`scripts/verify-compliance-report.ps1` created and verified. Run against `api-contract-compliance-report-6010f6.md` returns VALID. Script checks: Self-Audit section present, zero "Open" rows without deviation, resolution descriptions for RESOLVED rows, specific columns in Self-Audit table, parent document references.
+
+**Closed:** 2026-06-09T18:00:00+05:00
+
 ## E_doc
 
-Run `scripts/verify-compliance-report.ps1` against `api-contract-compliance-report-6010f6.md` — it fails with "Verification script not found".
+Run `scripts/verify-compliance-report.ps1` against `api-contract-compliance-report-6010f6.md` — returns VALID.
