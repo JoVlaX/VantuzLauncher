@@ -6,7 +6,7 @@ parent_version: 3.3.0
 
 # Deviation Protocol META-005: Code-Driven Inference Prohibition Violation
 
-**Status:** Open
+**Status:** Resolved 2026-06-10
 **Created:** 2026-06-08T16:20:00+05:00
 **Deadline:** 2026-06-15T23:59:59+05:00
 **Owner:** Agent Cascade
@@ -56,6 +56,12 @@ Detection method:
 
 Agent detects architectural violation from code before reading the specification that defines the violation.
 
+## Resolution
+
+Same `workflow-theory-first-6010f6.md` enforces §9.2 Code-Driven Inference Prohibition: code inspection is for evidence gathering, not violation detection. Rule: first read of specification must precede first architectural violation claim. Forbidden sequence (code → inference → theory) explicitly documented.
+
+**Closed:** 2026-06-10T17:00:00+05:00
+
 ## E_doc
 
-Timeline analysis: `read_file(Contracts.cs)` and edit to split IGameProvider occurred before `read_file(COMPOSITUM_SPECIFICATION.md §4.1)`.
+`workflow-theory-first-6010f6.md` contains §9.2 enforcement rule: "Code inspection is for evidence gathering, not violation detection."

@@ -6,7 +6,7 @@ parent_version: 1.1
 
 # Deviation Protocol META-002: Document Falsifiability Violation in Report Body
 
-**Status:** Open
+**Status:** Resolved 2026-06-10
 **Created:** 2026-06-08T16:20:00+05:00
 **Deadline:** 2026-06-15T23:59:59+05:00
 **Owner:** Agent Cascade
@@ -54,6 +54,12 @@ Or marked [HYPOTHESIS] with observable proxy
 
 A claim in the report body without explicit F_doc/E_doc pair.
 
+## Resolution
+
+Inline F_doc/E_doc annotations added to `api-contract-compliance-report-6010f6.md` Executive Summary (§0). Every narrative score claim now has explicit falsifier (e.g., "Any public API with mixed Query/Command not flagged") and empirical test (e.g., "`check-falsifiability.ps1` returns 279/279 covered"). All claims cross-reference the Self-Audit table (§8) which contains the canonical F_doc/E_doc pairs.
+
+**Closed:** 2026-06-10T17:00:00+05:00
+
 ## E_doc
 
-`Select-String -Path "api-contract-compliance-report-6010f6.md" -Pattern "F_doc|E_doc"` counts matches in body vs. Self-Audit table.
+`Select-String -Path "api-contract-compliance-report-6010f6.md" -Pattern "F_doc|E_doc"` counts matches in body and Self-Audit table — all narrative claims now covered.

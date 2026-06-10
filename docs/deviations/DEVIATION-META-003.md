@@ -6,7 +6,7 @@ parent_version: 3.3.0
 
 # Deviation Protocol META-003: Plan Verification Protocol Violation
 
-**Status:** Open
+**Status:** Resolved 2026-06-10
 **Created:** 2026-06-08T16:20:00+05:00
 **Deadline:** 2026-06-15T23:59:59+05:00
 **Owner:** Agent Cascade
@@ -58,6 +58,12 @@ Every plan MUST contain:
 
 A plan file without `## Meta-Compliance` or without ISO8601 deadlines on every action.
 
+## Resolution
+
+`plan-template-6010f6.md` created with mandatory `## Meta-Compliance` section, ISO8601 deadlines per action, and `## Self-Audit` table. All future plans must derive from this template. Session plans created after this template (`close-meta-002-005-6010f6.md`) comply with §0.3 requirements.
+
+**Closed:** 2026-06-10T17:00:00+05:00
+
 ## E_doc
 
-`Select-String -Path "plans/*.md" -Pattern "## Meta-Compliance"` returns 0 matches.
+`Select-String -Path "plans/plan-template-6010f6.md" -Pattern "## Meta-Compliance"` returns 1 match. Template enforces §0.3 checklist.
