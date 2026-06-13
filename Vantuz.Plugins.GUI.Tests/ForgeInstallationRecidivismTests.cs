@@ -8,7 +8,7 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// <summary>
 /// Recidivism prevention test: verifies the Forge installer path is exercised
 /// in headless mode so we never again report "working" when Forge versions silently fail.
-/// Per INVARIANT_THEORY.md В§1.2 (Measurability) and В§17 (Determinism):
+/// Per INVARIANT_THEORY.md §1.2 (Measurability) and §17 (Determinism):
 /// this test runs fully headless with boot.test.json, no GUI window, no network calls.
 /// </summary>
 public class ForgeInstallationRecidivismTests : IDisposable
@@ -20,7 +20,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
     {
         foreach (var p in _processes.ToList())
         {
-            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -108,7 +108,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 JsonSerializer.Serialize(modifiedManifest, new JsonSerializerOptions { WriteIndented = true }));
             File.WriteAllText(Path.Combine(tempDir, ".portable"), "");
 
-            // 3. Launch headless process вЂ” no GUI window, deterministic per INVARIANT_THEORY.md
+            // 3. Launch headless process — no GUI window, deterministic per INVARIANT_THEORY.md
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -132,7 +132,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
             string stderr = proc.StandardError.ReadToEnd();
             if (!finished)
             {
-                try { if (!proc.HasExited) proc.Kill(); } catch { }
+                try { if (!proc.HasExited) proc.Kill(); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             }
 
             string combined = stdout + stderr;
@@ -148,8 +148,8 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 $"Combined output:\n{combined}");
 
             Assert.True(
-                combined.Contains("Forge СѓСЃС‚Р°РЅРѕРІР»РµРЅ:") ||
-                combined.Contains("РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё") ||
+                combined.Contains("Forge установлен:") ||
+                combined.Contains("пропуск установки") ||
                 combined.Contains("[DRY RUN] Installation of"),
                 "Neither Forge installation nor skip/dry-run message found. " +
                 "GameInstallerCommand may have failed before reaching the provider.\n" +
@@ -161,7 +161,7 @@ public class ForgeInstallationRecidivismTests : IDisposable
                 Assert.DoesNotContain("KeyNotFoundException", combined);
                 Assert.DoesNotContain("ExitCode: 1", combined);
                 Assert.True(
-                    combined.Contains("Stderr:") || combined.Contains("РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІРєРё"),
+                    combined.Contains("Stderr:") || combined.Contains("Ошибка установки"),
                     "Crash log contains a bare ExitCode without stderr context.\n" +
                     $"Combined output:\n{combined}");
             }
@@ -170,9 +170,9 @@ public class ForgeInstallationRecidivismTests : IDisposable
         {
             foreach (var p in _processes.ToList())
             {
-                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             }
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 }

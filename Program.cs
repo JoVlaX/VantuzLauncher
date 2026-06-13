@@ -95,7 +95,11 @@ class Program
             {
                 File.AppendAllText(crashLogPath, detailedMsg + "\n");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                // F_doc: {Crash log write fails silently} E_doc: {User still sees MessageBox with actionable info; log absence is non-fatal}
+                Console.Error.WriteLine($"Failed to write crash log: {ex.Message}");
+            }
 
             // Surface to user — WinExe hides console, so use Win32 MessageBox
             // Keep message user-friendly and actionable

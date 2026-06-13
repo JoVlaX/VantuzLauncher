@@ -5,7 +5,7 @@ using Xunit;
 namespace Vantuz.Core.Tests;
 
 /// <summary>
-/// GUI-mode process lifecycle verification per AGENT_FAILURE_ANALYSIS.md В§6.5 (R4, R5).
+/// GUI-mode process lifecycle verification per AGENT_FAILURE_ANALYSIS.md §6.5 (R4, R5).
 /// Ensures double-clicking the EXE creates a window and closing it kills the process cleanly.
 /// </summary>
 [Collection("GUI Sequential")]
@@ -29,7 +29,7 @@ public class GuiModeProcessTests : IDisposable
         // interfering with parallel ForgeInstallationRecidivismTests
         foreach (var p in _ownedProcesses)
         {
-            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(2_000); } } catch { }
+            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(2_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -67,20 +67,20 @@ public class GuiModeProcessTests : IDisposable
         Assert.NotNull(proc);
         _ownedProcesses.Add(proc);
 
-        // Wait up to 30s for a window handle (R4) вЂ” increased for parallel test runs
+        // Wait up to 30s for a window handle (R4) — increased for parallel test runs
         bool windowAppeared = SpinWait.SpinUntil(() => { proc.Refresh(); return proc.MainWindowHandle != IntPtr.Zero; }, TimeSpan.FromSeconds(30));
         Assert.True(windowAppeared, "MainWindowHandle was not created within 30 seconds");
 
-        // Graceful close via WM_CLOSE (R5) вЂ” Avalonia does not respond to Process.CloseMainWindow()
+        // Graceful close via WM_CLOSE (R5) — Avalonia does not respond to Process.CloseMainWindow()
         bool closed = SendMessage(proc.MainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero) != IntPtr.Zero;
         if (!closed)
         {
             proc.Kill();
         }
 
-        // Wait up to 20s for exit вЂ” increased for parallel test runs
+        // Wait up to 20s for exit — increased for parallel test runs
         bool exited = proc.WaitForExit(20_000);
-        Assert.True(exited, "Process did not exit within 20 seconds after window close вЂ” potential zombie");
+        Assert.True(exited, "Process did not exit within 20 seconds after window close — potential zombie");
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class GuiModeProcessTests : IDisposable
         string traceLogPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             ".vantuzlauncher", "launcher_trace.log");
-        try { File.Delete(traceLogPath); } catch { }
+        try { File.Delete(traceLogPath); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
 
         using var proc = Process.Start(new ProcessStartInfo(exe)
         {
@@ -131,7 +131,7 @@ public class GuiModeProcessTests : IDisposable
         Assert.NotNull(proc);
         _ownedProcesses.Add(proc);
 
-        // R4: wait for main window вЂ” increased for parallel test runs
+        // R4: wait for main window — increased for parallel test runs
         bool windowAppeared = SpinWait.SpinUntil(
             () => { proc.Refresh(); return proc.MainWindowHandle != IntPtr.Zero; },
             TimeSpan.FromSeconds(30));
@@ -140,7 +140,7 @@ public class GuiModeProcessTests : IDisposable
         // Let the pipeline run for a few seconds (enough for GUI plugin + version validation)
         Thread.Sleep(5_000);
 
-        // Graceful shutdown вЂ” Avalonia does not respond to Process.CloseMainWindow()
+        // Graceful shutdown — Avalonia does not respond to Process.CloseMainWindow()
         SendMessage(proc.MainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
         if (!proc.WaitForExit(5_000))
         {

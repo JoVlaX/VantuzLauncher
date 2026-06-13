@@ -169,7 +169,12 @@ public class MinecraftGameCommandProvider : IGameCommandProvider
                 finally
                 {
                     cts.Cancel();
-                    try { await heartbeatTask; } catch { }
+                    try { await heartbeatTask; }
+                    catch (Exception ex)
+                    {
+                        // F_doc: {Heartbeat task throws after cancellation} E_doc: {Cancelled task is expected; finally must complete regardless}
+                        Console.Error.WriteLine($"Heartbeat cleanup: {ex.Message}");
+                    }
                 }
             }
             /// F_doc: {DisposeAsync returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DisposeAsync behavior

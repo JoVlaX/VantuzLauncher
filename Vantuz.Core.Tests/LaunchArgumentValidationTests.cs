@@ -8,7 +8,7 @@ namespace Vantuz.Core.Tests;
 
 /// <summary>
 /// Tests for pre-flight validation and early-failure paths in launch-related commands.
-/// Per INVARIANT_THEORY.md В§4.1: falsifiable claims about argument correctness.
+/// Per INVARIANT_THEORY.md §4.1: falsifiable claims about argument correctness.
 /// </summary>
 /// F_doc: {LaunchArgumentValidationTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies LaunchArgumentValidationTests behavior
 public class LaunchArgumentValidationTests
@@ -68,7 +68,7 @@ public class LaunchArgumentValidationTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -124,7 +124,7 @@ public class LaunchArgumentValidationTests
     }
 
     /// <summary>
-    /// E_doc: Full chain GameLaunchCommand в†’ OS.ExecuteCommand works when variables are properly resolved.
+    /// E_doc: Full chain GameLaunchCommand → OS.ExecuteCommand works when variables are properly resolved.
     /// F_doc: Reproduces the 2026-06-07 crash where unresolved {{mcDir}} leaked into gameArgs.
     /// </summary>
     [Fact]
@@ -191,7 +191,7 @@ public class LaunchArgumentValidationTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 

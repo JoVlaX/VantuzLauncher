@@ -7,7 +7,7 @@ namespace Vantuz.Core.Tests;
 
 /// <summary>
 /// GUI pipeline positive verification tests.
-/// Per INVARIANT_THEORY.md В§1.2: a claim must be falsifiable by a positive observation.
+/// Per INVARIANT_THEORY.md §1.2: a claim must be falsifiable by a positive observation.
 /// These tests assert that the GUI manifest (boot.json) pipeline can be fully resolved
 /// to loaded plugin classes, closing the gap between "build succeeds" and "GUI pipeline works".
 /// </summary>
@@ -66,7 +66,7 @@ public class GuiPipelinePositiveVerificationTests
         }
         finally
         {
-            try { Directory.Delete(workspace, true); } catch { }
+            try { Directory.Delete(workspace, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -142,7 +142,7 @@ public class GuiPipelinePositiveVerificationTests
         }
         finally
         {
-            try { Directory.Delete(workspace, true); } catch { }
+            try { Directory.Delete(workspace, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 

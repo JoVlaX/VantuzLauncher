@@ -12,7 +12,7 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// waits for Avalonia plugin window "Vantuz Minecraft Launcher", enters credentials
 /// via UI Automation, clicks Play, and asserts all pipeline step completion markers
 /// are present in launcher_trace.log.
-/// Per COMPOSITUM_SPECIFICATION.md В§4.1: GUI is a Category (plugin) concern, not Product.
+/// Per COMPOSITUM_SPECIFICATION.md §4.1: GUI is a Category (plugin) concern, not Product.
 /// </summary>
 [Collection("GUI Sequential")]
 public class GuiModeE2ETests : IDisposable
@@ -24,7 +24,7 @@ public class GuiModeE2ETests : IDisposable
     {
         foreach (var p in _processes.ToList())
         {
-            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -59,10 +59,10 @@ public class GuiModeE2ETests : IDisposable
                             return candidate;
                         }
                     }
-                    catch { }
+                    catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
                 }
             }
-            catch { }
+            catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             Thread.Sleep(200);
         }
         return null;
@@ -82,7 +82,7 @@ public class GuiModeE2ETests : IDisposable
                     return candidate;
                 }
             }
-            catch { }
+            catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             Thread.Sleep(200);
         }
         return null;
@@ -122,7 +122,7 @@ public class GuiModeE2ETests : IDisposable
                 Thread.Sleep(500);
             }
         }
-        catch { }
+        catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
     }
 
     private static void SendChar(char c)
@@ -253,7 +253,7 @@ public class GuiModeE2ETests : IDisposable
                                traceLog.Contains("[STEP] Game.LaunchCommand completed");
                         if (completed) break;
                     }
-                    catch { }
+                    catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
                 }
                 Thread.Sleep(500);
             }
@@ -276,9 +276,9 @@ public class GuiModeE2ETests : IDisposable
             // Cleanup: kill process and remove temp directory
             foreach (var p in _processes.ToList())
             {
-                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             }
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 }

@@ -70,7 +70,11 @@ public class AsyncFileReporter : IStatusReporter, IAsyncDisposable
         {
             await _processTask;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            // F_doc: {ProcessLogsAsync throws after cancellation} E_doc: {Writer disposal must proceed regardless; cancelled task is expected}
+            Console.Error.WriteLine($"AsyncFileReporter dispose: {ex.Message}");
+        }
         finally
         {
             await _writer.DisposeAsync();

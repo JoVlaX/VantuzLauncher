@@ -10,7 +10,7 @@ namespace Vantuz.Plugins.GUI.Tests;
 
 /// <summary>
 /// Recidivism prevention test: verifies that GUI-mode pipeline with OS.ExecuteCommand
-/// (waitForExit=false) does NOT hang the launcher. Per INVARIANT_THEORY.md В§1.2 and В§17.
+/// (waitForExit=false) does NOT hang the launcher. Per INVARIANT_THEORY.md §1.2 and §17.
 /// </summary>
 [Collection("GUI Sequential")]
 public class GuiModeFireAndForgetRecidivismTests : IDisposable
@@ -22,7 +22,7 @@ public class GuiModeFireAndForgetRecidivismTests : IDisposable
     {
         foreach (var p in _processes.ToList())
         {
-            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -182,9 +182,9 @@ public class GuiModeFireAndForgetRecidivismTests : IDisposable
         {
             foreach (var p in _processes.ToList())
             {
-                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             }
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 }

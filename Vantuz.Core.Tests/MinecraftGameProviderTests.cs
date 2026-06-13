@@ -5,9 +5,9 @@ using Vantuz.Plugins.Minecraft;
 using Xunit;
 
 /// <summary>
-/// Tests for MinecraftGameQueryProvider вЂ” the layer that CmlLib uses to check version
+/// Tests for MinecraftGameQueryProvider — the layer that CmlLib uses to check version
 /// existence and parse Forge version strings.
-/// Per INVARIANT_THEORY.md В§1.2: falsifiable claims about version detection.
+/// Per INVARIANT_THEORY.md §1.2: falsifiable claims about version detection.
 /// </summary>
 /// F_doc: {MinecraftGameQueryProviderTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies MinecraftGameQueryProviderTests behavior
 public class MinecraftGameQueryProviderTests
@@ -85,7 +85,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -114,7 +114,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -158,7 +158,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -202,7 +202,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -229,7 +229,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -253,7 +253,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -306,12 +306,12 @@ public class MinecraftGameQueryProviderTests
             var result = await command.ExecuteAsync(context, stepConfig);
 
             Assert.True(result.Success);
-            Assert.Contains("СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅР°", reporter.Logs[^1]); // "Р’РµСЂСЃРёСЏ ... СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІР»РµРЅР°, РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё."
+            Assert.Contains("уже установлена", reporter.Logs[^1]); // "Версия ... уже установлена, пропуск установки."
             Assert.True(context.Get<bool>("InstallSkipped"));
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -372,7 +372,7 @@ public class MinecraftGameQueryProviderTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 

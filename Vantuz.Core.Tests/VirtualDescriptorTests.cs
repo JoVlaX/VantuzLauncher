@@ -7,8 +7,8 @@ using Vantuz.Core;
 using Xunit;
 
 /// <summary>
-/// Tests for VirtualDescriptor вЂ” ARM002/ARM003 lightweight descriptor system.
-/// Per INVARIANT_THEORY В§1.2: falsifiable claims about descriptor lifecycle.
+/// Tests for VirtualDescriptor — ARM002/ARM003 lightweight descriptor system.
+/// Per INVARIANT_THEORY §1.2: falsifiable claims about descriptor lifecycle.
 /// </summary>
 /// F_doc: {VirtualDescriptorTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies VirtualDescriptorTests behavior
 public class VirtualDescriptorTests
@@ -96,12 +96,12 @@ public class VirtualDescriptorTests
         finally
         {
             Environment.CurrentDirectory = originalDir;
-            try { File.Delete(Path.Combine(Path.GetTempPath(), relativePath)); } catch { }
+            try { File.Delete(Path.Combine(Path.GetTempPath(), relativePath)); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
     /// <summary>
-    /// E_doc: SaveToFileAsync rejects absolute paths per Nomadic Invariant В§3.2.
+    /// E_doc: SaveToFileAsync rejects absolute paths per Nomadic Invariant §3.2.
     /// F_doc: Absolute path accepted without exception.
     /// </summary>
     [Fact]

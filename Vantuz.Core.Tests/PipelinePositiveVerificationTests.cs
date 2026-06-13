@@ -7,7 +7,7 @@ namespace Vantuz.Core.Tests;
 
 /// <summary>
 /// Positive verification tests for the Vantuz pipeline.
-/// Per INVARIANT_THEORY.md В§1.2: a claim must be falsifiable by a positive observation.
+/// Per INVARIANT_THEORY.md §1.2: a claim must be falsifiable by a positive observation.
 /// These tests assert that specific pipeline steps actually executed and logged completion markers,
 /// not merely that no crash occurred.
 /// </summary>
@@ -79,11 +79,11 @@ public class PipelinePositiveVerificationTests
 
             // Positive assertion 3: downstream payload mutations exist (proof pipeline produced data)
             Assert.NotNull(result.Payload);
-            Assert.True(result.Payload.ContainsKey("workspace"), "Payload missing 'workspace' вЂ” pipeline did not propagate initial payload");
+            Assert.True(result.Payload.ContainsKey("workspace"), "Payload missing 'workspace' — pipeline did not propagate initial payload");
         }
         finally
         {
-            try { Directory.Delete(workspace, true); } catch { }
+            try { Directory.Delete(workspace, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 

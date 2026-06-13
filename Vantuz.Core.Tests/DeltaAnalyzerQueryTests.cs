@@ -11,8 +11,8 @@ using Vantuz.Plugins.OS;
 using Xunit;
 
 /// <summary>
-/// Tests for DeltaAnalyzerQuery вЂ” ARM005 CQRS Query for delta analysis.
-/// Per INVARIANT_THEORY В§1.2: falsifiable claims about file delta computation.
+/// Tests for DeltaAnalyzerQuery — ARM005 CQRS Query for delta analysis.
+/// Per INVARIANT_THEORY §1.2: falsifiable claims about file delta computation.
 /// </summary>
 /// F_doc: {DeltaAnalyzerQueryTests returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies DeltaAnalyzerQueryTests behavior
 public class DeltaAnalyzerQueryTests
@@ -82,7 +82,7 @@ public class DeltaAnalyzerQueryTests
         }
         finally
         {
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 

@@ -8,7 +8,7 @@ namespace Vantuz.Plugins.GUI.Tests;
 /// <summary>
 /// Recidivism prevention test: verifies the launch path is exercised in headless mode
 /// so we never again claim "working" when authlib is missing or the JVM crashes on start.
-/// Per INVARIANT_THEORY.md В§1.2 (Measurability) and В§17 (Determinism):
+/// Per INVARIANT_THEORY.md §1.2 (Measurability) and §17 (Determinism):
 /// this test runs fully headless with boot.test.json, no GUI window, no network calls.
 /// </summary>
 public class RealLaunchRecidivismTests : IDisposable
@@ -20,7 +20,7 @@ public class RealLaunchRecidivismTests : IDisposable
     {
         foreach (var p in _processes.ToList())
         {
-            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 
@@ -113,7 +113,7 @@ public class RealLaunchRecidivismTests : IDisposable
             // 3. Place a mock authlib so Game.LaunchCommand does not fail on missing file
             File.WriteAllText(authlibPath, "MOCK_AUTHLIB");
 
-            // 4. Launch headless process вЂ” no GUI window, deterministic per INVARIANT_THEORY.md
+            // 4. Launch headless process — no GUI window, deterministic per INVARIANT_THEORY.md
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -137,7 +137,7 @@ public class RealLaunchRecidivismTests : IDisposable
             string stderr = proc.StandardError.ReadToEnd();
             if (!finished)
             {
-                try { if (!proc.HasExited) proc.Kill(); } catch { }
+                try { if (!proc.HasExited) proc.Kill(); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             }
 
             string combined = stdout + stderr;
@@ -148,8 +148,8 @@ public class RealLaunchRecidivismTests : IDisposable
 
             // Forge installation step must have been reached (dryRun or real)
             Assert.True(
-                combined.Contains("Forge СѓСЃС‚Р°РЅРѕРІР»РµРЅ:") ||
-                combined.Contains("РїСЂРѕРїСѓСЃРє СѓСЃС‚Р°РЅРѕРІРєРё") ||
+                combined.Contains("Forge установлен:") ||
+                combined.Contains("пропуск установки") ||
                 combined.Contains("[DRY RUN] Installation of"),
                 "Forge installation was not reached or skipped.\n" +
                 $"Combined output:\n{combined}");
@@ -181,9 +181,9 @@ public class RealLaunchRecidivismTests : IDisposable
         {
             foreach (var p in _processes.ToList())
             {
-                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch { }
+                try { if (!p.HasExited) { p.Kill(); p.WaitForExit(5_000); } } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
             }
-            try { Directory.Delete(tempDir, true); } catch { }
+            try { Directory.Delete(tempDir, true); } catch (Exception ex) { /* F_doc: {Cleanup or retry may throw} E_doc: {Test continues; failure non-fatal to test objective} */ }
         }
     }
 }
