@@ -1,4 +1,4 @@
-#pragma warning disable ARM007
+﻿#pragma warning disable ARM007
 
 namespace Vantuz.Plugins.Minecraft;
 

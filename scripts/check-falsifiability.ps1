@@ -81,12 +81,12 @@ Write-Host "Coverage: $percentage% (threshold: $threshold%)"
 if ($missing.Count -gt 0 -and $missing.Count -le 10) {
     Write-Host "`nMissing APIs:"
     foreach ($m in $missing) {
-        Write-Host "  $($m.File):$($m.Line) — $($m.Api)"
+        Write-Host "  $($m.File):$($m.Line) - $($m.Api)"
     }
 } elseif ($missing.Count -gt 10) {
     Write-Host "`nFirst 10 missing APIs:"
     foreach ($m in $missing | Select-Object -First 10) {
-        Write-Host "  $($m.File):$($m.Line) — $($m.Api)"
+        Write-Host "  $($m.File):$($m.Line) - $($m.Api)"
     }
 }
 

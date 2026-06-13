@@ -1,4 +1,4 @@
-namespace Vantuz.Host;
+﻿namespace Vantuz.Host;
 
 using System;
 using System.Collections.Generic;

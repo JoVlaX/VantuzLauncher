@@ -1,4 +1,4 @@
-namespace Vantuz.Core.Tests;
+﻿namespace Vantuz.Core.Tests;
 
 using System;
 using System.Collections.Generic;

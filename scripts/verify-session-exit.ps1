@@ -68,6 +68,33 @@ try {
     } else { Register "recidivism-self-audit" "PASS" "No report" }
 } catch { Register "recidivism-self-audit" "FAIL" $_.Exception.Message 1 }
 
+# Step 6: encoding
+Write-Host ""
+Write-Host "=== STEP: verify-encoding ==="
+try {
+    & "$scriptDir\verify-encoding.ps1" -ProjectRoot $ProjectRoot | Out-Null
+    if ($LASTEXITCODE -eq 0) { Register "verify-encoding" "PASS" "All .cs UTF-8-BOM" }
+    else { Register "verify-encoding" "FAIL" "Encoding violations" $LASTEXITCODE }
+} catch { Register "verify-encoding" "FAIL" $_.Exception.Message 1 }
+
+# Step 7: exhaustive-audit
+Write-Host ""
+Write-Host "=== STEP: exhaustive-audit ==="
+try {
+    & "$scriptDir\exhaustive-audit.ps1" -ProjectRoot $ProjectRoot -PlansDir $PlansDir | Out-Null
+    if ($LASTEXITCODE -eq 0) { Register "exhaustive-audit" "PASS" "All categories PASS" }
+    else { Register "exhaustive-audit" "FAIL" "Audit failures" $LASTEXITCODE }
+} catch { Register "exhaustive-audit" "FAIL" $_.Exception.Message 1 }
+
+# Step 8: invariant-gate
+Write-Host ""
+Write-Host "=== STEP: invariant-gate ==="
+try {
+    & "$scriptDir\invariant-gate.ps1" -ProjectRoot $ProjectRoot | Out-Null
+    if ($LASTEXITCODE -eq 0) { Register "invariant-gate" "PASS" "Solution invariants OK" }
+    else { Register "invariant-gate" "FAIL" "Gate blocked" $LASTEXITCODE }
+} catch { Register "invariant-gate" "FAIL" $_.Exception.Message 1 }
+
 # Summary
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

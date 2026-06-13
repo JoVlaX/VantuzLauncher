@@ -46,6 +46,8 @@ class Program
 
     static async Task RunGuiModeAsync()
     {
+        Win32SplashScreen.Show();
+
         try
         {
             string testFile = Path.Combine(WorkspacePath, ".access_test");
@@ -54,9 +56,10 @@ class Program
         }
         catch (UnauthorizedAccessException)
         {
-            string msg = $"РћС€РёР±РєР° РґРѕСЃС‚СѓРїР°! РќРµС‚ РїСЂР°РІ РЅР° Р·Р°РїРёСЃСЊ РІ СЂР°Р±РѕС‡СѓСЋ РїР°РїРєСѓ:\n{WorkspacePath}\nР—Р°РїСѓСЃС‚РёС‚Рµ РѕС‚ РёРјРµРЅРё РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР° РёР»Рё СѓРґР°Р»РёС‚Рµ С„Р°Р№Р» .portable.";
+            Win32SplashScreen.Close();
+            string msg = $"Ошибка доступа! Нет прав на запись в рабочую папку:\n{WorkspacePath}\nЗапустите от имени Администратора или удалите файл .portable.";
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher вЂ” РћС€РёР±РєР° РґРѕСЃС‚СѓРїР°", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, "Vantuz Launcher — Ошибка доступа", MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -82,6 +85,7 @@ class Program
 
         if (!result.Success)
         {
+            Win32SplashScreen.Close();
             string error = result.ErrorMessage ?? "Unknown error";
             string detailedMsg = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Pipeline failed: {error}";
             Console.Error.WriteLine(detailedMsg);
@@ -93,15 +97,17 @@ class Program
             }
             catch { }
 
-            // Surface to user вЂ” WinExe hides console, so use Win32 MessageBox
+            // Surface to user — WinExe hides console, so use Win32 MessageBox
             // Keep message user-friendly and actionable
-            string userFriendly = $"РћС€РёР±РєР° Р·Р°РїСѓСЃРєР°:\n{error}\n\nРџРѕРґСЂРѕР±РЅРѕСЃС‚Рё Р·Р°РїРёСЃР°РЅС‹ РІ:\n{crashLogPath}";
-            MessageBoxW(0, userFriendly, "Vantuz Launcher вЂ” РћС€РёР±РєР°", MB_OK | MB_ICONERROR);
+            string userFriendly = $"Ошибка запуска:\n{error}\n\nПодробности записаны в:\n{crashLogPath}";
+            MessageBoxW(0, userFriendly, "Vantuz Launcher — Ошибка", MB_OK | MB_ICONERROR);
 
             // Give the dialog a moment to render before the process exits
             await Task.Delay(100);
             Environment.Exit(1);
         }
+
+        Win32SplashScreen.Close();
 
         if (result.Payload != null &&
             result.Payload.TryGetValue("UpdateReady", out var updateReadyObj) &&

@@ -108,6 +108,7 @@ public class DeltaAnalyzerQueryTests
     {
         public System.Collections.Generic.List<string> Logs { get; } = new();
         public void ReportState(string message) => Logs.Add(message);
+        /// F_doc: {ReportProgress logs incorrect format or throws} E_doc: Unit test or static analysis verifies format
         public void ReportProgress(string taskName, double percentage) => Logs.Add($"[{taskName}] {percentage:F1}%");
     }
 }
