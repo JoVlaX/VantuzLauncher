@@ -55,7 +55,7 @@ if ($newCs) {
 Write-Host "--- INV-002: CQRS Separation ---" -ForegroundColor Yellow
 if ($newCs) {
     try {
-        $out = & "$scriptDir\audit-compliance.ps1" -SourcePath $ProjectRoot 2>&1
+        $out = & "$scriptDir\audit-compliance.ps1" -SourcePath $ProjectRoot -OutputPath "$ProjectRoot\audit-report.json" 2>&1
         if ($LASTEXITCODE -eq 0) { Register "INV-002" "PASS" "CQRS separation maintained" }
         else { Register "INV-002" "FAIL" "CQRS violation introduced" $LASTEXITCODE }
     } catch { Register "INV-002" "FAIL" $_.Exception.Message 1 }

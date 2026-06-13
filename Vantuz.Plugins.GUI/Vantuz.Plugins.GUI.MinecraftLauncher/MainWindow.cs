@@ -61,7 +61,7 @@ public class MainWindow : Window, ICredentialProvider
         LoadSavedConfig();
 
         LogTextBox.Text = $"[{DateTime.Now:HH:mm:ss}] GUI initialized\n";
-        StatusText.Text = "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ";
+        StatusText.Text = "Введите логин и пароль";
         VersionText.Text = $"v{DateTime.Now:yyyyMMdd.HHmm}";
 
         if (autoSubmitTestCredentials)
@@ -113,48 +113,48 @@ public class MainWindow : Window, ICredentialProvider
         var scroll = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         var leftStack = new StackPanel { Margin = new Thickness(20) };
 
-        leftStack.Children.Add(new TextBlock { Text = "Р’РҐРћР”", FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 15), FontSize = 12 });
+        leftStack.Children.Add(new TextBlock { Text = Properties.Resources.HeaderLogin, FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 15), FontSize = 12 });
 
-        leftStack.Children.Add(new TextBlock { Text = "Р›РћР“РРќ", Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 5) });
+        leftStack.Children.Add(new TextBlock { Text = Properties.Resources.LabelUsername, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 5) });
         var uBorder = new Border { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), CornerRadius = new CornerRadius(4), Margin = new Thickness(0, 0, 0, 12) };
         UsernameBox = new TextBox { Background = Brushes.Transparent, Foreground = Brushes.White, BorderThickness = new Thickness(0), Padding = new Thickness(10, 8, 10, 8), FontSize = 13, CaretBrush = Brushes.White };
         AutomationProperties.SetAutomationId(UsernameBox, "UsernameBox");
         uBorder.Child = UsernameBox;
         leftStack.Children.Add(uBorder);
 
-        leftStack.Children.Add(new TextBlock { Text = "РџРђР РћР›Р¬", Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 5) });
+        leftStack.Children.Add(new TextBlock { Text = Properties.Resources.LabelPassword, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 5) });
         var pBorder = new Border { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), CornerRadius = new CornerRadius(4), Margin = new Thickness(0, 0, 0, 10) };
         PasswordBox = new TextBox { Background = Brushes.Transparent, Foreground = Brushes.White, BorderThickness = new Thickness(0), Padding = new Thickness(10, 8, 10, 8), FontSize = 13, CaretBrush = Brushes.White, PasswordChar = '*' };
         AutomationProperties.SetAutomationId(PasswordBox, "PasswordBox");
         pBorder.Child = PasswordBox;
         leftStack.Children.Add(pBorder);
 
-        RememberMeBox = new CheckBox { Content = "Р—Р°РїРѕРјРЅРёС‚СЊ РјРµРЅСЏ", Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), Margin = new Thickness(0, 0, 0, 25), FontSize = 11 };
+        RememberMeBox = new CheckBox { Content = Properties.Resources.CheckRememberMe, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), Margin = new Thickness(0, 0, 0, 25), FontSize = 11 };
         leftStack.Children.Add(RememberMeBox);
 
-        leftStack.Children.Add(new TextBlock { Text = "РќРђРЎРўР РћР™РљР", FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 15), FontSize = 12 });
-        leftStack.Children.Add(new TextBlock { Text = "Р’Р«Р”Р•Р›Р•РќРР• РћР—РЈ", Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 8) });
+        leftStack.Children.Add(new TextBlock { Text = Properties.Resources.HeaderSettings, FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 15), FontSize = 12 });
+        leftStack.Children.Add(new TextBlock { Text = Properties.Resources.LabelRamAllocation, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 8) });
 
         RamSlider = new Slider { Minimum = 1024, Maximum = 16384, SmallChange = 512, LargeChange = 1024, Value = 4096, TickFrequency = 512, Margin = new Thickness(0, 0, 0, 5) };
         leftStack.Children.Add(RamSlider);
 
-        RamText = new TextBlock { Text = "Р’С‹РґРµР»РµРЅРѕ: 4096 РњР‘", Foreground = Brushes.White, FontSize = 11, Margin = new Thickness(0, 0, 0, 20), FontWeight = FontWeight.SemiBold };
+        RamText = new TextBlock { Text = string.Format(Properties.Resources.RamAllocatedFormat, 4096), Foreground = Brushes.White, FontSize = 11, Margin = new Thickness(0, 0, 0, 20), FontWeight = FontWeight.SemiBold };
         leftStack.Children.Add(RamText);
 
-        PlayButton = new Button { Content = "РР“Р РђРўР¬", Height = 45, Background = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)), Foreground = Brushes.White, FontWeight = FontWeight.Bold, FontSize = 14, BorderThickness = new Thickness(0) };
+        PlayButton = new Button { Content = Properties.Resources.ButtonPlay, Height = 45, Background = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)), Foreground = Brushes.White, FontWeight = FontWeight.Bold, FontSize = 14, BorderThickness = new Thickness(0) };
         AutomationProperties.SetAutomationId(PlayButton, "PlayButton");
         PlayButton.Click += PlayButton_Click;
         leftStack.Children.Add(PlayButton);
 
-        CancelButton = new Button { Content = "РћС‚РјРµРЅР°", Height = 35, Background = Brushes.Transparent, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 12, BorderThickness = new Thickness(1), BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)), Margin = new Thickness(0, 10, 0, 0), IsVisible = false };
+        CancelButton = new Button { Content = Properties.Resources.ButtonCancel, Height = 35, Background = Brushes.Transparent, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 12, BorderThickness = new Thickness(1), BorderBrush = new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x55)), Margin = new Thickness(0, 10, 0, 0), IsVisible = false };
         CancelButton.Click += CancelButton_Click;
         leftStack.Children.Add(CancelButton);
 
         ProgressPanel = new StackPanel { IsVisible = false, Margin = new Thickness(0, 20, 0, 0) };
-        ProgressPanel.Children.Add(new TextBlock { Text = "РЎРўРђРўРЈРЎ", FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 10), FontSize = 12 });
+        ProgressPanel.Children.Add(new TextBlock { Text = Properties.Resources.HeaderStatus, FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 10), FontSize = 12 });
 
         var sBorder = new Border { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), CornerRadius = new CornerRadius(4), Padding = new Thickness(10), Margin = new Thickness(0, 0, 0, 10) };
-        StatusText = new TextBlock { Text = "РџРѕРґРіРѕС‚РѕРІРєР°...", TextWrapping = TextWrapping.Wrap, Foreground = new SolidColorBrush(Color.FromRgb(0xDD, 0xDD, 0xDD)), FontSize = 11 };
+        StatusText = new TextBlock { Text = Properties.Resources.StatusPreparing, TextWrapping = TextWrapping.Wrap, Foreground = new SolidColorBrush(Color.FromRgb(0xDD, 0xDD, 0xDD)), FontSize = 11 };
         sBorder.Child = StatusText;
         ProgressPanel.Children.Add(sBorder);
 
@@ -217,7 +217,7 @@ public class MainWindow : Window, ICredentialProvider
             if (e.Property == Slider.ValueProperty)
             {
                 int value = (int)RamSlider.Value;
-                RamText.Text = $"Р’С‹РґРµР»РµРЅРѕ: {value} РњР‘";
+                RamText.Text = string.Format(Properties.Resources.RamAllocatedFormat, value);
             }
         };
     }
@@ -265,8 +265,8 @@ public class MainWindow : Window, ICredentialProvider
         if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
         {
             // In Avalonia, show a simple message box via window or just log
-            AppendToLog("[WARN] РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІРІРµРґРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ.");
-            StatusText.Text = "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ";
+            AppendToLog(Properties.Resources.LogEnterCredentials);
+            StatusText.Text = Properties.Resources.StatusEnterCredentials;
             return;
         }
 
@@ -387,7 +387,7 @@ public class MainWindow : Window, ICredentialProvider
             RamSlider.Minimum = 1024;
             RamSlider.Value = 4096;
         }
-        RamText.Text = $"Р’С‹РґРµР»РµРЅРѕ: {(int)RamSlider.Value} РњР‘";
+        RamText.Text = string.Format(Properties.Resources.RamAllocatedFormat, (int)RamSlider.Value);
     }
 
     private void LoadSavedConfig()
@@ -405,7 +405,7 @@ public class MainWindow : Window, ICredentialProvider
                     RememberMeBox.IsChecked = config.RememberMe;
                     int ramValue = Math.Clamp(config.RamMb, (int)RamSlider.Minimum, (int)RamSlider.Maximum);
                     RamSlider.Value = ramValue;
-                    RamText.Text = $"Р’С‹РґРµР»РµРЅРѕ: {ramValue} РњР‘";
+                    RamText.Text = string.Format(Properties.Resources.RamAllocatedFormat, ramValue);
                 }
             }
         }

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StatusEnterCredentials" xml:space="preserve">
+    <value>Введите логин и пароль</value>
+    <comment>MainWindow.cs:64,269 — StatusText placeholder when credentials empty</comment>
+  </data>
+  <data name="HeaderLogin" xml:space="preserve">
+    <value>ВХОД</value>
+    <comment>MainWindow.cs:116 — Section header</comment>
+  </data>
+  <data name="LabelUsername" xml:space="preserve">
+    <value>ЛОГИН</value>
+    <comment>MainWindow.cs:118 — Username field label</comment>
+  </data>
+  <data name="LabelPassword" xml:space="preserve">
+    <value>ПАРОЛЬ</value>
+    <comment>MainWindow.cs:125 — Password field label</comment>
+  </data>
+  <data name="CheckRememberMe" xml:space="preserve">
+    <value>Запомнить меня</value>
+    <comment>MainWindow.cs:132 — Remember me checkbox</comment>
+  </data>
+  <data name="HeaderSettings" xml:space="preserve">
+    <value>НАСТРОЙКИ</value>
+    <comment>MainWindow.cs:135 — Settings section header</comment>
+  </data>
+  <data name="LabelRamAllocation" xml:space="preserve">
+    <value>ВЫДЕЛЕНИЕ ОЗУ</value>
+    <comment>MainWindow.cs:136 — RAM allocation label</comment>
+  </data>
+  <data name="RamAllocatedFormat" xml:space="preserve">
+    <value>Выделено: {0} МБ</value>
+    <comment>MainWindow.cs:141,220,390,408 — Dynamic RAM display format</comment>
+  </data>
+  <data name="ButtonPlay" xml:space="preserve">
+    <value>ИГРАТЬ</value>
+    <comment>MainWindow.cs:144 — Primary action button</comment>
+  </data>
+  <data name="ButtonCancel" xml:space="preserve">
+    <value>Отмена</value>
+    <comment>MainWindow.cs:149 — Cancel button</comment>
+  </data>
+  <data name="HeaderStatus" xml:space="preserve">
+    <value>СТАТУС</value>
+    <comment>MainWindow.cs:154 — Status panel header</comment>
+  </data>
+  <data name="StatusPreparing" xml:space="preserve">
+    <value>Подготовка...</value>
+    <comment>MainWindow.cs:157 — Default status text</comment>
+  </data>
+  <data name="LogEnterCredentials" xml:space="preserve">
+    <value>[WARN] Пожалуйста, введите логин и пароль.</value>
+    <comment>MainWindow.cs:268 — Log warning when credentials empty</comment>
+  </data>
+</root>

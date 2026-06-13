@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -15,7 +16,7 @@ class Program
     /// F_doc: {WorkspacePath returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies WorkspacePath behavior
     public static string WorkspacePath { get; private set; } = string.Empty;
 
-    // Win32 MessageBox for WinExe error surfacing вЂ” console is invisible
+    // Win32 MessageBox for WinExe error surfacing - console is invisible
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern int MessageBoxW(nint hWnd, string text, string caption, uint type);
     private const uint MB_OK = 0x0;
@@ -31,7 +32,7 @@ class Program
             var ex = (Exception)e.ExceptionObject;
             string msg = $"CRITICAL: {ex.Message}\n{ex.StackTrace}";
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher вЂ” Critical Error", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, Properties.Resources.ErrorCriticalTitle, MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         };
 
@@ -46,7 +47,11 @@ class Program
 
     static async Task RunGuiModeAsync()
     {
+        var splashSw = Stopwatch.StartNew();
         Win32SplashScreen.Show();
+        splashSw.Stop();
+        // F_doc: {Splash latency > 100ms} E_doc: {Stopwatch measurement logged; CI can enforce threshold}
+        Console.WriteLine($"[STARTUP] Splash latency: {splashSw.ElapsedMilliseconds}ms");
 
         try
         {
@@ -57,9 +62,9 @@ class Program
         catch (UnauthorizedAccessException)
         {
             Win32SplashScreen.Close();
-            string msg = $"Ошибка доступа! Нет прав на запись в рабочую папку:\n{WorkspacePath}\nЗапустите от имени Администратора или удалите файл .portable.";
+            string msg = string.Format(Properties.Resources.ErrorAccessDenied, WorkspacePath);
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher — Ошибка доступа", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, Properties.Resources.ErrorAccessDeniedTitle, MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -71,7 +76,7 @@ class Program
         {
             string msg = $"boot.gui.json not found at {bootJsonPath}";
             Console.Error.WriteLine(msg);
-            MessageBoxW(0, msg, "Vantuz Launcher вЂ” Missing Config", MB_OK | MB_ICONERROR);
+            MessageBoxW(0, msg, Properties.Resources.ErrorMissingConfigTitle, MB_OK | MB_ICONERROR);
             Environment.Exit(2);
         }
 
@@ -103,8 +108,8 @@ class Program
 
             // Surface to user — WinExe hides console, so use Win32 MessageBox
             // Keep message user-friendly and actionable
-            string userFriendly = $"Ошибка запуска:\n{error}\n\nПодробности записаны в:\n{crashLogPath}";
-            MessageBoxW(0, userFriendly, "Vantuz Launcher — Ошибка", MB_OK | MB_ICONERROR);
+            string userFriendly = string.Format(Properties.Resources.ErrorLaunchFailed, error, crashLogPath);
+            MessageBoxW(0, userFriendly, Properties.Resources.ErrorLaunchFailedTitle, MB_OK | MB_ICONERROR);
 
             // Give the dialog a moment to render before the process exits
             await Task.Delay(100);
