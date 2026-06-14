@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text.Json;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -31,6 +32,10 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
         bool autoSubmit = stepConfig.TryGetProperty("autoSubmitTestCredentials", out var autoSubmitProp) && autoSubmitProp.GetBoolean();
         bool isHosted = Avalonia.Application.Current != null;
 
+        // Link GUI cancellation to pipeline so Cancel button terminates downstream processes
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
+        context.Set("cancellation_token", cts.Token);
+
         if (isHosted)
         {
             _app = Avalonia.Application.Current;
@@ -40,6 +45,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
             {
                 _reporter = new GUIProgressReporter();
                 _mainWindow = new MainWindow(_reporter, workspacePath, autoSubmit);
+                _mainWindow.PipelineCts = cts;
                 _mainWindow.Show();
 
                 context.Set("gui_reporter", _reporter);
@@ -60,7 +66,7 @@ public class MinecraftLauncherGUIPlugin : ICommandPlugin
             {
                 try
                 {
-                    AppBuilder.Configure(() => new PluginApp(_reporter, workspacePath, context, tcs, autoSubmit))
+                    AppBuilder.Configure(() => new PluginApp(_reporter, workspacePath, context, tcs, autoSubmit, cts))
                         .UsePlatformDetect()
                         .LogToTrace()
                         .StartWithClassicDesktopLifetime(Array.Empty<string>());
@@ -108,16 +114,18 @@ public class PluginApp : Avalonia.Application
     private readonly string _workspacePath;
     private readonly CommandContext _context;
     private readonly TaskCompletionSource<bool> _tcs;
+    private readonly CancellationTokenSource _cts;
 
     private readonly bool _autoSubmit;
 
-    public PluginApp(GUIProgressReporter reporter, string workspacePath, CommandContext context, TaskCompletionSource<bool> tcs, bool autoSubmitTestCredentials = false)
+    public PluginApp(GUIProgressReporter reporter, string workspacePath, CommandContext context, TaskCompletionSource<bool> tcs, bool autoSubmitTestCredentials, CancellationTokenSource cts)
     {
         _reporter = reporter;
         _workspacePath = workspacePath;
         _context = context;
         _tcs = tcs;
         _autoSubmit = autoSubmitTestCredentials;
+        _cts = cts;
         Styles.Add(new Avalonia.Themes.Fluent.FluentTheme());
     }
 /// F_doc: {OnFrameworkInitializationCompleted returns incorrect result or throws unexpectedly} E_doc: Unit test or static analysis verifies OnFrameworkInitializationCompleted behavior
@@ -127,6 +135,7 @@ public class PluginApp : Avalonia.Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var window = new MainWindow(_reporter, _workspacePath, _autoSubmit);
+            window.PipelineCts = _cts;
             desktop.MainWindow = window;
             window.Show();
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;

@@ -168,3 +168,12 @@
 ---
 
 *Последнее обновление: 2026-06-07*
+
+### 6. Commit Protocol (INV-012)
+`powershell
+.\scripts\verify-commit.ps1 -ProjectRoot .
+``r
+- [ ] Working tree clean after audit PASS
+- [ ] Last commit message contains INV-XXX references
+- [ ] Last commit message contains F_doc/E_doc
+

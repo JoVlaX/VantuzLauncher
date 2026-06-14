@@ -25,6 +25,10 @@ class Program
     [STAThread]
     static async Task Main(string[] args)
     {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        var totalSw = Stopwatch.StartNew();
+        Console.Title = "Vantuz Launcher - Initializing...";
+
         WorkspacePath = DetermineWorkspace();
 
         AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -42,16 +46,22 @@ class Program
             return;
         }
 
-        await RunGuiModeAsync();
+        await RunGuiModeAsync(totalSw);
     }
 
-    static async Task RunGuiModeAsync()
+    static async Task RunGuiModeAsync(Stopwatch totalSw)
     {
         var splashSw = Stopwatch.StartNew();
         Win32SplashScreen.Show();
         splashSw.Stop();
+        totalSw.Stop();
         // F_doc: {Splash latency > 100ms} E_doc: {Stopwatch measurement logged; CI can enforce threshold}
         Console.WriteLine($"[STARTUP] Splash latency: {splashSw.ElapsedMilliseconds}ms");
+        Console.WriteLine($"[STARTUP] Total to-splash: {totalSw.ElapsedMilliseconds}ms");
+        if (totalSw.ElapsedMilliseconds > 3000)
+        {
+            Console.WriteLine("[STARTUP] WARNING: Total startup latency exceeds 3000ms. Consider ReadyToRun or self-contained build.");
+        }
 
         try
         {
@@ -123,7 +133,7 @@ class Program
             updateReadyObj is bool updateReady && updateReady)
         {
             string hostExe = result.Payload.TryGetValue("hostExecutable", out var hostExeObj) && hostExeObj is string he ? he : "VantuzLauncher.exe";
-            string updateScript = result.Payload.TryGetValue("UpdateScript", out var scriptObj) && scriptObj is string s ? s : null;
+            string? updateScript = result.Payload.TryGetValue("UpdateScript", out var scriptObj) && scriptObj is string s ? s : null;
             if (!string.IsNullOrEmpty(updateScript))
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

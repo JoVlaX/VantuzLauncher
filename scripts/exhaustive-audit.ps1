@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 param(
     [Parameter(Mandatory=$true)][string]$ProjectRoot,
     [string]$PlansDir = "C:\Users\1\.windsurf\plans"
@@ -21,7 +21,7 @@ Write-Host "EXHAUSTIVE AUDIT - All Categories" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Category 1: Falsifiability coverage (INVARIANT_THEORY §1.2)
+# Category 1: Falsifiability coverage (INVARIANT_THEORY В§1.2)
 Write-Host "--- Category 1: Falsifiability Coverage ---" -ForegroundColor Yellow
 try {
     $out = & "$scriptDir\check-falsifiability.ps1" -SourcePath $ProjectRoot -Threshold 90 2>&1
@@ -29,7 +29,7 @@ try {
     else { Register "Falsifiability" "FAIL" "Coverage below threshold" $LASTEXITCODE }
 } catch { Register "Falsifiability" "FAIL" $_.Exception.Message 1 }
 
-# Category 2: CQRS Separation (COMPOSITUM_SPEC §2.2 / INVARIANT_THEORY §2.2)
+# Category 2: CQRS Separation (COMPOSITUM_SPEC В§2.2 / INVARIANT_THEORY В§2.2)
 Write-Host "--- Category 2: CQRS Separation ---" -ForegroundColor Yellow
 try {
     $out = & "$scriptDir\audit-compliance.ps1" -SourcePath $ProjectRoot -OutputPath "$ProjectRoot\audit-report.json" 2>&1
@@ -37,7 +37,7 @@ try {
     else { Register "CQRS" "FAIL" "Violations found" $LASTEXITCODE }
 } catch { Register "CQRS" "FAIL" $_.Exception.Message 1 }
 
-# Category 3: Empty catch blocks (INVARIANT_THEORY §1.1 - determinism)
+# Category 3: Empty catch blocks (INVARIANT_THEORY В§1.1 - determinism)
 Write-Host "--- Category 3: Empty Catch Blocks ---" -ForegroundColor Yellow
 try {
     $emptyCatches = Get-ChildItem -Path $ProjectRoot -Filter "*.cs" -Recurse -ErrorAction SilentlyContinue | Where-Object {
@@ -69,7 +69,7 @@ try {
     }
 } catch { Register "Startup-Feedback" "FAIL" $_.Exception.Message 1 }
 
-# Category 6: Deviation inventory (COMPOSITUM_SPEC §7.2)
+# Category 6: Deviation inventory (COMPOSITUM_SPEC В§7.2)
 Write-Host "--- Category 6: Deviation Inventory ---" -ForegroundColor Yellow
 try {
     $devDir = "$ProjectRoot\docs\deviations"
@@ -80,7 +80,7 @@ try {
     } else { Register "Deviations" "PASS" "No deviation directory" }
 } catch { Register "Deviations" "FAIL" $_.Exception.Message 1 }
 
-# Category 7: Plan compliance (COMPOSITUM_SPEC §0.3)
+# Category 7: Plan compliance (COMPOSITUM_SPEC В§0.3)
 Write-Host "--- Category 7: Plan Compliance ---" -ForegroundColor Yellow
 try {
     $plans = Get-ChildItem -Path $PlansDir -Filter "*.md" -ErrorAction SilentlyContinue
@@ -127,6 +127,55 @@ try {
     else { Register "Build" "FAIL" "Build failed" $LASTEXITCODE }
 } catch { Register "Build" "FAIL" $_.Exception.Message 1 }
 
+# Category 10: UX Invariant (INV-005b)
+Write-Host "--- Category 10: UX Invariant ---" -ForegroundColor Yellow
+try {
+    $uxIssues = @()
+
+    # 10a: Console encoding
+    $progCs = Get-Content "$ProjectRoot\Program.cs" -Raw
+    if ($progCs -notmatch "Console\.OutputEncoding\s*=\s*System\.Text\.Encoding\.UTF8") {
+        $uxIssues += "Console.OutputEncoding != UTF8"
+    }
+
+    # 10b: IRunningProcessHandle exists
+    $contractsCs = Get-Content "$ProjectRoot\Vantuz.Core\Contracts.cs" -Raw
+    if ($contractsCs -notmatch "interface\s+IRunningProcessHandle") {
+        $uxIssues += "IRunningProcessHandle missing"
+    }
+
+    # 10c: RAM slider quantized to 1024
+    $mainWinCs = Get-Content "$ProjectRoot\Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\MainWindow.cs" -Raw
+    if ($mainWinCs -notmatch "TickFrequency\s*=\s*1024") {
+        $uxIssues += "RAM slider not quantized to 1024"
+    }
+
+    # 10d: Application icon wired
+    $csproj = Get-Content "$ProjectRoot\Vantuz.Plugins.GUI\Vantuz.Plugins.GUI.MinecraftLauncher\Vantuz.Plugins.GUI.MinecraftLauncher.csproj" -Raw
+    if ($csproj -notmatch "AvaloniaResource.*icon\.png") {
+        $uxIssues += "Avalonia icon resource missing"
+    }
+    if ($mainWinCs -notmatch "WindowIcon\(" -and $mainWinCs -notmatch "this\.Icon\s*=") {
+        $uxIssues += "Window.Icon not set"
+    }
+
+    if ($uxIssues.Count -gt 0) {
+        Register "UX-Invariant" "FAIL" ($uxIssues -join "; ") 1
+    } else {
+        Register "UX-Invariant" "PASS" "All INV-005b sub-invariants satisfied"
+    }
+} catch { Register "UX-Invariant" "FAIL" $_.Exception.Message 1 }
+
+    # 10e: Commit Protocol (INV-012)
+    try {
+        $gitStatus = git -C $ProjectRoot status --short 2>$null
+        if ($gitStatus) {
+            Register "Commit-Protocol" "FAIL" "Uncommitted changes present post-audit" 1
+        } else {
+            Register "Commit-Protocol" "PASS" "Working tree clean"
+        }
+    } catch { Register "Commit-Protocol" "FAIL" $_.Exception.Message 1 }
+
 # Summary
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
@@ -146,3 +195,4 @@ Write-Host "Categories: $($results.Count) | PASS: $($results | Where-Object { $_
 
 $exitCode = if ($overall) { 0 } else { 1 }
 exit $exitCode
+

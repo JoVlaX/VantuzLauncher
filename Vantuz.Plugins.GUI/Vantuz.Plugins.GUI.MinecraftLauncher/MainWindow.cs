@@ -11,6 +11,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Vantuz.Core;
 
@@ -43,12 +44,28 @@ public class MainWindow : Window, ICredentialProvider
     public event EventHandler<CredentialsSubmittedEventArgs>? CredentialsSubmitted;
     public event EventHandler? CredentialsCancelled;
 
+    /// <summary>
+    /// Cancellation token source linked to the pipeline's token.
+    /// Set by the plugin host so GUI cancellation propagates to all pipeline steps.
+    /// </summary>
+    public CancellationTokenSource? PipelineCts { get; set; }
+
     public MainWindow(GUIProgressReporter reporter, string workspacePath, bool autoSubmitTestCredentials = false)
     {
         _reporter = reporter;
         _configPath = Path.Combine(workspacePath, "launcher_config.json");
 
         BuildUI();
+
+        // Window icon per User-Perceptual-Feedback Invariant INV-005b.6
+        try
+        {
+            this.Icon = new WindowIcon(AssetLoader.Open(new Uri("avares://Vantuz.Plugins.GUI.MinecraftLauncher/Assets/icon.png")));
+        }
+        catch
+        {
+            // F_doc: {Asset missing or URI invalid} E_doc: {Build audit verifies file exists}
+        }
 
         reporter.StateChanged += OnStateChanged;
         reporter.ProgressChanged += OnProgressChanged;
@@ -117,14 +134,14 @@ public class MainWindow : Window, ICredentialProvider
 
         leftStack.Children.Add(new TextBlock { Text = Properties.Resources.LabelUsername, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 5) });
         var uBorder = new Border { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), CornerRadius = new CornerRadius(4), Margin = new Thickness(0, 0, 0, 12) };
-        UsernameBox = new TextBox { Background = Brushes.Transparent, Foreground = Brushes.White, BorderThickness = new Thickness(0), Padding = new Thickness(10, 8, 10, 8), FontSize = 13, CaretBrush = Brushes.White };
+        UsernameBox = new TextBox { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), Foreground = Brushes.White, BorderThickness = new Thickness(0), Padding = new Thickness(10, 8, 10, 8), FontSize = 13, CaretBrush = Brushes.White };
         AutomationProperties.SetAutomationId(UsernameBox, "UsernameBox");
         uBorder.Child = UsernameBox;
         leftStack.Children.Add(uBorder);
 
         leftStack.Children.Add(new TextBlock { Text = Properties.Resources.LabelPassword, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 5) });
         var pBorder = new Border { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), CornerRadius = new CornerRadius(4), Margin = new Thickness(0, 0, 0, 10) };
-        PasswordBox = new TextBox { Background = Brushes.Transparent, Foreground = Brushes.White, BorderThickness = new Thickness(0), Padding = new Thickness(10, 8, 10, 8), FontSize = 13, CaretBrush = Brushes.White, PasswordChar = '*' };
+        PasswordBox = new TextBox { Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)), Foreground = Brushes.White, BorderThickness = new Thickness(0), Padding = new Thickness(10, 8, 10, 8), FontSize = 13, CaretBrush = Brushes.White, PasswordChar = '*' };
         AutomationProperties.SetAutomationId(PasswordBox, "PasswordBox");
         pBorder.Child = PasswordBox;
         leftStack.Children.Add(pBorder);
@@ -135,7 +152,7 @@ public class MainWindow : Window, ICredentialProvider
         leftStack.Children.Add(new TextBlock { Text = Properties.Resources.HeaderSettings, FontWeight = FontWeight.Bold, Foreground = Brushes.White, Margin = new Thickness(0, 0, 0, 15), FontSize = 12 });
         leftStack.Children.Add(new TextBlock { Text = Properties.Resources.LabelRamAllocation, Foreground = new SolidColorBrush(Color.FromRgb(0xAA, 0xAA, 0xAA)), FontSize = 10, Margin = new Thickness(0, 0, 0, 8) });
 
-        RamSlider = new Slider { Minimum = 1024, Maximum = 16384, SmallChange = 512, LargeChange = 1024, Value = 4096, TickFrequency = 512, Margin = new Thickness(0, 0, 0, 5) };
+        RamSlider = new Slider { Minimum = 1024, Maximum = 16384, SmallChange = 1024, LargeChange = 2048, Value = 4096, TickFrequency = 1024, Margin = new Thickness(0, 0, 0, 5) };
         leftStack.Children.Add(RamSlider);
 
         RamText = new TextBlock { Text = string.Format(Properties.Resources.RamAllocatedFormat, 4096), Foreground = Brushes.White, FontSize = 11, Margin = new Thickness(0, 0, 0, 20), FontWeight = FontWeight.SemiBold };
@@ -217,6 +234,12 @@ public class MainWindow : Window, ICredentialProvider
             if (e.Property == Slider.ValueProperty)
             {
                 int value = (int)RamSlider.Value;
+                int rounded = (value / 1024) * 1024;
+                if (rounded != value)
+                {
+                    RamSlider.Value = rounded;
+                    value = rounded;
+                }
                 RamText.Text = string.Format(Properties.Resources.RamAllocatedFormat, value);
             }
         };
@@ -282,6 +305,7 @@ public class MainWindow : Window, ICredentialProvider
     private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         AppendToLog("[ACTION] User requested cancellation");
+        PipelineCts?.Cancel();
         CredentialsCancelled?.Invoke(this, EventArgs.Empty);
         _credentialsTcs.TrySetCanceled();
     }
@@ -378,8 +402,8 @@ public class MainWindow : Window, ICredentialProvider
             int totalGb = totalRamMb / 1024;
             RamSlider.Maximum = Math.Min(totalGb * 1024, 32768);
             RamSlider.Minimum = 1024;
-            RamSlider.Value = Math.Clamp(totalRamMb / 2, 1024, 8192);
-            RamSlider.TickFrequency = 512;
+            RamSlider.Value = (Math.Clamp(totalRamMb / 2, 1024, 8192) / 1024) * 1024;
+            RamSlider.TickFrequency = 1024;
         }
         catch
         {

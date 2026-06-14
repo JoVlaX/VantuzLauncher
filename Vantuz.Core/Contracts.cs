@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -133,6 +134,45 @@ public interface ICommandPlugin : IAsyncDisposable
 /// E_doc: Unit test asserts CommandResult(Success=true) has null ErrorMessage; Failure has non-null ErrorMessage
 /// </summary>
 public record CommandResult(bool Success, string? ErrorMessage = null);
+
+/// <summary>
+/// Handle to a running child process launched by the pipeline.
+/// Per INVARIANT_THEORY.md §2.2: GUI must not know process specifics; pipeline owns lifecycle.
+/// F_doc: {Cancel requested but child process continues after 5s}
+/// E_doc: {Test asserts process.HasExited == true within 5s of Terminate()}
+/// </summary>
+public interface IRunningProcessHandle
+{
+    void Terminate();
+    bool HasExited { get; }
+    int? ExitCode { get; }
+}
+
+/// <summary>
+/// Wrapper around System.Diagnostics.Process exposing only invariant-compliant operations.
+/// F_doc: {ProcessHandle wraps null or disposed Process}
+/// E_doc: {Unit test with mock Process verifies Terminate calls Kill and Dispose}
+/// </summary>
+public sealed class ProcessHandle : IRunningProcessHandle
+{
+    private readonly Process _process;
+    public ProcessHandle(Process process) => _process = process;
+    public bool HasExited => _process.HasExited;
+    public int? ExitCode => _process.HasExited ? _process.ExitCode : null;
+    public void Terminate()
+    {
+        try
+        {
+            if (!_process.HasExited)
+            {
+                _process.Kill(true); // entire process tree
+                _process.Dispose();
+            }
+        }
+        catch (InvalidOperationException) { /* already exited */ }
+        catch (NotSupportedException) { /* platform limitation */ }
+    }
+}
 
 // ============================================
 // UNIVERSAL GAME PROVIDER ABSTRACTION

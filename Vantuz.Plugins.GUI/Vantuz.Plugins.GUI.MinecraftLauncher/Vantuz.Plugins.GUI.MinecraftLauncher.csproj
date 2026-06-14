@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Assets\icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Vantuz.Core\Vantuz.Core.csproj" />
     <ProjectReference Include="..\..\Vantuz.Host\Vantuz.Host.csproj" />
   </ItemGroup>

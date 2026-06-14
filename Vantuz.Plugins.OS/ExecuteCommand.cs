@@ -20,6 +20,11 @@ public class ExecuteCommand : ICommandPlugin
  
     public async Task<CommandResult> ExecuteAsync(CommandContext context, JsonElement stepConfig)
     {
+        // Honor GUI cancellation override if present (set by MinecraftLauncherGUIPlugin)
+        CancellationToken effectiveToken = context.Get<CancellationToken>("cancellation_token") is CancellationToken guiToken
+            ? guiToken
+            : context.CancellationToken;
+
         string fileName = stepConfig.GetProperty("fileName").GetString()
             ?? throw new InvalidOperationException("fileName is missing"); 
          
@@ -103,8 +108,8 @@ public class ExecuteCommand : ICommandPlugin
 
             if (waitForExit)
             {
-                process.BeginOutputReadLine(); 
-                await process.WaitForExitAsync(context.CancellationToken);
+                process.BeginOutputReadLine();
+                await process.WaitForExitAsync(effectiveToken);
 
                 if (process.ExitCode != 0)
                 {
@@ -117,15 +122,22 @@ public class ExecuteCommand : ICommandPlugin
             }
             else
             {
-                // Fire-and-forget: do not Dispose while child is alive.
+                // Fire-and-forget: register handle so pipeline can terminate child on cancellation.
+                context.Set("os.running_process", new ProcessHandle(process));
+
                 // Give process a brief grace period to detect immediate crash.
                 try
                 {
-                    await Task.Delay(2000, context.CancellationToken);
+                    await Task.Delay(2000, effectiveToken);
                 }
                 catch (OperationCanceledException)
                 {
-                    // Pipeline shutting down, ignore
+                    // Pipeline shutting down: kill child process tree.
+                    if (context.Get<IRunningProcessHandle>("os.running_process") is IRunningProcessHandle handle)
+                    {
+                        handle.Terminate();
+                    }
+                    return new CommandResult(false, "Launch cancelled by user.");
                 }
 
                 if (process.HasExited && process.ExitCode != 0)
