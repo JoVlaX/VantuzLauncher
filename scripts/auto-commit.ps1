@@ -34,7 +34,7 @@ foreach ($f in $allFiles) {
     }
 }
 
-$invRefs = $invRefs | Select-Object -Unique
+$invRefs = $invRefs | Select-Object -Unique; if (-not $invRefs) { $invRefs = @("INV-012") }
 $fdocs = $fdocs | Select-Object -Unique | Select-Object -First 3
 $edocs = $edocs | Select-Object -Unique | Select-Object -First 3
 
@@ -56,3 +56,4 @@ if ($MessageOverride) {
 git -C $ProjectRoot add -A
 git -C $ProjectRoot commit -m "$msg"
 Write-Host "Committed with message:`n$msg"
+
