@@ -14,7 +14,7 @@ $status = git -C $ProjectRoot status --short
 if ($status) { $issues += "Working tree dirty: $($status -join '; ')" }
 
 # 2. Last commit must reference invariants
-$lastMsg = git -C $ProjectRoot log -1 --format=%B
+$lastMsg = (git -C $ProjectRoot log -1 --format=%B) -join "`n"
 if ($lastMsg -notmatch 'INV-\d+[a-z]?(?:\.\d+)?') { $issues += "No INV-XXX reference in last commit message" }
 
 # 3. Last commit must contain F_doc/E_doc
@@ -28,3 +28,4 @@ if ($issues.Count -gt 0) {
     Write-Host "PASS: Commit protocol satisfied." -ForegroundColor Green
     exit 0
 }
+
